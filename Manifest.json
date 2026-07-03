@@ -1,0 +1,27 @@
+{
+  "name": "Swi9ti — خضرة طازجة فكازا",
+  "short_name": "Swi9ti",
+  "description": "قلب على الخضرة، زيد للسلة، سيفط الطلبية على واتساب. توصيل فنفس النهار فالدار البيضاء والمحمدية.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#FBF6EC",
+  "theme_color": "#1F3D2B",
+  "orientation": "portrait",
+  "lang": "ar-MA",
+  "dir": "rtl",
+  "icons": [
+    {
+      "src": "LOGO.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "LOGO.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

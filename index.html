@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="ar-MA">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
+
+<!-- ===== SEO ===== -->
+<title>Swi9ti — خضرة طازجة كتوصل ليك فكازا اليوم</title>
+<meta name="description" content="Swi9ti: قلب، زيد، سيفط الطلبية على واتساب — خضرة طازجة من الفلاحة ديال الدار البيضاء، كتوصل ليك حتى لباب دارك فنفس النهار. توصيل سريع، تمن مزيان، بلا زحمة.">
+<meta name="keywords" content="خضرة طازجة كازا, توصيل خضرة الدار البيضاء, swi9ti, livraison legumes casablanca, épicerie en ligne casablanca, خضر وفواكه اونلاين">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<meta name="author" content="Swi9ti">
+<link rel="canonical" href="https://swi9ti.com/">
+
+<!-- Open Graph -->
+<meta property="og:type" content="website">
+<meta property="og:locale" content="ar_MA">
+<meta property="og:site_name" content="Swi9ti">
+<meta property="og:title" content="Swi9ti — خضرة طازجة كتوصل ليك فكازا اليوم">
+<meta property="og:description" content="قلب على الخضرة، زيد للسلة، سيفط الطلبية على واتساب. توصيل فنفس النهار فالدار البيضاء والمحمدية.">
+<meta property="og:image" content="https://swi9ti.com/LOGO.png">
+<meta property="og:url" content="https://swi9ti.com/">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Swi9ti — خضرة طازجة كتوصل ليك فكازا اليوم">
+<meta name="twitter:description" content="قلب، زيد، سيفط الطلبية على واتساب — توصيل فنفس النهار فكازا.">
+<meta name="twitter:image" content="https://swi9ti.com/LOGO.png">
+
+<!-- ===== PWA / Mobile ===== -->
+<meta name="theme-color" content="#1F3D2B">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Swi9ti">
+<meta name="format-detection" content="telephone=no">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="LOGO.png">
+<link rel="icon" type="image/png" sizes="192x192" href="LOGO.png">
+<link rel="icon" type="image/x-icon" href="LOGO1.png">
+
+<!-- Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+<!-- ===== Structured data (SEO) ===== -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "GroceryStore",
+  "name": "Swi9ti",
+  "url": "https://swi9ti.com",
+  "image": "https://swi9ti.com/LOGO.png",
+  "telephone": "+212625185245",
+  "email": "hello@Swi9ti.ma",
+  "priceRange": "MAD",
+  "areaServed": [
+    { "@type": "City", "name": "الدار البيضاء" },
+    { "@type": "City", "name": "المحمدية" }
+  ],
+  "openingHoursSpecification": {
+    "@type": "OpeningHoursSpecification",
+    "dayOfWeek": ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"],
+    "opens": "08:00",
+    "closes": "20:00"
+  }
+}
+</script>
+
+<!-- Tailwind via CDN -->
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          sand:      { 50:'#FBF6EC', 100:'#F4ECDA' },
+          green:     { 600:'#3E7C4A', 700:'#326239', 900:'#1F3D2B' },
+          terracotta:{ 400:'#E07F4C', 500:'#D9622B', 600:'#B9501F' },
+          saffron:   { 300:'#F0C26B', 400:'#E8A33D' },
+          charcoal:  { 700:'#3A3530', 800:'#2A2622' },
+        },
+        fontFamily: {
+          display: ['Fraunces', 'serif'],
+          body: ['"Plus Jakarta Sans"', 'sans-serif'],
+        },
+        boxShadow: {
+          crate: '0 1px 0 rgba(42,38,34,0.06), 0 8px 20px -10px rgba(42,38,34,0.25)',
+        },
+      },
+    },
+  };
+</script>
+
+<style>
+  .awning {
+    background-image: repeating-linear-gradient(
+      100deg,
+      #D9622B 0px, #D9622B 26px,
+      #FBF6EC 26px, #FBF6EC 52px,
+      #326239 52px, #326239 78px,
+      #FBF6EC 78px, #FBF6EC 104px
+    );
+  }
+  ::-webkit-scrollbar{ display:none; }
+  * { scrollbar-width:none; }
+  .scroll-snap { scroll-snap-type: x mandatory; }
+  .scroll-snap > * { scroll-snap-align: start; }
+  @keyframes pop { 0%{ transform:scale(1);} 35%{ transform:scale(1.18);} 100%{ transform:scale(1);} }
+  .pop { animation: pop .35s ease; }
+  @keyframes riseIn { from{ opacity:0; transform: translateY(10px);} to{ opacity:1; transform:none;} }
+  .rise-in { animation: riseIn .4s ease both; }
+  [data-skel] { background: linear-gradient(110deg, #EEE6D6 8%, #F6EFE1 18%, #EEE6D6 33%); background-size: 200% 100%; animation: shimmer 1.4s linear infinite; }
+  @keyframes shimmer { to { background-position-x: -200%; } }
+  @media (prefers-reduced-motion: reduce){ .pop,.rise-in,[data-skel]{ animation:none !important; } }
+
+  /* Hero overlay */
+  .hero-bg {
+    background-image:
+      linear-gradient(to bottom, rgba(31,61,43,0.82) 0%, rgba(31,61,43,0.65) 60%, rgba(31,61,43,0.88) 100%),
+      url('https://images.unsplash.com/photo-1542838132-92c53300491e?w=1600&q=80&auto=format&fit=crop');
+    background-size: cover;
+    background-position: center;
+  }
+
+  /* WhatsApp confirm modal */
+  #waModal { transition: opacity .25s ease; }
+  #waModal.hidden { opacity:0; pointer-events:none; }
+
+  /* ---- Mobile polish ---- */
+  html, body { overflow-x: hidden; }
+  #stickyBar { padding-bottom: env(safe-area-inset-bottom); }
+  #waModal, #cartDrawer { padding-bottom: env(safe-area-inset-bottom); }
+  header { padding-top: env(safe-area-inset-top); }
+  input, select, textarea, button { font-size: max(16px, 1em); } /* stops iOS auto-zoom on focus */
+  a, button { -webkit-tap-highlight-color: transparent; }
+  :focus-visible { outline: 2px solid #3E7C4A; outline-offset: 2px; }
+</style>
+</head>
+
+<body class="bg-sand-50 text-charcoal-800 font-body antialiased pb-24 lg:pb-0">
+
+  <!-- ===== PRELOADER ===== -->
+  <div id="preloader" role="status" aria-live="polite" class="fixed inset-0 z-[100] bg-white flex flex-col items-center justify-center gap-6 transition-opacity duration-500">
+    <img src="LOGO.png" alt="" class="w-24 h-24 sm:w-30 sm:h-30 object-contain">
+    <div class="w-40 sm:w-48 h-1.5 rounded-full bg-green-100 overflow-hidden">
+      <div id="preloaderBar" class="h-full bg-green-600 rounded-full" style="width:0%; transition: width .3s ease;"></div>
+    </div>
+    <span class="sr-only">كيتحمل...</span>
+  </div>
+
+  <!-- ===== TOP BAR ===== -->
+  <header class="sticky top-0 z-40 bg-sand-50/95 backdrop-blur border-b border-charcoal-800/10">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center gap-3">
+
+      <!-- Menu btn — Heroicons: bars-3 -->
+      <button id="menuBtn" class="lg:hidden -ml-1 p-2.5 rounded-full active:bg-charcoal-800/5 min-w-[44px] min-h-[44px] flex items-center justify-center" aria-label="فتح الأصناف">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-6 h-6">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25H12"/>
+        </svg>
+      </button>
+
+      <a href="#" class="flex items-center justify-center shrink-0" aria-label="Swi9ti — الصفحة الرئيسية">
+        <img src="LOGO.png" alt="Swi9ti" width="82" height="82" class="h-[56px] sm:h-[68px] lg:h-[82px] w-auto object-contain" fetchpriority="high">
+      </a>
+      <!-- Search — Heroicons: magnifying-glass -->
+      <div class="flex-1 relative hidden sm:block">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="absolute left-3 top-1/2 -translate-y-1/2 text-charcoal-800/40 w-5 h-5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"/>
+        </svg>
+        <input id="searchInput" type="search" placeholder="قلب على طماطم، بصل…" aria-label="قلب على الخضرة" autocomplete="off"
+          class="w-full bg-charcoal-800/5 focus:bg-white rounded-full pl-10 pr-4 py-2.5 text-sm outline-none ring-1 ring-transparent focus:ring-green-600 transition">
+      </div>
+
+      <div class="flex-1 sm:hidden"></div>
+
+      <!-- Cart btn — Heroicons: shopping-cart -->
+      <button id="cartBtn" class="relative p-2.5 rounded-full bg-green-700 text-sand-50 shrink-0 min-w-[44px] min-h-[44px] flex items-center justify-center active:scale-95 transition" aria-label="فتح السلة ديالك">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-5 h-5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 0 0-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 0 0-16.536-1.84M7.5 14.25 5.106 5.272M6 20.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Zm12.75 0a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z"/>
+        </svg>
+        <span id="cartCount" class="absolute -top-1.5 -right-1.5 min-w-[20px] h-5 px-1 rounded-full bg-terracotta-500 text-[11px] font-bold flex items-center justify-center text-white hidden" aria-live="polite">0</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- ===== HERO ===== -->
+  <section class="relative overflow-hidden">
+    <div class="awning h-2.5 w-full opacity-90"></div>
+    <div class="hero-bg relative">
+      <div class="max-w-6xl mx-auto px-4 pt-10 pb-20 sm:pt-16 sm:pb-28 relative z-10">
+        <p class="text-saffron-300 text-xs font-semibold tracking-[0.2em] uppercase mb-3">كازا · مجنية من الصباح الباكر</p>
+        <h1 class="font-display text-sand-50 text-4xl sm:text-5xl lg:text-6xl leading-[1.08] font-semibold max-w-xl">
+          الخضرة ديالك،<br> جاية من عند الفلاح<br><span class="text-saffron-300">حتى لباب دارك.</span>
+        </h1>
+        <p class="text-sand-50/80 mt-4 max-w-md text-[15px] sm:text-base">
+          Swi9ti كيختار أحسن الخضرة من عند الفلاحة ديال المنطقة، وكينيفذ ليك فنفس النهار — بلا تعب، بلا زحمة.
+        </p>
+        <div class="mt-7 flex flex-wrap gap-3 items-center">
+          <button onclick="document.getElementById('catalogue').scrollIntoView({behavior:'smooth'})"
+            class="bg-terracotta-500 hover:bg-terracotta-600 text-white font-semibold text-sm px-6 py-3 rounded-full transition active:scale-95 flex items-center gap-2">
+            <!-- Heroicons: sparkles -->
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-4 h-4">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09Z"/>
+            </svg>
+            شوف الخضرة
+          </button>
+          <div class="flex items-center gap-2 text-sand-50/85 text-sm bg-white/10 backdrop-blur-sm rounded-full px-4 py-2.5">
+            <!-- Heroicons: truck -->
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-4 h-4 text-saffron-300 shrink-0">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 18.75a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 0 1-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 0 0-3.213-9.193 2.056 2.056 0 0 0-1.58-.86H14.25M16.5 18.75h-2.25m0-11.177v-.958c0-.568-.422-1.048-.987-1.106a48.554 48.554 0 0 0-10.026 0 1.106 1.106 0 0 0-.987 1.106v7.635m12-6.677v6.677m0 4.5v-4.5m0 0h-12"/>
+            </svg>
+            توصيل اليوم قبل 7 ديالعشية
+          </div>
+        </div>
+        <!-- trust badges -->
+        <div class="mt-8 flex flex-wrap gap-4">
+          <div class="flex items-center gap-2 text-sand-50/70 text-xs">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-4 h-4 text-saffron-400">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 0 1-1.043 3.296 3.745 3.745 0 0 1-3.296 1.043A3.745 3.745 0 0 1 12 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 0 1-3.296-1.043 3.745 3.745 0 0 1-1.043-3.296A3.745 3.745 0 0 1 3 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 0 1 1.043-3.296 3.746 3.746 0 0 1 3.296-1.043A3.746 3.746 0 0 1 12 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 0 1 3.296 1.043 3.746 3.746 0 0 1 1.043 3.296A3.745 3.745 0 0 1 21 12Z"/>
+            </svg>
+            طازجة 100%
+          </div>
+          <div class="flex items-center gap-2 text-sand-50/70 text-xs">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-4 h-4 text-saffron-400">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15.182 15.182a4.5 4.5 0 0 1-6.364 0M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0ZM9.75 9.75c0 .414-.168.75-.375.75S9 10.164 9 9.75 9.168 9 9.375 9s.375.336.375.75Zm-.375 0h.008v.015h-.008V9.75Zm5.625 0c0 .414-.168.75-.375.75s-.375-.336-.375-.75.168-.75.375-.75.375.336.375.75Zm-.375 0h.008v.015h-.008V9.75Z"/>
+            </svg>
+            زبناء رابحين
+          </div>
+          <div class="flex items-center gap-2 text-sand-50/70 text-xs">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-4 h-4 text-saffron-400">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
+            </svg>
+            طلبية فساعة
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="awning h-2.5 w-full opacity-90"></div>
+  </section>
+
+  <!-- ===== MOBILE SEARCH (منقولة برا من الهيدر باش الهيدر يبقى: منيو — لوگو — سلة) ===== -->
+  <div class="sm:hidden max-w-6xl mx-auto px-4 pt-4">
+    <div class="relative">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="absolute left-3 top-1/2 -translate-y-1/2 text-charcoal-800/40 w-5 h-5">
+        <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"/>
+      </svg>
+      <input id="searchInputMobile" type="search" placeholder="قلب على طماطم، بصل…" aria-label="قلب على الخضرة" autocomplete="off"
+        class="w-full bg-white shadow-crate rounded-full pl-10 pr-4 py-2.5 text-sm outline-none ring-1 ring-charcoal-800/10 focus:ring-green-600 transition">
+    </div>
+  </div>
+
+  <!-- ===== CATEGORIES ===== -->
+  <nav class="max-w-6xl mx-auto px-4 pt-5">
+    <div id="categoryRow" class="flex gap-2 overflow-x-auto scroll-snap pb-1 -mx-1 px-1"></div>
+  </nav>
+
+  <!-- ===== CATALOGUE ===== -->
+  <main id="catalogue" class="max-w-6xl mx-auto px-4 pt-5 pb-16">
+    <div class="flex items-baseline justify-between mb-4">
+      <h2 class="font-display text-2xl font-semibold text-green-900" id="sectionTitle">كل الخضرة</h2>
+      <span id="resultCount" class="text-xs text-charcoal-800/50"></span>
+    </div>
+    <div id="productGrid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4"></div>
+    <div id="emptyState" class="hidden text-center py-16">
+      <p class="text-4xl mb-2">🧺</p>
+      <p class="font-display text-lg text-green-900">ما لقينا والو</p>
+      <p class="text-sm text-charcoal-800/60 mt-1">جرب كلمة أخرى، ولا قلب فصنف آخر.</p>
+    </div>
+  </main>
+
+  <!-- ===== FOOTER ===== -->
+  <footer class="bg-green-900 text-sand-50/80 relative">
+    <div class="awning h-2.5 w-full opacity-90"></div>
+    <div class="max-w-6xl mx-auto px-4 py-10 grid sm:grid-cols-3 gap-8 text-sm">
+      <div>
+        <div class="flex items-center gap-2 mb-2">
+          <img src="LOGO.png" alt="Swi9ti" width="48" height="48" loading="lazy" class="w-12 h-12 rounded-lg object-contain">
+        </div>
+        <p class="text-sand-50/60">سوق الخضرة ديال كازا، بكليك وحد.</p>
+      </div>
+      <div>
+        <p class="text-saffron-300 font-semibold mb-2 uppercase text-xs tracking-wide">التوصيل</p>
+        <p class="text-sand-50/60">الدار البيضاء و المحمدية<br>7/7، من 8h حتى 20h</p>
+      </div>
+      <div>
+        <p class="text-saffron-300 font-semibold mb-2 uppercase text-xs tracking-wide">تواصل معنا</p>
+        <p class="text-sand-50/60">+212 6 25 18 52 45<br>hello@Swi9ti.ma</p>
+      </div>
+    </div>
+
+    <!-- Founders section -->
+    <div class="border-t border-sand-50/10 max-w-6xl mx-auto px-4 py-6 flex flex-col sm:flex-row items-center justify-between gap-3">
+      <p class="text-sand-50/40 text-xs text-center sm:text-left">© 2026 Swi9ti — مصنوع بـ🍅 فكازا</p>
+      <div class="flex items-center gap-3 text-xs text-sand-50/50">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 text-saffron-400 shrink-0">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/>
+        </svg>
+        <span>مبتكرو المنصة: <strong class="text-sand-50/70">Ratib Mohammed Amine</strong> &amp; <strong class="text-sand-50/70">Mustapha Ait Lhaj</strong></span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ===== STICKY CART BAR (mobile: barre كاملة تحت — desktop: pastille عائمة فالزاوية) ===== -->
+  <div id="stickyBar" class="hidden fixed bottom-0 inset-x-0 lg:inset-x-auto lg:right-6 lg:bottom-6 z-40">
+    <div class="max-w-6xl mx-auto px-3 pb-3 lg:max-w-none lg:mx-0 lg:px-0 lg:pb-0">
+      <button id="stickyBarBtn" class="w-full lg:w-auto lg:min-w-[300px] bg-green-700 hover:bg-green-600 active:scale-[0.98] text-sand-50 rounded-2xl lg:rounded-full shadow-crate lg:shadow-2xl px-4 py-3 lg:px-6 lg:py-4 flex items-center justify-between gap-4 transition">
+        <span class="flex items-center gap-2 text-sm font-medium">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-4 h-4 lg:w-5 lg:h-5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 0 0-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 0 0-16.536-1.84M7.5 14.25 5.106 5.272M6 20.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Zm12.75 0a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z"/>
+          </svg>
+          <span id="stickyCount" class="bg-white/20 rounded-full px-2 py-0.5 text-xs font-bold">0</span> حاجة
+        </span>
+        <span class="font-semibold">شوف السلة · <span id="stickyTotal">0 MAD</span></span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ===== CATEGORY DRAWER (mobile) ===== -->
+  <div id="catDrawerOverlay" class="hidden fixed inset-0 bg-charcoal-800/40 z-50"></div>
+  <div id="catDrawer" role="dialog" aria-modal="true" aria-label="الأصناف" class="fixed top-0 left-0 h-full w-72 bg-sand-50 z-50 -translate-x-full transition-transform duration-300 shadow-2xl">
+    <div class="p-5">
+      <div class="flex items-center justify-between mb-5">
+        <span class="font-display text-lg text-green-900 font-semibold">الأصناف</span>
+        <button id="catDrawerClose" class="p-1.5 rounded-full bg-charcoal-800/5">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-5 h-5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+      <div id="categoryListDrawer" class="flex flex-col gap-1"></div>
+    </div>
+  </div>
+
+  <!-- ===== CART DRAWER ===== -->
+  <div id="cartOverlay" class="hidden fixed inset-0 bg-charcoal-800/40 z-50"></div>
+  <div id="cartDrawer" role="dialog" aria-modal="true" aria-label="السلة ديالك" class="fixed top-0 right-0 h-full w-full sm:w-[420px] bg-sand-50 z-50 translate-x-full transition-transform duration-300 shadow-2xl flex flex-col">
+    <div class="flex items-center justify-between px-5 py-4 border-b border-charcoal-800/10 shrink-0">
+      <span class="font-display text-lg text-green-900 font-semibold">السلة ديالك</span>
+      <button id="cartClose" class="p-1.5 rounded-full bg-charcoal-800/5">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-5 h-5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/>
+        </svg>
+      </button>
+    </div>
+    <div id="cartItems" class="flex-1 overflow-y-auto px-5 py-4 flex flex-col gap-4"></div>
+    <div id="cartFooter" class="border-t border-charcoal-800/10 p-5 shrink-0">
+      <div class="flex items-center justify-between text-sm text-charcoal-800/60 mb-1">
+        <span>المجموع الجزئي</span><span id="cartSubtotal">0 MAD</span>
+      </div>
+      <div class="flex items-center justify-between text-sm text-charcoal-800/60 mb-3">
+        <span>التوصيل</span><span class="text-green-700 font-medium">20 درهم</span>
+      </div>
+      <div class="flex items-center justify-between font-semibold text-green-900 text-lg mb-4">
+        <span>الكل</span><span id="cartTotal">0 MAD</span>
+      </div>
+      <button id="checkoutBtn" class="w-full bg-green-700 hover:bg-green-600 text-white font-semibold py-3 rounded-full transition active:scale-95 flex items-center justify-center gap-2">
+        <!-- Heroicons: paper-airplane -->
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-5 h-5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 12 3.269 3.125A59.769 59.769 0 0 1 21.485 12 59.768 59.768 0 0 1 3.27 20.875L5.999 12Zm0 0h7.5"/>
+        </svg>
+        سيفط الطلبية
+      </button>
+    </div>
+  </div>
+
+  <!-- ===== WHATSAPP CONFIRM MODAL ===== -->
+  <div id="waModal" role="dialog" aria-modal="true" aria-label="تأكيد الطلبية" class="hidden fixed inset-0 z-[70] flex items-end sm:items-center justify-center p-4">
+    <div class="absolute inset-0 bg-charcoal-800/50 backdrop-blur-sm" id="waModalOverlay"></div>
+    <div class="relative bg-white rounded-3xl shadow-2xl w-full max-w-sm p-6 rise-in overflow-y-auto max-h-[90vh]">
+
+      <!-- Header -->
+      <div class="flex items-center gap-3 mb-4">
+        <div class="w-12 h-12 rounded-2xl bg-[#25D366] flex items-center justify-center shrink-0">
+          <svg viewBox="0 0 24 24" class="w-6 h-6 fill-white" xmlns="http://www.w3.org/2000/svg">
+            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
+            <path d="M12 0C5.373 0 0 5.373 0 12c0 2.116.553 4.103 1.519 5.83L.057 23.27a.75.75 0 0 0 .923.923l5.44-1.462A11.945 11.945 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.89 0-3.663-.524-5.18-1.435l-.37-.22-3.83 1.03 1.03-3.83-.22-.37A9.955 9.955 0 0 1 2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/>
+          </svg>
+        </div>
+        <div>
+          <p class="font-semibold text-green-900">تأكيد الطلبية</p>
+          <p class="text-xs text-charcoal-800/50">غادي تتوجه لواتساب</p>
+        </div>
+      </div>
+
+      <!-- Order summary -->
+      <div id="waOrderSummary" class="bg-sand-50 rounded-2xl p-4 mb-4 text-sm text-charcoal-800/80 max-h-36 overflow-y-auto font-mono text-xs leading-relaxed"></div>
+
+      <!-- ── Client info form ── -->
+      <div class="flex flex-col gap-3 mb-5">
+        <p class="text-xs font-semibold text-charcoal-800/50 uppercase tracking-wide">معلومات التوصيل</p>
+
+        <!-- Name -->
+        <div class="flex flex-col gap-1">
+          <label class="text-xs text-charcoal-800/60">الاسم الكامل *</label>
+          <input id="clientName" type="text" placeholder="مثلاً: فاطمة الزهراء"
+            class="w-full bg-sand-50 rounded-xl px-3 py-2.5 text-sm outline-none ring-1 ring-charcoal-800/10 focus:ring-green-600 transition placeholder:text-charcoal-800/25">
+        </div>
+
+        <!-- Phone -->
+        <div class="flex flex-col gap-1">
+          <label class="text-xs text-charcoal-800/60">رقم الهاتف *</label>
+          <input id="clientPhone" type="tel" inputmode="numeric" placeholder="مثلاً: 0612345678"
+            class="w-full bg-sand-50 rounded-xl px-3 py-2.5 text-sm outline-none ring-1 ring-charcoal-800/10 focus:ring-green-600 transition placeholder:text-charcoal-800/25">
+        </div>
+
+        <!-- Location -->
+        <div class="flex flex-col gap-1">
+          <label class="text-xs text-charcoal-800/60">العنوان / الحي *</label>
+          <input id="clientLocation" type="text" placeholder="مثلاً: حي السلام، درب السلطان…"
+            class="w-full bg-sand-50 rounded-xl px-3 py-2.5 text-sm outline-none ring-1 ring-charcoal-800/10 focus:ring-green-600 transition placeholder:text-charcoal-800/25">
+        </div>
+
+        <!-- Day -->
+        <div class="flex flex-col gap-1">
+          <label class="text-xs text-charcoal-800/60">يوم التوصيل *</label>
+          <select id="clientDay"
+            class="w-full bg-sand-50 rounded-xl px-3 py-2.5 text-sm outline-none ring-1 ring-charcoal-800/10 focus:ring-green-600 transition appearance-none">
+            <option value="">— اختار اليوم —</option>
+            <option>اليوم</option>
+            <option>غدا</option>
+            <option>الاثنين</option>
+            <option>الثلاثاء</option>
+            <option>الأربعاء</option>
+            <option>الخميس</option>
+            <option>الجمعة</option>
+            <option>السبت</option>
+            <option>الأحد</option>
+          </select>
+        </div>
+
+        <!-- Time slot -->
+        <div class="flex flex-col gap-1">
+          <label class="text-xs text-charcoal-800/60">الفترة المناسبة *</label>
+          <div id="timeSlots" class="grid grid-cols-2 gap-2">
+            <button type="button" data-slot="8h–11h"  class="slot-btn py-2 rounded-xl text-xs font-medium border border-charcoal-800/10 bg-sand-50 text-charcoal-800/70 active:scale-95 transition">🌅 8h – 11h</button>
+            <button type="button" data-slot="11h–14h" class="slot-btn py-2 rounded-xl text-xs font-medium border border-charcoal-800/10 bg-sand-50 text-charcoal-800/70 active:scale-95 transition">☀️ 11h – 14h</button>
+            <button type="button" data-slot="14h–17h" class="slot-btn py-2 rounded-xl text-xs font-medium border border-charcoal-800/10 bg-sand-50 text-charcoal-800/70 active:scale-95 transition">🌤️ 14h – 17h</button>
+            <button type="button" data-slot="17h–20h" class="slot-btn py-2 rounded-xl text-xs font-medium border border-charcoal-800/10 bg-sand-50 text-charcoal-800/70 active:scale-95 transition">🌆 17h – 20h</button>
+          </div>
+        </div>
+
+        <!-- Error message -->
+        <p id="formError" class="hidden text-xs text-terracotta-500 font-medium text-center">⚠️ عبي جميع الحقول قبل المتابعة</p>
+      </div>
+
+      <!-- Buttons -->
+      <div class="flex gap-3">
+        <button id="waCancelBtn" class="flex-1 py-2.5 rounded-full border border-charcoal-800/15 text-sm font-medium text-charcoal-800/70 active:bg-charcoal-800/5">لّا، رجع</button>
+        <button id="waConfirmBtn" class="flex-1 py-2.5 rounded-full bg-[#25D366] text-white text-sm font-semibold flex items-center justify-center gap-2 active:scale-95 transition">
+          <svg viewBox="0 0 24 24" class="w-4 h-4 fill-white shrink-0" xmlns="http://www.w3.org/2000/svg">
+            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
+            <path d="M12 0C5.373 0 0 5.373 0 12c0 2.116.553 4.103 1.519 5.83L.057 23.27a.75.75 0 0 0 .923.923l5.44-1.462A11.945 11.945 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.89 0-3.663-.524-5.18-1.435l-.37-.22-3.83 1.03 1.03-3.83-.22-.37A9.955 9.955 0 0 1 2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/>
+          </svg>
+          إيه، سيفط!
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ===== TOAST ===== -->
+  <div id="toast" role="status" aria-live="polite" class="hidden fixed bottom-24 lg:bottom-6 left-1/2 -translate-x-1/2 z-[60] bg-charcoal-800 text-sand-50 text-sm font-medium px-4 py-2.5 rounded-full shadow-xl whitespace-nowrap max-w-[90vw] text-center"></div>
+
+  <!-- PapaParse: يقرا الـ CSV ديال Google Sheet (تحديث الأثمنة) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

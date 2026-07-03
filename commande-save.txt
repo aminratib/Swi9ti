@@ -1,0 +1,21 @@
+commmande sauvegarde github : ----------------------------
+
+git add .
+git commit -m "Ajout de nouvelles fonctionnalités"
+git push
+
+
+
+
+commande serveur local : ----------------------------------
+python -m http.server
+
+
+
+BASE DE DONNES PRIX - MARCHANDISE : -----------------------
+https://docs.google.com/spreadsheets/d/17VrNGhZ9XaqG2LvWm274IxV6vIacWH7dzKMKwZLrZ0w/edit?usp=sharing
+
+
+TABLEAU DE COMMANDE - CLIENT : ------------------------------------
+https://docs.google.com/spreadsheets/d/19DhDHzeAvfLFgkKVWAMF5o3ukEQC-YPp5CGJ0JHnTB8/edit?usp=sharing
+ le script du taleau commande : https://script.google.com/macros/s/AKfycbwhQ33c3ZEhrfUtb-zLVHj4_TLCzAfAqBOHPRFPf9sTH0o-mNo4gt8aj_ZxQ8kzEeiypg/exec
