@@ -73,28 +73,79 @@ let PRODUCTS = [
   { id: 'p40', name: 'أفوكا',             darija: 'أفوكا',         emoji: '🥑', category: 'fruits', price: 0, unit: 'كيلو', query: 'avocado',          promo: false },
 ];
 
-const CATEGORIES = [
-  { id: 'tout',     label: 'الكل',                  emoji: '🧺' },
-  { id: 'legumes',  label: 'خضرة',                  emoji: '🍅' },
-  { id: 'racines',  label: 'جذور ودرنات',            emoji: '🥔' },
-  { id: 'feuilles', label: 'أوراق',                  emoji: '🥬' },
-  { id: 'herbes',   label: 'عشاب وتوابل',            emoji: '🌿' },
-  { id: 'agrumes',  label: 'حوامض',                  emoji: '🍋' },
-  { id: 'fruits',   label: 'فواكه',                  emoji: '🍎' },
-  { id: 'promo',    label: 'بروموسيون 🔥',            emoji: '🔥' },
-];
+/* ---- ملاحظة على الصور ----
+   دابا كل المنتجات (p1 → p40) صورهم كيجيو بروابط من الويب — والو محلي، والو
+   فمجلد images/. راجع دالة getProductImage() فوق قليل (القسم 3): كتبني رابط
+   الصورة أوتوماتيكيا حسب حقل query ديال كل منتج، بلا ما تكون خاصك تدير حتى
+   حاجة يدويا. إلا صورة ما طلعاتش لسبب ما، الموقع كيرجع تلقائيا للإيموجي 🍎
+   بلا ما يبان أي خطأ للزبون. وتقدر فأي وقت تبدل صورة منتج معين برابط خاص
+   بيك، غير زيد عمود "img" فـ Google Sheet ديالك وحطو الرابط لي بغيتي — الموقع
+   كيقرا هاد العمود تلقائيا (شوف rowsToProducts فوق) وكيولي هو الأولوية. */
 
-/* ---------- 1bis. SYNCHRONISATION GOOGLE SHEET (ATHMAN ديال المرشاندايز) ----------
-   كيفاش تخدم:
-   1) دير Google Sheet بالأعمدة: id, name, darija, emoji, category, price, unit, query, promo
-      (شوف الملف "swi9ti_products_template.csv" لي عطيتك باش تبدا منو).
-   2) فـ Google Sheet: ملف → مشاركة → نشر على الويب (Fichier → Partager → Publier sur le web)
-      اختار الورقة ديالك، اختار الصيغة CSV، ودز على "نشر".
-   3) نسخ الرابط لي عطاوك (كيبان بحال:
-      https://docs.google.com/spreadsheets/d/e/XXXXXXXXXXXX/pub?gid=0&single=true&output=csv)
-   4) لصق هاد الرابط فـ SHEET_CSV_URL تحت.
-   من بعد، غير بدلت الثمن (أو الاسم، الصنف...) فـ Google Sheet، الموقع كيتحدث
-   وحدو (كنجربو كل 5 دقايق، أو مانوال ب loadProductsFromSheet() فـ console). */
+/* كل صنف عندو تسمية بالدارجة وإيموجي مقترح. إلا كتبتي فـ Google Sheet صنف
+   جديد ماشي موجود هنا (مثلاً "champignons")، الموقع غايبني ليه شيب تلقائيا
+   بإيموجي 🧺 عام والاسم بحال ما كتبتيه بالضبط فـ Sheet — بلا ما تلمس الكود. */
+const CATEGORY_META = {
+  legumes:  { label: 'خضرة',                  emoji: '🍅' },
+  racines:  { label: 'جذور ودرنات',            emoji: '🥔' },
+  feuilles: { label: 'أوراق',                  emoji: '🥬' },
+  herbes:   { label: 'عشاب وتوابل',            emoji: '🌿' },
+  agrumes:  { label: 'حوامض',                  emoji: '🍋' },
+  fruits:   { label: 'فواكه',                  emoji: '🍎' },
+};
+
+let CATEGORIES = [];
+function computeCategories() {
+  const present = [...new Set(PRODUCTS.map(p => String(p.category || '').trim()).filter(Boolean))];
+  CATEGORIES = [
+    { id: 'tout', label: 'الكل', emoji: '🧺' },
+    ...present.map(id => ({
+      id,
+      label: CATEGORY_META[id]?.label || id,
+      emoji: CATEGORY_META[id]?.emoji || '🧺',
+    })),
+    { id: 'promo', label: 'بروموسيون 🔥', emoji: '🔥' },
+  ];
+}
+computeCategories();
+
+/* ---------- 1bis. SYNCHRONISATION GOOGLE SHEET — Sheet = المصدر الوحيد للمنتجات ----------
+   هاد الـ Sheet ماشي غير للأثمنة، هو لي كيبني الكتالوگ كامل ديال المنتجات فـ
+   الموقع (زيد، بدل، حيد) — راه الدالة rowsToProducts() تحت كتقرا الـ Sheet
+   وكتعوض PRODUCTS بأكملها فـ كل مزامنة، بلا ما تبقى حتى حاجة "ثابتة" فالكود.
+
+   الأعمدة (بالضبط بهاد الترتيب، سطر 1 = رؤوس الأعمدة):
+   id | name | darija | emoji | category | price | unit | query | promo | img
+
+   • id       : معرف فريد، ما يتكررش (p1, p2... ولا أي تسمية، المهم يبقى وحيد)
+   • name     : الاسم اللي كيبان فالكارد
+   • darija   : بالدارجة (كيدخل فالبحث)
+   • emoji    : إيموجي احتياطي إلا الصورة ما طلعاتش
+   • category : أي كلمة بغيتي (legumes, fruits, herbes...) — إلا كتبتي صنف
+                جديد ماشي موجود، الموقع كيدير ليه شيب تلقائيا وحدو (شوف
+                CATEGORY_META فوق قليل إلا بغيتي تزيدو ترجمة/إيموجي مخصص ليه)
+   • price    : رقم بلا رمز الدرهم (مثلاً 12 ولا 12.5)
+   • unit     : كيلو / بوكاية / حبة / رأس...
+   • query    : كلمة بالإنجليزية كتستعمل باش تبني رابط الصورة أوتوماتيكيا
+                (شوف getProductImage فالقسم 3) إلا ماكتبتيش رابط فـ img
+   • img      : (اختياري) رابط صورة مباشر ديالك — إلا عمرتيه، كيولي هو
+                الأولوية على الصورة الأوتوماتيكية
+
+   ➕ زيادة منتج    : زيد سطر جديد فالـ Sheet بـ id جديد.
+   ✏️ تبديل منتج    : بدل أي خانة (الثمن، الاسم، الصورة...) — كيتبدل فالموقع.
+   ❌ حذف منتج      : حيد السطر بأكمله (ولا فرغ خانة "price" ديالو، rowsToProducts
+                      كيشد غير الأسطر لي فيهم id + name + price).
+   الترتيب ديال الأسطر فـ Sheet = هو نفسو الترتيب لي غادي يبان بيه الصنف الأول
+   مرة فالفلاتر (شيبس الأصناف فوق).
+
+   كيفاش تربط الـ Sheet:
+   1) Google Sheet بهاد الأعمدة بالضبط (فوق).
+   2) ملف → مشاركة → نشر على الويب → اختار الورقة → صيغة CSV → "نشر".
+   3) نسخ الرابط (كيبان بحال:
+      https://docs.google.com/spreadsheets/d/e/XXXXXXXXXXXX/pub?output=csv)
+   4) لصقو فـ SHEET_CSV_URL تحت.
+   الموقع كيتحدث وحدو كل 5 دقايق (ولا مانوال بـ loadProductsFromSheet() فـ
+   console ديال المتصفح). */
 
 const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR12tPAT6hzYjzT_lZIbcJD1O9upGZrrYSd6-Vz1V5rpc1ypZ2sixYDE9yfrlL7zkB-kaYoUiNgvyBo/pub?output=csv';
 
@@ -142,6 +193,8 @@ function loadProductsFromSheet() {
         return;
       }
       PRODUCTS = fresh;
+      computeCategories();
+      if (!CATEGORIES.some(c => c.id === state.category)) state.category = 'tout';
       renderCategories();
       renderProducts();
       renderCartBadges();
@@ -159,13 +212,34 @@ const state = {
   category: 'tout',
   cart: JSON.parse(localStorage.getItem('casabtata_cart') || '{}'),
   selectedSlot: '',
+  selectedDay: '',
+  formStep: 1,
+  geo: null, // { lat, lng } إلا الزبون قبل يشارك الموقع ديالو
 };
+
+const TOTAL_STEPS = 6;
+const STEP_LABELS = {
+  1: 'الاسم',
+  2: 'رقم الهاتف',
+  3: 'العنوان والموقع',
+  4: 'يوم التوصيل',
+  5: 'الفترة المناسبة',
+  6: 'تأكيد الطلبية',
+};
+const DAY_OPTIONS = ['اليوم', 'غدا', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت', 'الأحد'];
 
 const saveCart  = () => localStorage.setItem('casabtata_cart', JSON.stringify(state.cart));
 
-/* ---------- 3. IMAGES LOCALES ---------- */
+/* ---------- 3. صور المنتجات (كلها روابط من الويب، بلا تخزين محلي) ---------- */
+// كل منتج (p1 → p40) عندو حقل query بالإنجليزية، وكنستعملوه باش نبنيو رابط
+// صورة حقيقية من LoremFlickr (خدمة صور مجانية كتخدم بالكلمة المفتاحية، خفيفة
+// وموثوقة، ماشي بحال روابط ثابتة لي تقدر تنكسر). الـ lock=رقم كيخلي نفس
+// الصورة تبقى ثابتة لكل منتج (ماشي عشوائية فكل مرة كترفرش الصفحة).
 function getProductImage(product) {
-  return product.img || `images/${product.id}.jpg`;
+  if (product.img) return product.img; // أولوية لأي رابط مخصص جا من عمود "img" فـ Google Sheet
+  const lockNumber = parseInt(String(product.id).replace(/\D/g, ''), 10) || 1;
+  const keyword = encodeURIComponent(product.query || product.darija || product.name);
+  return `https://loremflickr.com/600/600/${keyword}?lock=${lockNumber}`;
 }
 
 /* ---------- 4. CATÉGORIES ---------- */
@@ -219,7 +293,7 @@ function renderProducts() {
   list.forEach((p, i) => {
     const qty = state.cart[p.id] || 0;
     const card = document.createElement('div');
-    card.className = 'rise-in bg-white rounded-2xl shadow-crate overflow-hidden flex flex-col';
+    card.className = 'rise-in group bg-white rounded-2xl shadow-crate ring-1 ring-charcoal-800/[0.04] overflow-hidden flex flex-col transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5 hover:ring-charcoal-800/[0.08]';
     card.style.animationDelay = `${Math.min(i * 35, 300)}ms`;
     card.innerHTML = `
       <div class="relative aspect-square bg-sand-100 overflow-hidden">
@@ -248,7 +322,7 @@ function renderProducts() {
         el.alt = p.name;
         el.loading = 'lazy';
         el.decoding = 'async';
-        el.className = 'w-full h-full object-cover';
+        el.className = 'w-full h-full object-cover transition-transform duration-300 group-hover:scale-105';
         slot.appendChild(el);
       };
       img.src = getProductImage(p);
@@ -308,7 +382,19 @@ function refreshQtyZone(id) {
 
 /* ---------- 6. PANIER ---------- */
 function cartEntries() {
-  return Object.entries(state.cart).map(([id, qty]) => ({ ...productById(id), qty }));
+  let hadStaleItems = false;
+  const entries = Object.entries(state.cart)
+    .map(([id, qty]) => {
+      const product = productById(id);
+      if (!product) { hadStaleItems = true; return null; } // تحيد من Sheet (CRUD: حذف) → كنشيلوه من السلة تلقائيا
+      return { ...product, qty };
+    })
+    .filter(Boolean);
+  if (hadStaleItems) {
+    Object.keys(state.cart).forEach(id => { if (!productById(id)) delete state.cart[id]; });
+    saveCart();
+  }
+  return entries;
 }
 const DELIVERY = 20;
 function cartTotal() {
@@ -413,8 +499,13 @@ function sendOrderToSheet(clientInfo) {
 
   const payload = {
     name: clientInfo.name,
-    phone: clientInfo.phone,
+    // ⚠️ كنزيدو علامة الأبوستروف (') قبل رقم الهاتف: هادشي كيقول لـ Google
+    // Sheets "خديه بحال نص/تيكست" ماشي رقم ولا صيغة (=SUM...) — بهاد الشكل
+    // ما يبقاش +212 كيتقرا كخطأ #NAME? ولا كيبان بصيغة غريبة فالخانة. هاد
+    // الأبوستروف كتبان غير فـ Sheet، ما عندهاش علاقة برسالة واتساب.
+    phone: `'${clientInfo.phone}`,
     location: clientInfo.location,
+    mapsLink: clientInfo.mapsLink || '',
     availability,
     cartDetails,
     totalToPay,
@@ -447,12 +538,145 @@ function buildWhatsAppMessage(clientInfo) {
   msg += `👤 *الاسم:* ${clientInfo.name}\n`;
   msg += `📞 *الهاتف:* ${clientInfo.phone}\n`;
   msg += `📍 *العنوان:* ${clientInfo.location}\n`;
+  if (clientInfo.mapsLink) {
+    msg += `🗺️ *الموقع الدقيق (خريطة):* ${clientInfo.mapsLink}\n`;
+  }
   msg += `📅 *يوم التوصيل:* ${clientInfo.day}\n`;
   msg += `🕐 *الفترة المناسبة:* ${clientInfo.slot}\n`;
   msg += `━━━━━━━━━━━━━━━━\n`;
   msg += `🕐 ${now}\n\n`;
   msg += `شكرا على الطلبية! غادي نتواصلو معاك قريبا 🙏`;
   return msg;
+}
+
+/* ---- Multi-step wizard: خطوة وحدة فكل مرة، تقدم أوتوماتيكي، بار التقدم ---- */
+function renderDayGrid() {
+  const grid = document.getElementById('dayGrid');
+  grid.innerHTML = DAY_OPTIONS.map(day => `
+    <button type="button" data-day="${day}" class="day-btn py-3 rounded-xl text-xs font-medium border border-charcoal-800/10 bg-sand-50 text-charcoal-800/70 active:scale-95 transition">${day}</button>
+  `).join('');
+  document.querySelectorAll('.day-btn').forEach(btn => {
+    btn.onclick = () => {
+      state.selectedDay = btn.dataset.day;
+      document.querySelectorAll('.day-btn').forEach(b => {
+        b.classList.remove('bg-green-700', 'text-white', 'border-green-700');
+        b.classList.add('bg-sand-50', 'text-charcoal-800/70', 'border-charcoal-800/10');
+      });
+      btn.classList.add('bg-green-700', 'text-white', 'border-green-700');
+      btn.classList.remove('bg-sand-50', 'text-charcoal-800/70', 'border-charcoal-800/10');
+      document.getElementById('formError').classList.add('hidden');
+      setTimeout(nextStep, 280); // تقدم أوتوماتيكي لعندالخطوة لي مورا
+    };
+  });
+}
+
+function updateProgress() {
+  const pct = Math.round((state.formStep / TOTAL_STEPS) * 100);
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('stepPercent').textContent = pct + '%';
+  document.getElementById('stepLabel').textContent = `الخطوة ${state.formStep} من ${TOTAL_STEPS} — ${STEP_LABELS[state.formStep]}`;
+}
+
+function goToStep(n) {
+  state.formStep = n;
+  document.querySelectorAll('.form-step').forEach(el => {
+    el.classList.toggle('hidden', Number(el.dataset.step) !== n);
+  });
+  updateProgress();
+  document.getElementById('formError').classList.add('hidden');
+
+  const backBtn = document.getElementById('stepBackBtn');
+  const nextBtn = document.getElementById('stepNextBtn');
+  const sendBtn = document.getElementById('waConfirmBtn');
+
+  backBtn.textContent = n === 1 ? 'لّا، رجع' : '‹ رجوع';
+  nextBtn.classList.toggle('hidden', n === TOTAL_STEPS);
+  sendBtn.classList.toggle('hidden', n !== TOTAL_STEPS);
+
+  if (n === TOTAL_STEPS) renderReview();
+
+  requestAnimationFrame(() => {
+    if (n === 1) document.getElementById('clientName').focus();
+    if (n === 2) document.getElementById('clientPhone').focus();
+    if (n === 3) document.getElementById('clientLocation').focus();
+  });
+}
+
+function currentStepValid() {
+  const n = state.formStep;
+  if (n === 1) return document.getElementById('clientName').value.trim().length >= 2;
+  if (n === 2) return /^[0-9]{9}$/.test(document.getElementById('clientPhone').value.trim());
+  if (n === 3) return document.getElementById('clientLocation').value.trim().length >= 3;
+  if (n === 4) return !!state.selectedDay;
+  if (n === 5) return !!state.selectedSlot;
+  return true;
+}
+
+function nextStep() {
+  if (!currentStepValid()) {
+    document.getElementById('formError').classList.remove('hidden');
+    return;
+  }
+  document.getElementById('formError').classList.add('hidden');
+  if (state.formStep < TOTAL_STEPS) goToStep(state.formStep + 1);
+}
+
+function prevStep() {
+  if (state.formStep === 1) { hideWAModal(); return; }
+  goToStep(state.formStep - 1);
+}
+
+function renderReview() {
+  const name = document.getElementById('clientName').value.trim();
+  const phone = document.getElementById('clientPhone').value.trim();
+  const location = document.getElementById('clientLocation').value.trim();
+  const rows = [
+    ['👤', 'الاسم', name],
+    ['📞', 'الهاتف', `+212 ${phone}`],
+    ['📍', 'العنوان', location],
+    ['📅', 'اليوم', state.selectedDay],
+    ['🕐', 'الفترة', state.selectedSlot],
+  ];
+  if (state.geo) rows.push(['🗺️', 'الموقع على الخريطة', 'محدد بدقة ✅']);
+  document.getElementById('reviewSummary').innerHTML = rows.map(([icon, label, val]) => `
+    <div class="flex items-start justify-between gap-3">
+      <span class="text-charcoal-800/50 shrink-0">${icon} ${label}</span>
+      <span class="font-semibold text-charcoal-800 text-left">${val}</span>
+    </div>
+  `).join('');
+}
+
+function captureLocation() {
+  const btn = document.getElementById('geoBtn');
+  const label = document.getElementById('geoBtnLabel');
+  const statusEl = document.getElementById('geoStatus');
+  const errorEl = document.getElementById('geoError');
+  errorEl.classList.add('hidden');
+
+  if (!navigator.geolocation) {
+    errorEl.textContent = '⚠️ الهاتف ديالك ما كيدعمش تحديد الموقع';
+    errorEl.classList.remove('hidden');
+    return;
+  }
+
+  label.textContent = 'كنحددو الموقع...';
+  btn.disabled = true;
+
+  navigator.geolocation.getCurrentPosition(
+    (pos) => {
+      state.geo = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+      label.textContent = 'تم تحديد الموقع ✅';
+      statusEl.classList.remove('hidden');
+      btn.disabled = false;
+      btn.classList.add('ring-2', 'ring-green-600');
+    },
+    () => {
+      btn.disabled = false;
+      label.textContent = 'حدد موقعي بدقة على الخريطة 📍';
+      errorEl.classList.remove('hidden');
+    },
+    { enableHighAccuracy: true, timeout: 10000 }
+  );
 }
 
 function showWAModal() {
@@ -465,17 +689,25 @@ function showWAModal() {
     `<div class="flex justify-between py-0.5"><span>${item.emoji} ${item.name} × ${item.qty}</span><span class="font-semibold">${item.price * item.qty} درهم</span></div>`
   ).join('') + `<div class="border-t border-charcoal-800/10 mt-2 pt-2 flex justify-between font-bold text-green-800"><span>المجموع</span><span>${total} درهم</span></div>`;
 
+  // Reset wizard
   document.getElementById('clientName').value = '';
   document.getElementById('clientPhone').value = '';
   document.getElementById('clientLocation').value = '';
-  document.getElementById('clientDay').value = '';
+  document.getElementById('geoStatus').classList.add('hidden');
+  document.getElementById('geoError').classList.add('hidden');
+  document.getElementById('geoBtnLabel').textContent = 'حدد موقعي بدقة على الخريطة 📍';
+  document.getElementById('geoBtn').classList.remove('ring-2', 'ring-green-600');
+  state.geo = null;
+  state.selectedDay = '';
+  state.selectedSlot = '';
   document.querySelectorAll('.slot-btn').forEach(b => {
     b.classList.remove('bg-green-700', 'text-white', 'border-green-700');
     b.classList.add('bg-sand-50', 'text-charcoal-800/70', 'border-charcoal-800/10');
   });
-  state.selectedSlot = '';
+  renderDayGrid();
   document.getElementById('formError').classList.add('hidden');
 
+  goToStep(1);
   document.getElementById('waModal').classList.remove('hidden');
 }
 
@@ -487,21 +719,24 @@ function sendToWhatsApp() {
   const name     = document.getElementById('clientName').value.trim();
   const phone    = document.getElementById('clientPhone').value.trim();
   const location = document.getElementById('clientLocation').value.trim();
-  const day      = document.getElementById('clientDay').value;
-  const slot     = state.selectedSlot || '';
+  const day      = state.selectedDay;
+  const slot     = state.selectedSlot;
 
   if (!name || !phone || !location || !day || !slot) {
+    goToStep(!name ? 1 : !phone ? 2 : !location ? 3 : !day ? 4 : 5);
     document.getElementById('formError').classList.remove('hidden');
     return;
   }
-  document.getElementById('formError').classList.add('hidden');
 
-  const msg = buildWhatsAppMessage({ name, phone, location, day, slot });
+  const mapsLink = state.geo ? `https://www.google.com/maps?q=${state.geo.lat},${state.geo.lng}` : '';
+  const clientInfo = { name, phone: `+212 ${phone}`, location, day, slot, mapsLink };
+
+  const msg = buildWhatsAppMessage(clientInfo);
   const encoded = encodeURIComponent(msg);
   const url = `https://wa.me/${WA_NUMBER}?text=${encoded}`;
 
   // كنسجلو الطلبية فـ Google Sheet وفـ نفس الوقت كنحلو WhatsApp
-  sendOrderToSheet({ name, phone, location, day, slot });
+  sendOrderToSheet(clientInfo);
   window.open(url, '_blank');
 
   state.cart = {};
@@ -558,9 +793,11 @@ function bindEvents() {
   document.getElementById('catDrawerOverlay').onclick = closeCatDrawer;
 
   document.getElementById('checkoutBtn').onclick = showWAModal;
-  document.getElementById('waCancelBtn').onclick = hideWAModal;
   document.getElementById('waModalOverlay').onclick = hideWAModal;
   document.getElementById('waConfirmBtn').onclick = sendToWhatsApp;
+  document.getElementById('stepBackBtn').onclick = prevStep;
+  document.getElementById('stepNextBtn').onclick = nextStep;
+  document.getElementById('geoBtn').onclick = captureLocation;
 
   document.querySelectorAll('.slot-btn').forEach(btn => {
     btn.onclick = () => {
@@ -571,7 +808,29 @@ function bindEvents() {
       });
       btn.classList.add('bg-green-700', 'text-white', 'border-green-700');
       btn.classList.remove('bg-sand-50', 'text-charcoal-800/70', 'border-charcoal-800/10');
+      document.getElementById('formError').classList.add('hidden');
+      setTimeout(nextStep, 280); // تقدم أوتوماتيكي بعد اختيار الفترة
     };
+  });
+
+  // ── Auto-advance فالفورمولير: كتقدم للحقل لي مورا بلا ما تدوز بالإيد ──
+  const nameInput = document.getElementById('clientName');
+  nameInput.addEventListener('keydown', e => {
+    if (e.key === 'Enter') { e.preventDefault(); nextStep(); }
+  });
+
+  const phoneInput = document.getElementById('clientPhone');
+  phoneInput.addEventListener('input', e => {
+    e.target.value = e.target.value.replace(/\D/g, '').replace(/^0+/, '').slice(0, 9);
+    if (e.target.value.length === 9) setTimeout(nextStep, 220); // كيقدم وحدو من غير زر
+  });
+  phoneInput.addEventListener('keydown', e => {
+    if (e.key === 'Enter') { e.preventDefault(); nextStep(); }
+  });
+
+  const locationInput = document.getElementById('clientLocation');
+  locationInput.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); nextStep(); }
   });
 
   let debounce;

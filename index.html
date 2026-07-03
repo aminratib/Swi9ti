@@ -387,73 +387,95 @@
       <!-- Order summary -->
       <div id="waOrderSummary" class="bg-sand-50 rounded-2xl p-4 mb-4 text-sm text-charcoal-800/80 max-h-36 overflow-y-auto font-mono text-xs leading-relaxed"></div>
 
-      <!-- ── Client info form ── -->
-      <div class="flex flex-col gap-3 mb-5">
-        <p class="text-xs font-semibold text-charcoal-800/50 uppercase tracking-wide">معلومات التوصيل</p>
+      <!-- ── Progress bar ── -->
+      <div class="mb-5">
+        <div class="flex items-center justify-between mb-2">
+          <span id="stepLabel" class="text-xs font-semibold text-green-800">الخطوة 1 من 6 — الاسم</span>
+          <span id="stepPercent" class="text-[10px] text-charcoal-800/35 font-semibold tabular-nums">17%</span>
+        </div>
+        <div class="h-1.5 bg-charcoal-800/10 rounded-full overflow-hidden">
+          <div id="progressFill" class="h-full bg-gradient-to-r from-green-600 to-green-700 rounded-full" style="width:16.6%; transition: width .35s cubic-bezier(.4,0,.2,1);"></div>
+        </div>
+      </div>
 
-        <!-- Name -->
-        <div class="flex flex-col gap-1">
-          <label class="text-xs text-charcoal-800/60">الاسم الكامل *</label>
-          <input id="clientName" type="text" placeholder="مثلاً: فاطمة الزهراء"
-            class="w-full bg-sand-50 rounded-xl px-3 py-2.5 text-sm outline-none ring-1 ring-charcoal-800/10 focus:ring-green-600 transition placeholder:text-charcoal-800/25">
+      <!-- ── Multi-step form: خطوة وحدة فكل مرة، تقدم أوتوماتيكي ── -->
+      <div id="formSteps" class="mb-2 min-h-[196px]">
+
+        <!-- Step 1 — Name -->
+        <div class="form-step" data-step="1">
+          <label for="clientName" class="text-xs text-charcoal-800/60 mb-1.5 block">شكون غادي توصلها الطلبية؟</label>
+          <input id="clientName" type="text" placeholder="الاسم الكامل، مثلاً فاطمة الزهراء" autocomplete="name" enterkeyhint="next"
+            class="w-full bg-sand-50 rounded-xl px-4 py-3.5 text-base outline-none ring-1 ring-charcoal-800/10 focus:ring-2 focus:ring-green-600 transition placeholder:text-charcoal-800/25">
         </div>
 
-        <!-- Phone -->
-        <div class="flex flex-col gap-1">
-          <label class="text-xs text-charcoal-800/60">رقم الهاتف *</label>
-          <input id="clientPhone" type="tel" inputmode="numeric" placeholder="مثلاً: 0612345678"
-            class="w-full bg-sand-50 rounded-xl px-3 py-2.5 text-sm outline-none ring-1 ring-charcoal-800/10 focus:ring-green-600 transition placeholder:text-charcoal-800/25">
+        <!-- Step 2 — Phone (+212 مسبقة) -->
+        <div class="form-step hidden" data-step="2">
+          <label for="clientPhone" class="text-xs text-charcoal-800/60 mb-1.5 block">رقم الهاتف (واتساب) باش نتصلو بيك</label>
+          <div class="flex items-stretch gap-2">
+            <span class="flex items-center gap-1 bg-green-50 text-green-800 font-bold text-sm px-3.5 rounded-xl ring-1 ring-green-600/15 shrink-0">+212</span>
+            <input id="clientPhone" type="tel" inputmode="numeric" maxlength="9" placeholder="6•• •• •• ••" autocomplete="tel-national" enterkeyhint="next"
+              class="flex-1 min-w-0 bg-sand-50 rounded-xl px-4 py-3.5 text-base tracking-widest outline-none ring-1 ring-charcoal-800/10 focus:ring-2 focus:ring-green-600 transition placeholder:text-charcoal-800/25">
+          </div>
+          <p class="text-[11px] text-charcoal-800/40 mt-2">9 أرقام من بعد +212، بلا الصفر (مثلاً 612345678)</p>
         </div>
 
-        <!-- Location -->
-        <div class="flex flex-col gap-1">
-          <label class="text-xs text-charcoal-800/60">العنوان / الحي *</label>
-          <input id="clientLocation" type="text" placeholder="مثلاً: حي السلام، درب السلطان…"
-            class="w-full bg-sand-50 rounded-xl px-3 py-2.5 text-sm outline-none ring-1 ring-charcoal-800/10 focus:ring-green-600 transition placeholder:text-charcoal-800/25">
+        <!-- Step 3 — Address + Geolocation -->
+        <div class="form-step hidden" data-step="3">
+          <label for="clientLocation" class="text-xs text-charcoal-800/60 mb-1.5 block">العنوان ولا الحي</label>
+          <textarea id="clientLocation" rows="2" placeholder="مثلاً: حي السلام، درب السلطان، قرب…"
+            class="w-full bg-sand-50 rounded-xl px-4 py-3 text-base outline-none ring-1 ring-charcoal-800/10 focus:ring-2 focus:ring-green-600 transition placeholder:text-charcoal-800/25 resize-none"></textarea>
+          <button type="button" id="geoBtn" class="mt-2.5 w-full flex items-center justify-center gap-2 bg-green-50 active:bg-green-100 text-green-800 text-sm font-semibold py-3 rounded-xl transition active:scale-[0.98]">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-4 h-4 shrink-0">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/>
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z"/>
+            </svg>
+            <span id="geoBtnLabel">حدد موقعي بدقة على الخريطة 📍</span>
+          </button>
+          <p id="geoStatus" class="hidden text-[11px] text-green-700 font-semibold mt-1.5 text-center">✅ تم تحديد موقعك — غادي يتبعت مباشرة مع الطلبية على واتساب</p>
+          <p id="geoError" class="hidden text-[11px] text-terracotta-500 font-medium mt-1.5 text-center">⚠️ ما قدرناش نحددو الموقع، تأكد من تفعيل GPS</p>
         </div>
 
-        <!-- Day -->
-        <div class="flex flex-col gap-1">
-          <label class="text-xs text-charcoal-800/60">يوم التوصيل *</label>
-          <select id="clientDay"
-            class="w-full bg-sand-50 rounded-xl px-3 py-2.5 text-sm outline-none ring-1 ring-charcoal-800/10 focus:ring-green-600 transition appearance-none">
-            <option value="">— اختار اليوم —</option>
-            <option>اليوم</option>
-            <option>غدا</option>
-            <option>الاثنين</option>
-            <option>الثلاثاء</option>
-            <option>الأربعاء</option>
-            <option>الخميس</option>
-            <option>الجمعة</option>
-            <option>السبت</option>
-            <option>الأحد</option>
-          </select>
+        <!-- Step 4 — Day -->
+        <div class="form-step hidden" data-step="4">
+          <label class="text-xs text-charcoal-800/60 mb-2 block">يوم التوصيل</label>
+          <div id="dayGrid" class="grid grid-cols-3 gap-2"></div>
         </div>
 
-        <!-- Time slot -->
-        <div class="flex flex-col gap-1">
-          <label class="text-xs text-charcoal-800/60">الفترة المناسبة *</label>
+        <!-- Step 5 — Time slot -->
+        <div class="form-step hidden" data-step="5">
+          <label class="text-xs text-charcoal-800/60 mb-2 block">الفترة المناسبة</label>
           <div id="timeSlots" class="grid grid-cols-2 gap-2">
-            <button type="button" data-slot="8h–11h"  class="slot-btn py-2 rounded-xl text-xs font-medium border border-charcoal-800/10 bg-sand-50 text-charcoal-800/70 active:scale-95 transition">🌅 8h – 11h</button>
-            <button type="button" data-slot="11h–14h" class="slot-btn py-2 rounded-xl text-xs font-medium border border-charcoal-800/10 bg-sand-50 text-charcoal-800/70 active:scale-95 transition">☀️ 11h – 14h</button>
-            <button type="button" data-slot="14h–17h" class="slot-btn py-2 rounded-xl text-xs font-medium border border-charcoal-800/10 bg-sand-50 text-charcoal-800/70 active:scale-95 transition">🌤️ 14h – 17h</button>
-            <button type="button" data-slot="17h–20h" class="slot-btn py-2 rounded-xl text-xs font-medium border border-charcoal-800/10 bg-sand-50 text-charcoal-800/70 active:scale-95 transition">🌆 17h – 20h</button>
+            <button type="button" data-slot="8h–11h"  class="slot-btn py-3.5 rounded-xl text-sm font-medium border border-charcoal-800/10 bg-sand-50 text-charcoal-800/70 active:scale-95 transition">🌅 8h – 11h</button>
+            <button type="button" data-slot="11h–14h" class="slot-btn py-3.5 rounded-xl text-sm font-medium border border-charcoal-800/10 bg-sand-50 text-charcoal-800/70 active:scale-95 transition">☀️ 11h – 14h</button>
+            <button type="button" data-slot="14h–17h" class="slot-btn py-3.5 rounded-xl text-sm font-medium border border-charcoal-800/10 bg-sand-50 text-charcoal-800/70 active:scale-95 transition">🌤️ 14h – 17h</button>
+            <button type="button" data-slot="17h–20h" class="slot-btn py-3.5 rounded-xl text-sm font-medium border border-charcoal-800/10 bg-sand-50 text-charcoal-800/70 active:scale-95 transition">🌆 17h – 20h</button>
           </div>
         </div>
 
-        <!-- Error message -->
-        <p id="formError" class="hidden text-xs text-terracotta-500 font-medium text-center">⚠️ عبي جميع الحقول قبل المتابعة</p>
+        <!-- Step 6 — Review -->
+        <div class="form-step hidden" data-step="6">
+          <p class="text-xs font-semibold text-charcoal-800/50 uppercase tracking-wide mb-2">تأكد من المعلومات قبل الإرسال</p>
+          <div id="reviewSummary" class="bg-sand-50 rounded-xl p-3.5 text-sm flex flex-col gap-2"></div>
+        </div>
+
       </div>
+
+      <!-- Error message -->
+      <p id="formError" class="hidden text-xs text-terracotta-500 font-medium text-center mb-3">⚠️ عمر هاد الحقل قبل ما تكمل</p>
 
       <!-- Buttons -->
       <div class="flex gap-3">
-        <button id="waCancelBtn" class="flex-1 py-2.5 rounded-full border border-charcoal-800/15 text-sm font-medium text-charcoal-800/70 active:bg-charcoal-800/5">لّا، رجع</button>
-        <button id="waConfirmBtn" class="flex-1 py-2.5 rounded-full bg-[#25D366] text-white text-sm font-semibold flex items-center justify-center gap-2 active:scale-95 transition">
+        <button id="stepBackBtn" class="flex-1 py-3 rounded-full border border-charcoal-800/15 text-sm font-medium text-charcoal-800/70 active:bg-charcoal-800/5 transition">لّا، رجع</button>
+        <button id="stepNextBtn" class="flex-[1.6] py-3 rounded-full bg-green-700 active:bg-green-600 text-white text-sm font-semibold flex items-center justify-center gap-1.5 active:scale-[0.98] transition">
+          التالي
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.2" stroke="currentColor" class="w-4 h-4 rtl:rotate-180"><path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+        </button>
+        <button id="waConfirmBtn" class="hidden flex-[1.6] py-3 rounded-full bg-[#25D366] active:bg-[#1fb857] text-white text-sm font-semibold flex items-center justify-center gap-2 active:scale-[0.98] transition">
           <svg viewBox="0 0 24 24" class="w-4 h-4 fill-white shrink-0" xmlns="http://www.w3.org/2000/svg">
             <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
             <path d="M12 0C5.373 0 0 5.373 0 12c0 2.116.553 4.103 1.519 5.83L.057 23.27a.75.75 0 0 0 .923.923l5.44-1.462A11.945 11.945 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.89 0-3.663-.524-5.18-1.435l-.37-.22-3.83 1.03 1.03-3.83-.22-.37A9.955 9.955 0 0 1 2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/>
           </svg>
-          إيه، سيفط!
+          إيه، سيفط الطلبية!
         </button>
       </div>
 
