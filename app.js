@@ -104,7 +104,7 @@ function computeCategories() {
       label: CATEGORY_META[id]?.label || id,
       emoji: CATEGORY_META[id]?.emoji || '🧺',
     })),
-    { id: 'promo', label: 'بروموسيون 🔥', emoji: '🔥' },
+    { id: 'promo', label: 'بروموسيون', emoji: '🔥' },
   ];
 }
 computeCategories();
@@ -243,6 +243,16 @@ function getProductImage(product) {
 }
 
 /* ---------- 4. CATÉGORIES ---------- */
+// إيموجيات الخضرة والفواكه (🍅🥔🥬...) خاصهم يبقاو — هوما لي كيمثلو نوع المنتج
+// بصريا للزبون. غير الأصناف "النظامية" (الكل / بروموسيون) لي كنبدلوهم
+// بـ Heroicons باش مايبانش الموقع فيه إيموجي كيبورد عشوائي.
+const CATEGORY_ICONS = {
+  tout:  `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-4 h-4 shrink-0"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 0 1 6 3.75h2.25A2.25 2.25 0 0 1 10.5 6v2.25a2.25 2.25 0 0 1-2.25 2.25H6a2.25 2.25 0 0 1-2.25-2.25V6ZM3.75 15.75A2.25 2.25 0 0 1 6 13.5h2.25a2.25 2.25 0 0 1 2.25 2.25V18a2.25 2.25 0 0 1-2.25 2.25H6A2.25 2.25 0 0 1 3.75 18v-2.25ZM13.5 6a2.25 2.25 0 0 1 2.25-2.25H18A2.25 2.25 0 0 1 20.25 6v2.25A2.25 2.25 0 0 1 18 10.5h-2.25a2.25 2.25 0 0 1-2.25-2.25V6ZM13.5 15.75a2.25 2.25 0 0 1 2.25-2.25H18a2.25 2.25 0 0 1 2.25 2.25V18A2.25 2.25 0 0 1 18 20.25h-2.25A2.25 2.25 0 0 1 13.5 18v-2.25Z"/></svg>`,
+  promo: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-4 h-4 shrink-0"><path stroke-linecap="round" stroke-linejoin="round" d="M15.362 5.214A8.252 8.252 0 0 1 12 21 8.25 8.25 0 0 1 6.038 7.048 8.287 8.287 0 0 0 9 9.6a8.983 8.983 0 0 1 3.361-6.867 8.21 8.21 0 0 0 3 2.48Z"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 18a3.75 3.75 0 0 0 .495-7.468 5.99 5.99 0 0 0-1.925 3.547 5.975 5.975 0 0 1-2.133-1.001A3.75 3.75 0 0 0 12 18Z"/></svg>`,
+};
+function categoryGlyph(cat) {
+  return CATEGORY_ICONS[cat.id] || `<span>${cat.emoji}</span>`;
+}
 function renderCategories() {
   const row = document.getElementById('categoryRow');
   const drawerList = document.getElementById('categoryListDrawer');
@@ -252,10 +262,10 @@ function renderCategories() {
   CATEGORIES.forEach(cat => {
     const active = state.category === cat.id;
     const chip = document.createElement('button');
-    chip.className = `shrink-0 px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition border ${
+    chip.className = `shrink-0 px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition border flex items-center gap-1.5 ${
       active ? 'bg-green-700 text-white border-green-700' : 'bg-white text-charcoal-800/70 border-charcoal-800/10 active:bg-charcoal-800/5'
     }`;
-    chip.innerHTML = `${cat.emoji} ${cat.label}`;
+    chip.innerHTML = `${categoryGlyph(cat)}<span>${cat.label}</span>`;
     chip.onclick = () => { state.category = cat.id; renderCategories(); renderProducts(); };
     row.appendChild(chip);
 
@@ -263,7 +273,7 @@ function renderCategories() {
     item.className = `flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-left transition ${
       active ? 'bg-green-700 text-white' : 'text-charcoal-800/80 active:bg-charcoal-800/5'
     }`;
-    item.innerHTML = `<span>${cat.emoji}</span><span>${cat.label}</span>`;
+    item.innerHTML = `${categoryGlyph(cat)}<span>${cat.label}</span>`;
     item.onclick = () => { state.category = cat.id; renderCategories(); renderProducts(); closeCatDrawer(); };
     drawerList.appendChild(item);
   });
@@ -296,9 +306,12 @@ function renderProducts() {
     card.className = 'rise-in group bg-white rounded-2xl shadow-crate ring-1 ring-charcoal-800/[0.04] overflow-hidden flex flex-col transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5 hover:ring-charcoal-800/[0.08]';
     card.style.animationDelay = `${Math.min(i * 35, 300)}ms`;
     card.innerHTML = `
-      <div class="relative aspect-square bg-sand-100 overflow-hidden">
-        <div data-img-slot="${p.id}" class="absolute inset-0 flex items-center justify-center text-5xl">${p.emoji}</div>
+      <div data-lightbox-trigger="${p.id}" class="relative aspect-square bg-sand-100 overflow-hidden cursor-zoom-in active:scale-[0.97] transition-transform" role="button" tabindex="0" aria-label="كبّر صورة ${p.name}">
+        <div data-skel data-img-slot="${p.id}" class="absolute inset-0 flex items-center justify-center text-5xl">${p.emoji}</div>
         ${p.promo ? `<span class="absolute top-2 left-2 bg-terracotta-500 text-white text-[10px] font-bold px-2 py-1 rounded-full">بروم</span>` : ''}
+        <span class="absolute bottom-1.5 right-1.5 w-6 h-6 rounded-full bg-charcoal-800/35 backdrop-blur-sm text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3.5 h-3.5"><path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607ZM10.5 7.5v6m-3-3h6"/></svg>
+        </span>
       </div>
       <div class="p-3 flex flex-col gap-2 flex-1">
         <h3 class="font-semibold text-sm leading-tight text-charcoal-800">${p.name}</h3>
@@ -315,6 +328,7 @@ function renderProducts() {
     if (slot) {
       const img = new Image();
       img.onload = () => {
+        slot.removeAttribute('data-skel');
         slot.innerHTML = '';
         slot.style.background = 'none';
         const el = document.createElement('img');
@@ -325,11 +339,38 @@ function renderProducts() {
         el.className = 'w-full h-full object-cover transition-transform duration-300 group-hover:scale-105';
         slot.appendChild(el);
       };
+      img.onerror = () => slot.removeAttribute('data-skel');
       img.src = getProductImage(p);
+    }
+
+    // Tap the image → open a zoomed-in lightbox so the client can see the product clearly
+    const trigger = card.querySelector(`[data-lightbox-trigger="${p.id}"]`);
+    if (trigger) {
+      trigger.onclick = () => openLightbox(p);
+      trigger.onkeydown = (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openLightbox(p); } };
     }
   });
 
   attachQtyHandlers();
+}
+
+/* ---------- 5bis. LIGHTBOX — تكبير صورة المنتج ---------- */
+function openLightbox(product) {
+  const lightbox = document.getElementById('imgLightbox');
+  const img = document.getElementById('lightboxImg');
+  img.src = getProductImage(product);
+  img.alt = product.name;
+  img.classList.remove('zoom-in');
+  void img.offsetWidth; // reset animation
+  img.classList.add('zoom-in');
+  document.getElementById('lightboxName').textContent = `${product.emoji} ${product.name}`;
+  document.getElementById('lightboxPrice').textContent = `${product.price} MAD / ${product.unit}`;
+  lightbox.classList.remove('hidden');
+  document.body.style.overflow = 'hidden';
+}
+function closeLightbox() {
+  document.getElementById('imgLightbox').classList.add('hidden');
+  document.body.style.overflow = '';
 }
 
 /* Heroicon: plus */
@@ -354,7 +395,7 @@ function qtyStepperHTML(id, qty, unit) {
 }
 
 function attachQtyHandlers() {
-  document.querySelectorAll('[data-add]').forEach(btn => btn.onclick = () => { updateQty(btn.dataset.add, 1); showToast(`✅ تزاد للسلة!`); });
+  document.querySelectorAll('[data-add]').forEach(btn => btn.onclick = () => { updateQty(btn.dataset.add, 1); showToast(`تزاد للسلة!`); });
   document.querySelectorAll('[data-inc]').forEach(btn => btn.onclick = () => updateQty(btn.dataset.inc, 1));
   document.querySelectorAll('[data-dec]').forEach(btn => btn.onclick = () => updateQty(btn.dataset.dec, -1));
 }
@@ -422,8 +463,10 @@ function renderCartDrawer() {
   const entries = cartEntries();
 
   if (entries.length === 0) {
-    wrap.innerHTML = `<div class="flex-1 flex flex-col items-center justify-center text-center py-10">
-      <p class="text-4xl mb-3">🧺</p>
+    wrap.innerHTML = `<div class="flex-1 flex flex-col items-center justify-center text-center py-10 fade-in">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.3" stroke="currentColor" class="w-14 h-14 mb-3 text-charcoal-800/25">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 0 0-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 0 0-16.536-1.84M7.5 14.25 5.106 5.272M6 20.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Zm12.75 0a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z"/>
+      </svg>
       <p class="font-display text-green-900 font-semibold">السلة فارغة</p>
       <p class="text-sm text-charcoal-800/55 mt-1">زيد بعض الخضرة الطازجة!</p>
     </div>`;
@@ -606,7 +649,8 @@ function currentStepValid() {
   const n = state.formStep;
   if (n === 1) return document.getElementById('clientName').value.trim().length >= 2;
   if (n === 2) return /^[0-9]{9}$/.test(document.getElementById('clientPhone').value.trim());
-  if (n === 3) return document.getElementById('clientLocation').value.trim().length >= 3;
+  // إلا الزبون حدد موقعه بالخريطة (GPS)، ما بقاش خاصو يعمر خانة العنوان يدويا
+  if (n === 3) return !!state.geo || document.getElementById('clientLocation').value.trim().length >= 3;
   if (n === 4) return !!state.selectedDay;
   if (n === 5) return !!state.selectedSlot;
   return true;
@@ -626,21 +670,32 @@ function prevStep() {
   goToStep(state.formStep - 1);
 }
 
+/* Heroicons مستعملة فملخص المراجعة */
+const REVIEW_ICONS = {
+  user:     `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-4 h-4 shrink-0"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z"/></svg>`,
+  phone:    `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-4 h-4 shrink-0"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h1.5a2.25 2.25 0 0 0 2.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 0 1-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 0 0-1.091-.852H4.5A2.25 2.25 0 0 0 2.25 4.5v2.25Z"/></svg>`,
+  pin:      `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-4 h-4 shrink-0"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z"/></svg>`,
+  calendar: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-4 h-4 shrink-0"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0V11.25A2.25 2.25 0 0 1 5.25 9h13.5a2.25 2.25 0 0 1 2.25 2.25v7.5"/></svg>`,
+  clock:    `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-4 h-4 shrink-0"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>`,
+  check:    `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4 shrink-0 text-green-600"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5"/></svg>`,
+};
+
 function renderReview() {
   const name = document.getElementById('clientName').value.trim();
   const phone = document.getElementById('clientPhone').value.trim();
-  const location = document.getElementById('clientLocation').value.trim();
+  const typedLocation = document.getElementById('clientLocation').value.trim();
+  const location = typedLocation || (state.geo ? 'الموقع محدد بدقة على الخريطة' : '');
   const rows = [
-    ['👤', 'الاسم', name],
-    ['📞', 'الهاتف', `+212 ${phone}`],
-    ['📍', 'العنوان', location],
-    ['📅', 'اليوم', state.selectedDay],
-    ['🕐', 'الفترة', state.selectedSlot],
+    [REVIEW_ICONS.user, 'الاسم', name],
+    [REVIEW_ICONS.phone, 'الهاتف', `+212 ${phone}`],
+    [REVIEW_ICONS.pin, 'العنوان', location],
+    [REVIEW_ICONS.calendar, 'اليوم', state.selectedDay],
+    [REVIEW_ICONS.clock, 'الفترة', state.selectedSlot],
   ];
-  if (state.geo) rows.push(['🗺️', 'الموقع على الخريطة', 'محدد بدقة ✅']);
+  if (state.geo) rows.push([REVIEW_ICONS.check, 'الموقع على الخريطة', 'محدد بدقة']);
   document.getElementById('reviewSummary').innerHTML = rows.map(([icon, label, val]) => `
     <div class="flex items-start justify-between gap-3">
-      <span class="text-charcoal-800/50 shrink-0">${icon} ${label}</span>
+      <span class="text-charcoal-800/50 shrink-0 flex items-center gap-1.5">${icon} ${label}</span>
       <span class="font-semibold text-charcoal-800 text-left">${val}</span>
     </div>
   `).join('');
@@ -654,7 +709,7 @@ function captureLocation() {
   errorEl.classList.add('hidden');
 
   if (!navigator.geolocation) {
-    errorEl.textContent = '⚠️ الهاتف ديالك ما كيدعمش تحديد الموقع';
+    errorEl.querySelector('span').textContent = 'الهاتف ديالك ما كيدعمش تحديد الموقع';
     errorEl.classList.remove('hidden');
     return;
   }
@@ -665,14 +720,17 @@ function captureLocation() {
   navigator.geolocation.getCurrentPosition(
     (pos) => {
       state.geo = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-      label.textContent = 'تم تحديد الموقع ✅';
+      label.textContent = 'تم تحديد الموقع';
       statusEl.classList.remove('hidden');
       btn.disabled = false;
       btn.classList.add('ring-2', 'ring-green-600');
+      document.getElementById('formError').classList.add('hidden');
+      // ما خصوش يعمر العنوان يدويا — كنقدمو أوتوماتيكيا للخطوة لي مورا
+      setTimeout(() => { if (state.formStep === 3) nextStep(); }, 650);
     },
     () => {
       btn.disabled = false;
-      label.textContent = 'حدد موقعي بدقة على الخريطة 📍';
+      label.textContent = 'حدد موقعي بدقة على الخريطة';
       errorEl.classList.remove('hidden');
     },
     { enableHighAccuracy: true, timeout: 10000 }
@@ -718,7 +776,9 @@ function hideWAModal() {
 function sendToWhatsApp() {
   const name     = document.getElementById('clientName').value.trim();
   const phone    = document.getElementById('clientPhone').value.trim();
-  const location = document.getElementById('clientLocation').value.trim();
+  const typedLocation = document.getElementById('clientLocation').value.trim();
+  // إلا الزبون حدد الموقع بالـ GPS وما كتبش العنوان يدويا، كنستعملو وصف بديل
+  const location = typedLocation || (state.geo ? 'الموقع محدد بدقة على الخريطة (شوف الرابط تحت)' : '');
   const day      = state.selectedDay;
   const slot     = state.selectedSlot;
 
@@ -746,14 +806,15 @@ function sendToWhatsApp() {
   renderProducts();
   hideWAModal();
   closeCartDrawer();
-  showToast('🎉 الطلبية تسافرت! تبقا تستنا واتساب');
+  showToast('الطلبية تسافرت! تبقا تستنا واتساب');
 }
 
 /* ---------- 8. TOAST ---------- */
+const TOAST_CHECK_ICON = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.2" stroke="currentColor" class="w-4 h-4 shrink-0 text-green-400"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5"/></svg>`;
 let toastTimer;
-function showToast(message) {
+function showToast(message, showIcon = true) {
   const toast = document.getElementById('toast');
-  toast.textContent = message;
+  toast.innerHTML = `<span class="flex items-center gap-2">${showIcon ? TOAST_CHECK_ICON : ''}<span>${message}</span></span>`;
   toast.classList.remove('hidden');
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => toast.classList.add('hidden'), 2200);
@@ -798,6 +859,10 @@ function bindEvents() {
   document.getElementById('stepBackBtn').onclick = prevStep;
   document.getElementById('stepNextBtn').onclick = nextStep;
   document.getElementById('geoBtn').onclick = captureLocation;
+  document.getElementById('lightboxClose').onclick = closeLightbox;
+  document.getElementById('imgLightbox').addEventListener('click', (e) => {
+    if (e.target.id === 'imgLightbox') closeLightbox();
+  });
 
   document.querySelectorAll('.slot-btn').forEach(btn => {
     btn.onclick = () => {
@@ -846,7 +911,8 @@ function bindEvents() {
 
   document.addEventListener('keydown', e => {
     if (e.key !== 'Escape') return;
-    if (!document.getElementById('waModal').classList.contains('hidden')) hideWAModal();
+    if (!document.getElementById('imgLightbox').classList.contains('hidden')) closeLightbox();
+    else if (!document.getElementById('waModal').classList.contains('hidden')) hideWAModal();
     else if (!document.getElementById('cartOverlay').classList.contains('hidden')) closeCartDrawer();
     else if (!document.getElementById('catDrawerOverlay').classList.contains('hidden')) closeCatDrawer();
   });
