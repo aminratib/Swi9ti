@@ -18,14 +18,14 @@
 <meta property="og:site_name" content="Swi9ti">
 <meta property="og:title" content="Swi9ti — خضرة طازجة كتوصل ليك فكازا اليوم">
 <meta property="og:description" content="قلب على الخضرة، زيد للسلة، سيفط الطلبية على واتساب. توصيل فنفس النهار فالدار البيضاء والمحمدية.">
-<meta property="og:image" content="https://swi9ti.com/LOGO.png">
+<meta property="og:image" content="https://swi9ti.com/LOGO1.png">
 <meta property="og:url" content="https://swi9ti.com/">
 
 <!-- Twitter Card -->
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Swi9ti — خضرة طازجة كتوصل ليك فكازا اليوم">
 <meta name="twitter:description" content="قلب، زيد، سيفط الطلبية على واتساب — توصيل فنفس النهار فكازا.">
-<meta name="twitter:image" content="https://swi9ti.com/LOGO.png">
+<meta name="twitter:image" content="https://swi9ti.com/LOGO1.png">
 
 <!-- ===== PWA / Mobile ===== -->
 <meta name="theme-color" content="#1F3D2B">
@@ -35,8 +35,8 @@
 <meta name="apple-mobile-web-app-title" content="Swi9ti">
 <meta name="format-detection" content="telephone=no">
 <link rel="manifest" href="manifest.json">
-<link rel="apple-touch-icon" href="LOGO.png">
-<link rel="icon" type="image/png" sizes="192x192" href="LOGO.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <link rel="icon" type="image/x-icon" href="LOGO1.png">
 
 <!-- Fonts -->
@@ -54,7 +54,7 @@
   "url": "https://swi9ti.com",
   "image": "https://swi9ti.com/LOGO.png",
   "telephone": "+212625185245",
-  "email": "hello@Swi9ti.ma",
+  "email": "hello@Swi9ti.com",
   "priceRange": "MAD",
   "areaServed": [
     { "@type": "City", "name": "الدار البيضاء" },
@@ -576,5 +576,18 @@
   <!-- PapaParse: يقرا الـ CSV ديال Google Sheet (تحديث الأثمنة) -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
   <script src="app.js"></script>
+
+  <!-- Service Worker — mode hors-ligne + condition requise pour la
+       transformation en app Android (TWA) via PWABuilder -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./service-worker.js').catch(() => {
+          // Échec silencieux (ex: navigateur trop ancien) — le site
+          // continue de fonctionner normalement sans mode hors-ligne
+        });
+      });
+    }
+  </script>
 </body>
 </html>

@@ -239,7 +239,7 @@ function getProductImageRaw(product) {
   if (product.img) return product.img; // أولوية لأي رابط مخصص جا من عمود "img" فـ Google Sheet
   const lockNumber = parseInt(String(product.id).replace(/\D/g, ''), 10) || 1;
   const keyword = encodeURIComponent(product.query || product.darija || product.name);
-  return `S`;
+  return `https://loremflickr.com/600/600/${keyword}?lock=${lockNumber}`;
 }
 
 // ---- Proxy d'optimisation (images.weserv.nl) ----
