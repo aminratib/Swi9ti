@@ -235,11 +235,34 @@ const saveCart  = () => localStorage.setItem('casabtata_cart', JSON.stringify(st
 // صورة حقيقية من LoremFlickr (خدمة صور مجانية كتخدم بالكلمة المفتاحية، خفيفة
 // وموثوقة، ماشي بحال روابط ثابتة لي تقدر تنكسر). الـ lock=رقم كيخلي نفس
 // الصورة تبقى ثابتة لكل منتج (ماشي عشوائية فكل مرة كترفرش الصفحة).
-function getProductImage(product) {
+function getProductImageRaw(product) {
   if (product.img) return product.img; // أولوية لأي رابط مخصص جا من عمود "img" فـ Google Sheet
   const lockNumber = parseInt(String(product.id).replace(/\D/g, ''), 10) || 1;
   const keyword = encodeURIComponent(product.query || product.darija || product.name);
   return `https://loremflickr.com/600/600/${keyword}?lock=${lockNumber}`;
+}
+
+// ---- Proxy d'optimisation (images.weserv.nl) ----
+// كنمرو أي صورة (LoremFlickr ولا رابط من Google Sheet) من هاد الخدمة المجانية
+// باش: 1) تصغر لقدّ لي محتاجينه بالضبط (ماشي 600×600 كل مرة) 2) تتحول لـ WebP
+// (وزن أقل بكثير من JPEG) 3) تقدر تولي مبلورة (blur) باش نصاوبو تأثير
+// "blur-up" — نعرضو نسخة صغيرة مبلورة فبضع كيلوبايت قبل ما توصل النسخة الكاملة.
+function optimizedImg(rawUrl, { w, q = 75, blur = 0 } = {}) {
+  const params = new URLSearchParams({ url: rawUrl, output: 'webp', q: String(q) });
+  if (w) params.set('w', String(w));
+  if (blur) params.set('blur', String(blur));
+  return `https://images.weserv.nl/?${params.toString()}`;
+}
+
+// الصورة الكاملة (تتعرض فالكارطة/الكارت/اللايتبوكس) — حجم قابل للتخصيص
+function getProductImage(product, size = 480) {
+  return optimizedImg(getProductImageRaw(product), { w: size, q: 76 });
+}
+
+// نسخة صغيرة جدا ومبلورة (~1-2 كيلوبايت) كتتحمل بزربة وكتبان كـ"blur-up"
+// placeholder قبل ما توصل الصورة الحقيقية
+function getProductImagePlaceholder(product) {
+  return optimizedImg(getProductImageRaw(product), { w: 24, q: 40, blur: 3 });
 }
 
 /* ---------- 4. CATÉGORIES ---------- */
@@ -279,6 +302,82 @@ function renderCategories() {
   });
 }
 
+/* ---------- 4bis. LAZY LOADING + BLUR-UP للصور ---------- */
+// كنستعملو IntersectionObserver باش ما نحملوش غير الصور لي قريبة من الشاشة
+// (بدل ما نطلقو الـ 40 صورة فنفس الوقت وهو لي كان كيسبب الريطارد والزحمة على
+// الشبكة). كل صورة كتبان أول مرة مبلورة (نسخة صغيرة خفيفة) ثم كتولي واضحة
+// بمجرد ما تكمل التحميل الكامل — تأثير "blur-up" بلا وميض ولا فراغ.
+let _imgObserver = null;
+const _imgObserverTargets = new WeakMap(); // slot(HTMLElement) -> product
+
+function getImgObserver() {
+  if (_imgObserver) return _imgObserver;
+  if (!('IntersectionObserver' in window)) return null;
+  _imgObserver = new IntersectionObserver((entries, obs) => {
+    entries.forEach(entry => {
+      if (!entry.isIntersecting) return;
+      const slot = entry.target;
+      const product = _imgObserverTargets.get(slot);
+      obs.unobserve(slot);
+      if (product) loadCardImage(slot, product);
+    });
+  }, { rootMargin: '500px 0px', threshold: 0.01 });
+  return _imgObserver;
+}
+
+function observeCardImage(slot, product) {
+  _imgObserverTargets.set(slot, product);
+  const obs = getImgObserver();
+  if (obs) {
+    obs.observe(slot);
+  } else {
+    // Fallback (متصفح قديم بلا IntersectionObserver) — نحملو مباشرة
+    loadCardImage(slot, product);
+  }
+}
+
+function loadCardImage(slot, p) {
+  const skel = slot.parentElement ? slot.parentElement.querySelector('[data-skel]') : null;
+  const fullSrc = getProductImage(p);
+  const placeholderSrc = getProductImagePlaceholder(p);
+
+  const img = document.createElement('img');
+  img.alt = p.name;
+  img.decoding = 'async';
+  img.loading = 'lazy';
+  img.className = 'w-full h-full object-cover transition-transform duration-300 group-hover:scale-105';
+  img.style.opacity = '0';
+  img.style.filter = 'blur(18px)';
+  img.style.transform = 'scale(1.1)';
+  img.style.transition = 'opacity .35s ease, filter .5s ease, transform .5s ease';
+
+  // 1) نسخة صغيرة مبلورة — توصل بزربة (بضع كيلوبايت) وتغطي الفراغ فوريا
+  const ph = new Image();
+  ph.onload = () => {
+    if (img.src === fullSrc) return; // الصورة الكاملة سبقات وصلات
+    img.src = placeholderSrc;
+    if (!img.isConnected) slot.appendChild(img);
+    requestAnimationFrame(() => { img.style.opacity = '1'; });
+  };
+  ph.src = placeholderSrc;
+
+  // 2) الصورة الكاملة فالخلفية — بمجرد ما توصل، كتبدل الـ blur وكتبان واضحة
+  const full = new Image();
+  full.onload = () => {
+    img.src = fullSrc;
+    if (!img.isConnected) slot.appendChild(img);
+    img.style.opacity = '1';
+    img.style.filter = 'blur(0)';
+    img.style.transform = 'scale(1)';
+    if (skel) skel.remove();
+  };
+  full.onerror = () => {
+    // الصورة ما وصلاتش — نخليو الإيموجي (skeleton) بادي عوض ما نبقاو بفراغ
+    if (skel) skel.removeAttribute('data-skel');
+  };
+  full.src = fullSrc;
+}
+
 /* ---------- 5. GRILLE PRODUITS ---------- */
 function filteredProducts() {
   return PRODUCTS.filter(p => {
@@ -307,7 +406,8 @@ function renderProducts() {
     card.style.animationDelay = `${Math.min(i * 35, 300)}ms`;
     card.innerHTML = `
       <div data-lightbox-trigger="${p.id}" class="relative aspect-square bg-sand-100 overflow-hidden cursor-zoom-in active:scale-[0.97] transition-transform" role="button" tabindex="0" aria-label="كبّر صورة ${p.name}">
-        <div data-skel data-img-slot="${p.id}" class="absolute inset-0 flex items-center justify-center text-5xl">${p.emoji}</div>
+        <div data-skel class="absolute inset-0 flex items-center justify-center text-5xl">${p.emoji}</div>
+        <div data-img-slot="${p.id}" class="absolute inset-0"></div>
         ${p.promo ? `<span class="absolute top-2 left-2 bg-terracotta-500 text-white text-[10px] font-bold px-2 py-1 rounded-full">بروم</span>` : ''}
         <span class="absolute bottom-1.5 right-1.5 w-6 h-6 rounded-full bg-charcoal-800/35 backdrop-blur-sm text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3.5 h-3.5"><path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607ZM10.5 7.5v6m-3-3h6"/></svg>
@@ -323,25 +423,10 @@ function renderProducts() {
     `;
     grid.appendChild(card);
 
-    // Load local image — replaces emoji only if image loads successfully
+    // Image chargée en lazy (IntersectionObserver) + effet blur-up progressif —
+    // voir observeCardImage()/loadCardImage() dans la section 4bis plus haut.
     const slot = card.querySelector(`[data-img-slot="${p.id}"]`);
-    if (slot) {
-      const img = new Image();
-      img.onload = () => {
-        slot.removeAttribute('data-skel');
-        slot.innerHTML = '';
-        slot.style.background = 'none';
-        const el = document.createElement('img');
-        el.src = getProductImage(p);
-        el.alt = p.name;
-        el.loading = 'lazy';
-        el.decoding = 'async';
-        el.className = 'w-full h-full object-cover transition-transform duration-300 group-hover:scale-105';
-        slot.appendChild(el);
-      };
-      img.onerror = () => slot.removeAttribute('data-skel');
-      img.src = getProductImage(p);
-    }
+    if (slot) observeCardImage(slot, p);
 
     // Tap the image → open a zoomed-in lightbox so the client can see the product clearly
     const trigger = card.querySelector(`[data-lightbox-trigger="${p.id}"]`);
@@ -358,11 +443,17 @@ function renderProducts() {
 function openLightbox(product) {
   const lightbox = document.getElementById('imgLightbox');
   const img = document.getElementById('lightboxImg');
-  img.src = getProductImage(product);
+  const lowSrc = getProductImage(product, 480);  // probablement déjà en cache (grille)
+  const hiSrc  = getProductImage(product, 900);  // qualité haute pour le zoom
+  img.src = lowSrc;
   img.alt = product.name;
   img.classList.remove('zoom-in');
   void img.offsetWidth; // reset animation
   img.classList.add('zoom-in');
+  // Upgrade silencieux vers la haute résolution une fois chargée, sans à-coup
+  const hi = new Image();
+  hi.onload = () => { img.src = hiSrc; };
+  hi.src = hiSrc;
   document.getElementById('lightboxName').textContent = `${product.emoji} ${product.name}`;
   document.getElementById('lightboxPrice').textContent = `${product.price} MAD / ${product.unit}`;
   lightbox.classList.remove('hidden');
@@ -492,20 +583,24 @@ function renderCartDrawer() {
     `).join('');
 
     // Load images in cart — replace emoji only if image loads
+    // (vignettes 56px → on demande une image déjà petite au proxy, pas 480px
+    // redimensionnée par le navigateur : bien plus léger et rapide)
     entries.forEach(item => {
       const slot = document.getElementById(`cart-img-${item.id}`);
       if (!slot) return;
+      const src = getProductImage(item, 112); // 2x pour écrans retina
       const img = new Image();
       img.onload = () => {
         slot.innerHTML = '';
         slot.classList.remove('flex', 'items-center', 'justify-center', 'text-2xl');
         const el = document.createElement('img');
-        el.src = getProductImage(item);
+        el.src = src;
         el.alt = item.name;
+        el.decoding = 'async';
         el.className = 'w-full h-full object-cover';
         slot.appendChild(el);
       };
-      img.src = getProductImage(item);
+      img.src = src;
     });
   }
 
