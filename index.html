@@ -191,11 +191,67 @@
 
 <body class="bg-sand-50 text-charcoal-800 font-body antialiased pb-24 lg:pb-0">
 
+
+  <!-- Splash screen animé -->
+<div id="splash-screen">
+  <img src="icon-512.png" alt="Swi9ti" id="splash-logo">
+</div>
+
+<style>
+  #splash-screen {
+    position: fixed;
+    inset: 0;
+    background: #FBF6EC; /* même couleur que ton background_color */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    transition: opacity 0.4s ease-out;
+  }
+
+  #splash-logo {
+    width: 120px;
+    height: 120px;
+    animation: splashPop 1s ease-out forwards;
+  }
+
+  @keyframes splashPop {
+    0% {
+      opacity: 0;
+      transform: scale(0.6);
+    }
+    60% {
+      opacity: 1;
+      transform: scale(1.08);
+    }
+    100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  #splash-screen.hide {
+    opacity: 0;
+    pointer-events: none;
+  }
+</style>
+
+<script>
+  window.addEventListener('load', () => {
+    setTimeout(() => {
+      const splash = document.getElementById('splash-screen');
+      splash.classList.add('hide');
+      setTimeout(() => splash.remove(), 400); // laisse le temps au fade de finir
+    }, 1200); // durée totale avant de disparaître
+  });
+</script>
+
+
   <!-- ===== PRELOADER ===== -->
   <div id="preloader" role="status" aria-live="polite" class="fixed inset-0 z-[100] bg-white flex flex-col items-center justify-center gap-6 transition-opacity duration-500">
     <img src="LOGO.svg" alt="" class="w-34 h-34 sm:w-50 sm:h-50 object-contain">
     <div class="w-40 sm:w-48 h-1.5 rounded-full bg-green-100 overflow-hidden">
-      <div id="preloaderBar" class="h-full bg-green-600 rounded-full" style="width:0%; transition: width .3s ease;"></div>
+      <div id="preloaderBar" class="h-full bg-gradient-to-r from-orange-600 to-green-600 rounded-full" style="width:0%; transition: width .3s ease;"></div>
     </div>
     <span class="sr-only">كيتحمل...</span>
   </div>
