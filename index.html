@@ -192,8 +192,8 @@
 <body class="bg-sand-50 text-charcoal-800 font-body antialiased pb-24 lg:pb-0">
 
 
-  <!-- Splash screen animé -->
-<div id="splash-screen">
+ <!-- Splash screen animé (app installée uniquement) -->
+<div id="splash-screen" style="display:none;">
   <img src="icon-512.png" alt="Swi9ti" id="splash-logo">
 </div>
 
@@ -201,8 +201,7 @@
   #splash-screen {
     position: fixed;
     inset: 0;
-    background: #FBF6EC; /* même couleur que ton background_color */
-    display: flex;
+    background: #FBF6EC;
     align-items: center;
     justify-content: center;
     z-index: 9999;
@@ -216,18 +215,9 @@
   }
 
   @keyframes splashPop {
-    0% {
-      opacity: 0;
-      transform: scale(0.6);
-    }
-    60% {
-      opacity: 1;
-      transform: scale(1.08);
-    }
-    100% {
-      opacity: 1;
-      transform: scale(1);
-    }
+    0% { opacity: 0; transform: scale(0.6); }
+    60% { opacity: 1; transform: scale(1.08); }
+    100% { opacity: 1; transform: scale(1); }
   }
 
   #splash-screen.hide {
@@ -237,15 +227,24 @@
 </style>
 
 <script>
-  window.addEventListener('load', () => {
-    setTimeout(() => {
-      const splash = document.getElementById('splash-screen');
-      splash.classList.add('hide');
-      setTimeout(() => splash.remove(), 400); // laisse le temps au fade de finir
-    }, 1200); // durée totale avant de disparaître
-  });
-</script>
+  function isRunningAsInstalledApp() {
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
+    const isIOSStandalone = window.navigator.standalone === true;
+    return isStandalone || isIOSStandalone;
+  }
 
+  if (isRunningAsInstalledApp()) {
+    const splash = document.getElementById('splash-screen');
+    splash.style.display = 'flex';
+
+    window.addEventListener('load', () => {
+      setTimeout(() => {
+        splash.classList.add('hide');
+        setTimeout(() => splash.remove(), 400);
+      }, 1200);
+    });
+  }
+</script>
 
   <!-- ===== PRELOADER ===== -->
   <div id="preloader" role="status" aria-live="polite" class="fixed inset-0 z-[100] bg-white flex flex-col items-center justify-center gap-6 transition-opacity duration-500">
