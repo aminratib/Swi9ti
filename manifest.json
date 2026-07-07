@@ -10,7 +10,7 @@
   "orientation": "portrait-primary",
   "lang": "ar-MA",
   "dir": "rtl",
-  "background_color": "#FBF6EC",
+  "background_color": "#FFFFFF",
   "theme_color": "#1F3D2B",
   "categories": ["shopping", "food", "lifestyle"],
   "icons": [
