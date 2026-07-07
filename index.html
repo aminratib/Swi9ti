@@ -236,83 +236,43 @@
     </div>
   </header>
 
-  <!-- ===== HERO ===== -->
-  <section class="relative overflow-hidden">
-    <div class="awning h-2.5 w-full opacity-90"></div>
-    <div class="hero-bg relative">
-      <div class="max-w-6xl mx-auto px-4 pt-10 pb-20 sm:pt-16 sm:pb-28 relative z-10">
-        <p class="text-saffron-300 text-xs font-semibold tracking-[0.2em] uppercase mb-3">كازا · مجنية من الصباح الباكر</p>
-        <h1 class="font-display text-sand-50 text-4xl sm:text-5xl lg:text-6xl leading-[1.08] font-semibold max-w-xl">
-          الخضرة ديالك،<br> جاية من عند الفلاح<br><span class="text-saffron-300">حتى لباب دارك.</span>
-        </h1>
-        <p class="text-sand-50/80 mt-4 max-w-md text-[15px] sm:text-base">
-          Swi9ti كيختار أحسن الخضرة من عند الفلاحة ديال المنطقة، وكينيفذ ليك فنفس النهار — بلا تعب، بلا زحمة.
-        </p>
-        <div class="mt-7 flex flex-wrap gap-3 items-center">
-          <button onclick="document.getElementById('catalogue').scrollIntoView({behavior:'smooth'})"
-            class="bg-terracotta-500 hover:bg-terracotta-600 text-white font-semibold text-sm px-6 py-3 rounded-full transition active:scale-95 flex items-center gap-2">
-            <!-- Heroicons: sparkles -->
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-4 h-4">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09Z"/>
-            </svg>
-            شوف الخضرة
-          </button>
-          <div class="flex items-center gap-2 text-sand-50/85 text-sm bg-white/10 backdrop-blur-sm rounded-full px-4 py-2.5">
-            <!-- Heroicons: truck -->
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-4 h-4 text-saffron-300 shrink-0">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 18.75a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 0 1-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 0 0-3.213-9.193 2.056 2.056 0 0 0-1.58-.86H14.25M16.5 18.75h-2.25m0-11.177v-.958c0-.568-.422-1.048-.987-1.106a48.554 48.554 0 0 0-10.026 0 1.106 1.106 0 0 0-.987 1.106v7.635m12-6.677v6.677m0 4.5v-4.5m0 0h-12"/>
-            </svg>
-            توصيل اليوم قبل 7 ديالعشية
-          </div>
-        </div>
-        <!-- trust badges -->
-        <div class="mt-8 flex flex-wrap gap-4">
-          <div class="flex items-center gap-2 text-sand-50/70 text-xs">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-4 h-4 text-saffron-400">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 0 1-1.043 3.296 3.745 3.745 0 0 1-3.296 1.043A3.745 3.745 0 0 1 12 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 0 1-3.296-1.043 3.745 3.745 0 0 1-1.043-3.296A3.745 3.745 0 0 1 3 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 0 1 1.043-3.296 3.746 3.746 0 0 1 3.296-1.043A3.746 3.746 0 0 1 12 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 0 1 3.296 1.043 3.746 3.746 0 0 1 1.043 3.296A3.745 3.745 0 0 1 21 12Z"/>
-            </svg>
-            طازجة 100%
-          </div>
-          <div class="flex items-center gap-2 text-sand-50/70 text-xs">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-4 h-4 text-saffron-400">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M15.182 15.182a4.5 4.5 0 0 1-6.364 0M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0ZM9.75 9.75c0 .414-.168.75-.375.75S9 10.164 9 9.75 9.168 9 9.375 9s.375.336.375.75Zm-.375 0h.008v.015h-.008V9.75Zm5.625 0c0 .414-.168.75-.375.75s-.375-.336-.375-.75.168-.75.375-.75.375.336.375.75Zm-.375 0h.008v.015h-.008V9.75Z"/>
-            </svg>
-            زبناء رابحين
-          </div>
-          <div class="flex items-center gap-2 text-sand-50/70 text-xs">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-4 h-4 text-saffron-400">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
-            </svg>
-            طلبية فساعة
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="awning h-2.5 w-full opacity-90"></div>
-  </section>
-
-  <!-- ===== MOBILE SEARCH (منقولة برا من الهيدر باش الهيدر يبقى: منيو — لوگو — سلة) ===== -->
-  <div class="sm:hidden max-w-6xl mx-auto px-4 pt-4">
+  <!-- ===== SEARCH BAR (1) ===== -->
+  <div class="max-w-6xl mx-auto px-4 pt-4 sm:hidden">
     <div class="relative">
       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="absolute left-3 top-1/2 -translate-y-1/2 text-charcoal-800/40 w-5 h-5">
         <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"/>
       </svg>
-      <input id="searchInputMobile" type="search" placeholder="قلب على طماطم، بصل…" aria-label="قلب على الخضرة" autocomplete="off"
+      <input id="searchInputMobile" type="search" placeholder="قلب على منتج…" aria-label="قلب على الخضرة" autocomplete="off"
         class="w-full bg-white shadow-crate rounded-full pl-10 pr-4 py-2.5 text-sm outline-none ring-1 ring-charcoal-800/10 focus:ring-green-600 transition">
     </div>
   </div>
 
-  <!-- ===== CATEGORIES ===== -->
+  <!-- ===== CATEGORIES — شيبس دائرية (2) ===== -->
   <nav class="max-w-6xl mx-auto px-4 pt-5">
-    <div id="categoryRow" class="flex gap-2 overflow-x-auto scroll-snap pb-1 -mx-1 px-1"></div>
+    <div id="categoryIconsRow" class="flex gap-4 overflow-x-auto scroll-snap pb-1 -mx-1 px-1 sm:justify-center"></div>
   </nav>
 
-  <!-- ===== CATALOGUE ===== -->
-  <main id="catalogue" class="max-w-6xl mx-auto px-4 pt-5 pb-16">
+  <!-- ===== PACKS PROMOTIONNELS — كاروسيل (3) ===== -->
+  <section class="max-w-6xl mx-auto px-4 pt-6">
+    <div id="packsCarousel" class="flex gap-3 overflow-x-auto scroll-snap pb-1 -mx-1 px-1"></div>
+  </section>
+
+  <!-- ===== OFFRES DU JOUR (4) ===== -->
+  <section class="max-w-6xl mx-auto px-4 pt-7">
+    <div class="flex items-baseline justify-between mb-3">
+      <h2 class="font-display text-lg sm:text-xl font-semibold text-green-900 flex items-center gap-1.5">عروض اليوم 🔥</h2>
+      <button id="seeAllDealsBtn" class="text-xs text-green-700 font-semibold shrink-0">شوف الكل</button>
+    </div>
+    <div id="dailyDeals" class="flex gap-3 overflow-x-auto scroll-snap pb-1 -mx-1 px-1"></div>
+  </section>
+
+  <!-- ===== CATALOGUE — جميع المنتجات (5) ===== -->
+  <main id="catalogue" class="max-w-6xl mx-auto px-4 pt-8 pb-10">
     <div class="flex items-baseline justify-between mb-4">
-      <h2 class="font-display text-2xl font-semibold text-green-900" id="sectionTitle">كل الخضرة</h2>
+      <h2 class="font-display text-2xl font-semibold text-green-900" id="sectionTitle">جميع المنتجات</h2>
       <span id="resultCount" class="text-xs text-charcoal-800/50"></span>
     </div>
+    <div id="categoryRow" class="flex gap-2 overflow-x-auto scroll-snap pb-1 -mx-1 px-1 mb-4"></div>
     <div id="productGrid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4"></div>
     <div id="emptyState" class="hidden text-center py-16 fade-in">
       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.3" stroke="currentColor" class="w-14 h-14 mx-auto mb-3 text-charcoal-800/25">
@@ -322,6 +282,30 @@
       <p class="text-sm text-charcoal-800/60 mt-1">جرب كلمة أخرى، ولا قلب فصنف آخر.</p>
     </div>
   </main>
+
+  <!-- ===== التوصيل والضمانات (6) ===== -->
+  <section class="max-w-6xl mx-auto px-4 pb-10">
+    <div class="grid grid-cols-3 gap-2 sm:gap-6 bg-white rounded-2xl shadow-crate ring-1 ring-charcoal-800/[0.04] p-4 sm:p-6">
+      <div class="flex flex-col items-center text-center gap-1.5">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor" class="w-6 h-6 sm:w-7 sm:h-7 text-green-700">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 18.75a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 0 1-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 0 0-3.213-9.193 2.056 2.056 0 0 0-1.58-.86H14.25M16.5 18.75h-2.25m0-11.177v-.958c0-.568-.422-1.048-.987-1.106a48.554 48.554 0 0 0-10.026 0 1.106 1.106 0 0 0-.987 1.106v7.635m12-6.677v6.677m0 4.5v-4.5m0 0h-12"/>
+        </svg>
+        <span class="text-[11px] sm:text-xs font-semibold text-charcoal-800 leading-tight">توصيل سريع<br>اليوم بالذات</span>
+      </div>
+      <div class="flex flex-col items-center text-center gap-1.5">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor" class="w-6 h-6 sm:w-7 sm:h-7 text-green-700">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 0 1-1.043 3.296 3.745 3.745 0 0 1-3.296 1.043A3.745 3.745 0 0 1 12 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 0 1-3.296-1.043 3.745 3.745 0 0 1-1.043-3.296A3.745 3.745 0 0 1 3 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 0 1 1.043-3.296 3.746 3.746 0 0 1 3.296-1.043A3.746 3.746 0 0 1 12 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 0 1 3.296 1.043 3.746 3.746 0 0 1 1.043 3.296A3.745 3.745 0 0 1 21 12Z"/>
+        </svg>
+        <span class="text-[11px] sm:text-xs font-semibold text-charcoal-800 leading-tight">منتجات طازة<br>100%</span>
+      </div>
+      <div class="flex flex-col items-center text-center gap-1.5">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor" class="w-6 h-6 sm:w-7 sm:h-7 text-green-700">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75m6-3v8.25a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V9.75m19.5 0a2.25 2.25 0 0 0-2.25-2.25h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 11.91a2.25 2.25 0 0 1-1.07-1.916V9.75"/>
+        </svg>
+        <span class="text-[11px] sm:text-xs font-semibold text-charcoal-800 leading-tight">خلص عند<br>الباب</span>
+      </div>
+    </div>
+  </section>
 
   <!-- ===== FOOTER ===== -->
   <footer class="bg-green-900 text-sand-50/80 relative">
@@ -355,7 +339,7 @@
   </footer>
 
   <!-- ===== STICKY CART BAR (mobile: barre كاملة تحت — desktop: pastille عائمة فالزاوية) ===== -->
-  <div id="stickyBar" class="hidden fixed bottom-0 inset-x-0 lg:inset-x-auto lg:right-6 lg:bottom-6 z-40">
+  <div id="stickyBar" class="hidden max-lg:!hidden fixed bottom-0 inset-x-0 lg:inset-x-auto lg:right-6 lg:bottom-6 z-40">
     <div class="max-w-6xl mx-auto px-3 pb-3 lg:max-w-none lg:mx-0 lg:px-0 lg:pb-0">
       <button id="stickyBarBtn" class="w-full lg:w-auto lg:min-w-[300px] bg-green-700 hover:bg-green-600 active:scale-[0.98] text-sand-50 rounded-2xl lg:rounded-full shadow-crate lg:shadow-2xl px-4 py-3 lg:px-6 lg:py-4 flex items-center justify-between gap-4 transition">
         <span class="flex items-center gap-2 text-sm font-medium">
@@ -368,6 +352,29 @@
       </button>
     </div>
   </div>
+
+  <!-- ===== NAVIGATION — بار سفلية (mobile) — بلا "بروفيل" (موقع ثابت، بلا حسابات) (7) ===== -->
+  <nav id="mobileTabBar" class="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-white/95 backdrop-blur border-t border-charcoal-800/10 flex items-center justify-around" style="padding-bottom: env(safe-area-inset-bottom);">
+    <button id="tabHomeBtn" class="flex flex-col items-center gap-0.5 px-6 py-2.5 text-green-700" aria-label="الرئيسية">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-5 h-5">
+        <path stroke-linecap="round" stroke-linejoin="round" d="m2.25 12 8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25"/>
+      </svg>
+      <span class="text-[10px] font-semibold">الرئيسية</span>
+    </button>
+    <button id="tabCatBtn" class="flex flex-col items-center gap-0.5 px-6 py-2.5 text-charcoal-800/55" aria-label="الأصناف">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-5 h-5">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 0 1 6 3.75h2.25A2.25 2.25 0 0 1 10.5 6v2.25a2.25 2.25 0 0 1-2.25 2.25H6a2.25 2.25 0 0 1-2.25-2.25V6ZM3.75 15.75A2.25 2.25 0 0 1 6 13.5h2.25a2.25 2.25 0 0 1 2.25 2.25V18a2.25 2.25 0 0 1-2.25 2.25H6A2.25 2.25 0 0 1 3.75 18v-2.25ZM13.5 6a2.25 2.25 0 0 1 2.25-2.25H18A2.25 2.25 0 0 1 20.25 6v2.25A2.25 2.25 0 0 1 18 10.5h-2.25a2.25 2.25 0 0 1-2.25-2.25V6ZM13.5 15.75a2.25 2.25 0 0 1 2.25-2.25H18a2.25 2.25 0 0 1 2.25 2.25V18A2.25 2.25 0 0 1 18 20.25h-2.25A2.25 2.25 0 0 1 13.5 18v-2.25Z"/>
+      </svg>
+      <span class="text-[10px] font-semibold">الأصناف</span>
+    </button>
+    <button id="tabCartBtn" class="relative flex flex-col items-center gap-0.5 px-6 py-2.5 text-charcoal-800/55" aria-label="السلة">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-5 h-5">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 0 0-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 0 0-16.536-1.84M7.5 14.25 5.106 5.272M6 20.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Zm12.75 0a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z"/>
+      </svg>
+      <span id="tabCartBadge" class="hidden absolute top-1 right-4 min-w-[16px] h-4 px-1 rounded-full bg-terracotta-500 text-[9px] font-bold text-white flex items-center justify-center">0</span>
+      <span class="text-[10px] font-semibold">السلة</span>
+    </button>
+  </nav>
 
   <!-- ===== CATEGORY DRAWER (mobile) ===== -->
   <div id="catDrawerOverlay" class="hidden fixed inset-0 bg-charcoal-800/40 z-50"></div>

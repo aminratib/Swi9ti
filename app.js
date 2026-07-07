@@ -73,6 +73,16 @@ let PRODUCTS = [
   { id: 'p40', name: 'أفوكا',             darija: 'أفوكا',         emoji: '🥑', category: 'fruits', price: 0, unit: 'كيلو', query: 'avocado',          promo: false },
 ];
 
+/* ---------- 1ter. باقات مميزة (Packs promotionnels) ----------
+   باقات بثمن مخفض، كل باقة كتزاد للسلة كوحدة وحدة (بحال منتج) — ماشي
+   مبنية من Google Sheet، معرفة هنا مباشرة. باش تزيد/تبدل باقة، غير بدل
+   هاد array. */
+const PACKS = [
+  { id: 'pack1', name: 'باقة السلاطة',  desc: 'كلشي لي خاصك لسلاطة طرية',      price: 39, oldPrice: 55, discount: 29, unit: 'باقة', emoji: '🥗', img: 'salad vegetables basket' },
+  { id: 'pack2', name: 'باقة الطاجين',  desc: 'خضرة مقطرة للطاجين ديال نهار', price: 45, oldPrice: 60, discount: 25, unit: 'باقة', emoji: '🍲', img: 'moroccan tagine vegetables' },
+  { id: 'pack3', name: 'باقة الفواكه',  desc: 'فواكه الموسم مختارة بالعين',   price: 49, oldPrice: 65, discount: 24, unit: 'باقة', emoji: '🍉', img: 'fresh fruit basket' },
+];
+
 /* ---- ملاحظة على الصور ----
    دابا كل المنتجات (p1 → p40) صورهم كيجيو بروابط من الويب — والو محلي، والو
    فمجلد images/. راجع دالة getProductImage() فوق قليل (القسم 3): كتبني رابط
@@ -86,13 +96,16 @@ let PRODUCTS = [
    جديد ماشي موجود هنا (مثلاً "champignons")، الموقع غايبني ليه شيب تلقائيا
    بإيموجي 🧺 عام والاسم بحال ما كتبتيه بالضبط فـ Sheet — بلا ما تلمس الكود. */
 const CATEGORY_META = {
-  legumes:  { label: 'خضرة',                  emoji: '🍅' },
-  racines:  { label: 'جذور ودرنات',            emoji: '🥔' },
-  feuilles: { label: 'أوراق',                  emoji: '🥬' },
-  herbes:   { label: 'عشاب وتوابل',            emoji: '🌿' },
-  agrumes:  { label: 'حوامض',                  emoji: '🍋' },
-  fruits:   { label: 'فواكه',                  emoji: '🍎' },
+  legumes:  { label: 'خضرة',                  emoji: '🍅', query: 'fresh vegetables' },
+  racines:  { label: 'جذور ودرنات',            emoji: '🥔', query: 'root vegetables' },
+  feuilles: { label: 'أوراق',                  emoji: '🥬', query: 'leafy greens' },
+  herbes:   { label: 'عشاب وتوابل',            emoji: '🌿', query: 'fresh herbs' },
+  agrumes:  { label: 'حوامض',                  emoji: '🍋', query: 'citrus fruit' },
+  fruits:   { label: 'فواكه',                  emoji: '🍎', query: 'fresh fruits' },
 };
+
+// ترتيب الشيبس الدائرية فالصفحة الرئيسية (Légumes → Fruits → Herbes → Racines، بحال التصميم)
+const CATEGORY_ICON_ORDER = ['legumes', 'fruits', 'herbes', 'racines'];
 
 let CATEGORIES = [];
 function computeCategories() {
@@ -195,6 +208,8 @@ function loadProductsFromSheet() {
       PRODUCTS = fresh;
       computeCategories();
       if (!CATEGORIES.some(c => c.id === state.category)) state.category = 'tout';
+      renderCategoryIcons();
+      renderDailyDeals();
       renderCategories();
       renderProducts();
       renderCartBadges();
@@ -300,6 +315,128 @@ function renderCategories() {
     item.onclick = () => { state.category = cat.id; renderCategories(); renderProducts(); closeCatDrawer(); };
     drawerList.appendChild(item);
   });
+}
+
+/* ---------- 4a. الشيبس الدائرية ديال الأصناف (فوق الصفحة الرئيسية) ---------- */
+function catIconUrl(seed, query, w = 96) {
+  const lock = String(seed).split('').reduce((a, c) => a + c.charCodeAt(0), 0) || 1;
+  const raw = `https://loremflickr.com/200/200/${encodeURIComponent(query)}?lock=${lock}`;
+  return optimizedImg(raw, { w, q: 72 });
+}
+
+function renderCategoryIcons() {
+  const row = document.getElementById('categoryIconsRow');
+  if (!row) return;
+  row.innerHTML = '';
+
+  const available = CATEGORIES.filter(c => c.id !== 'tout' && c.id !== 'promo');
+  const ordered = CATEGORY_ICON_ORDER.map(id => available.find(c => c.id === id)).filter(Boolean);
+  const rest = available.filter(c => !ordered.includes(c));
+  const shown = [...ordered, ...rest].slice(0, 4);
+
+  shown.forEach(cat => {
+    const meta = CATEGORY_META[cat.id];
+    const src = catIconUrl(cat.id, meta?.query || cat.label);
+    const btn = document.createElement('button');
+    btn.className = 'flex flex-col items-center gap-1.5 shrink-0 w-16';
+    btn.innerHTML = `
+      <span class="relative w-14 h-14 rounded-full overflow-hidden bg-sand-100 ring-1 ring-charcoal-800/10 flex items-center justify-center text-2xl">
+        <span>${meta?.emoji || cat.emoji}</span>
+        <img src="${src}" alt="${cat.label}" loading="lazy" decoding="async" class="absolute inset-0 w-full h-full object-cover" onerror="this.remove()">
+      </span>
+      <span class="text-[11px] font-medium text-charcoal-800/80 text-center leading-tight">${cat.label}</span>
+    `;
+    btn.onclick = () => {
+      state.category = cat.id;
+      renderCategories();
+      renderProducts();
+      document.getElementById('catalogue').scrollIntoView({ behavior: 'smooth' });
+    };
+    row.appendChild(btn);
+  });
+
+  // "زيادة" — كتفتح درج الأصناف بأكملها
+  const more = document.createElement('button');
+  more.className = 'flex flex-col items-center gap-1.5 shrink-0 w-16';
+  more.innerHTML = `
+    <span class="w-14 h-14 rounded-full bg-green-50 ring-1 ring-green-600/15 flex items-center justify-center text-green-700">
+      ${CATEGORY_ICONS.tout}
+    </span>
+    <span class="text-[11px] font-medium text-charcoal-800/80">زيادة</span>
+  `;
+  more.onclick = openCatDrawer;
+  row.appendChild(more);
+}
+
+/* ---------- 4b. باقات مميزة — كاروسيل ---------- */
+function renderPacks() {
+  const row = document.getElementById('packsCarousel');
+  if (!row) return;
+  row.innerHTML = '';
+
+  PACKS.forEach(pack => {
+    const bg = catIconUrl(pack.id, pack.img, 600);
+    const card = document.createElement('div');
+    card.className = 'relative shrink-0 w-[270px] sm:w-[320px] rounded-2xl overflow-hidden shadow-crate';
+    card.innerHTML = `
+      <div class="absolute inset-0 bg-cover bg-center" style="background-image:url('${bg}')"></div>
+      <div class="absolute inset-0 bg-gradient-to-t from-green-900/92 via-green-900/45 to-green-900/10"></div>
+      <div class="relative p-4 flex flex-col h-40 sm:h-44 justify-between">
+        <div class="flex items-start justify-between gap-2">
+          <div class="min-w-0">
+            <p class="font-display text-white text-lg font-semibold truncate">${pack.name}</p>
+            <p class="text-sand-50/80 text-xs mt-0.5 leading-snug">${pack.desc}</p>
+          </div>
+          <span class="bg-terracotta-500 text-white text-[11px] font-bold px-2 py-1 rounded-full shrink-0">-${pack.discount}%</span>
+        </div>
+        <div class="flex items-center justify-between gap-2">
+          <p class="text-saffron-300 font-bold text-lg">${pack.price} <span class="text-white/60 text-xs font-normal line-through">${pack.oldPrice}</span> درهم</p>
+          <button data-add-pack="${pack.id}" class="bg-white text-green-800 text-xs font-semibold px-4 py-2 rounded-full active:scale-95 transition shrink-0">زيد</button>
+        </div>
+      </div>
+    `;
+    row.appendChild(card);
+  });
+
+  document.querySelectorAll('[data-add-pack]').forEach(btn => {
+    btn.onclick = () => {
+      updateQty(btn.dataset.addPack, 1);
+      showToast('الباقة تزادت للسلة!');
+    };
+  });
+}
+
+/* ---------- 4c. عروض اليوم — سطر سكرول أفقي ---------- */
+function renderDailyDeals() {
+  const row = document.getElementById('dailyDeals');
+  if (!row) return;
+  const deals = PRODUCTS.filter(p => p.promo).slice(0, 12);
+  row.innerHTML = '';
+
+  deals.forEach(p => {
+    const qty = state.cart[p.id] || 0;
+    const card = document.createElement('div');
+    card.className = 'shrink-0 w-32 sm:w-36 bg-white rounded-2xl shadow-crate ring-1 ring-charcoal-800/[0.04] overflow-hidden flex flex-col';
+    card.innerHTML = `
+      <div class="relative aspect-square bg-sand-100 overflow-hidden">
+        <div data-skel class="absolute inset-0 flex items-center justify-center text-4xl">${p.emoji}</div>
+        <div data-img-slot="deal-${p.id}" class="absolute inset-0"></div>
+        <span class="absolute top-1.5 right-1.5 bg-terracotta-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full">حار 🔥</span>
+      </div>
+      <div class="p-2.5 flex flex-col gap-1.5 flex-1">
+        <h3 class="font-semibold text-xs leading-tight text-charcoal-800 truncate">${p.name}</h3>
+        <p class="text-green-700 font-bold text-xs">${p.price} درهم <span class="text-charcoal-800/40 font-normal">/${p.unit}</span></p>
+        <div class="mt-auto" data-qty-zone="${p.id}">
+          ${qty > 0 ? qtyStepperHTML(p.id, qty, p.unit) : addButtonHTML(p.id)}
+        </div>
+      </div>
+    `;
+    row.appendChild(card);
+    const slot = card.querySelector(`[data-img-slot="deal-${p.id}"]`);
+    if (slot) observeCardImage(slot, p);
+  });
+
+  attachQtyHandlers();
 }
 
 /* ---------- 4bis. LAZY LOADING + BLUR-UP للصور ---------- */
@@ -491,7 +628,7 @@ function attachQtyHandlers() {
   document.querySelectorAll('[data-dec]').forEach(btn => btn.onclick = () => updateQty(btn.dataset.dec, -1));
 }
 
-function productById(id) { return PRODUCTS.find(p => p.id === id); }
+function productById(id) { return PRODUCTS.find(p => p.id === id) || PACKS.find(p => p.id === id); }
 
 function updateQty(id, delta) {
   const current = state.cart[id] || 0;
@@ -504,11 +641,13 @@ function updateQty(id, delta) {
 }
 
 function refreshQtyZone(id) {
-  const zone = document.querySelector(`[data-qty-zone="${id}"]`);
-  if (!zone) return;
+  const zones = document.querySelectorAll(`[data-qty-zone="${id}"]`);
+  if (!zones.length) return;
   const qty = state.cart[id] || 0;
   const product = productById(id);
-  zone.innerHTML = qty > 0 ? qtyStepperHTML(id, qty, product && product.unit) : addButtonHTML(id);
+  zones.forEach(zone => {
+    zone.innerHTML = qty > 0 ? qtyStepperHTML(id, qty, product && product.unit) : addButtonHTML(id);
+  });
   attachQtyHandlers();
 }
 
@@ -547,6 +686,12 @@ function renderCartBadges() {
   sticky.classList.toggle('hidden', count === 0);
   document.getElementById('stickyCount').textContent = count;
   document.getElementById('stickyTotal').textContent = `${total} درهم`;
+
+  const tabBadge = document.getElementById('tabCartBadge');
+  if (tabBadge) {
+    tabBadge.textContent = count;
+    tabBadge.classList.toggle('hidden', count === 0);
+  }
 }
 
 function renderCartDrawer() {
@@ -948,6 +1093,22 @@ function bindEvents() {
   document.getElementById('catDrawerClose').onclick = closeCatDrawer;
   document.getElementById('catDrawerOverlay').onclick = closeCatDrawer;
 
+  // ── بار التنقل السفلية (mobile) — الرئيسية / الأصناف / السلة ──
+  const tabHomeBtn = document.getElementById('tabHomeBtn');
+  if (tabHomeBtn) tabHomeBtn.onclick = () => window.scrollTo({ top: 0, behavior: 'smooth' });
+  const tabCatBtn = document.getElementById('tabCatBtn');
+  if (tabCatBtn) tabCatBtn.onclick = openCatDrawer;
+  const tabCartBtn = document.getElementById('tabCartBtn');
+  if (tabCartBtn) tabCartBtn.onclick = openCartDrawer;
+
+  const seeAllDealsBtn = document.getElementById('seeAllDealsBtn');
+  if (seeAllDealsBtn) seeAllDealsBtn.onclick = () => {
+    state.category = 'promo';
+    renderCategories();
+    renderProducts();
+    document.getElementById('catalogue').scrollIntoView({ behavior: 'smooth' });
+  };
+
   document.getElementById('checkoutBtn').onclick = showWAModal;
   document.getElementById('waModalOverlay').onclick = hideWAModal;
   document.getElementById('waConfirmBtn').onclick = sendToWhatsApp;
@@ -1015,6 +1176,9 @@ function bindEvents() {
 
 /* ---------- 11. INIT ---------- */
 function init() {
+  renderCategoryIcons();
+  renderPacks();
+  renderDailyDeals();
   renderCategories();
   renderProducts();
   renderCartBadges();
