@@ -205,13 +205,6 @@
   <header class="sticky top-0 z-40 bg-sand-50/95 backdrop-blur border-b border-charcoal-800/10">
     <div class="max-w-6xl mx-auto px-4 py-3 flex items-center gap-3">
 
-      <!-- Menu btn — Heroicons: bars-3 -->
-      <button id="menuBtn" class="lg:hidden -ml-1 p-2.5 rounded-full active:bg-charcoal-800/5 min-w-[44px] min-h-[44px] flex items-center justify-center" aria-label="فتح الأصناف">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-6 h-6">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25H12"/>
-        </svg>
-      </button>
-
       <a href="#" class="flex items-center justify-center shrink-0" aria-label="Swi9ti — الصفحة الرئيسية">
         <img src="LOGO.svg" alt="Swi9ti" width="82" height="82" class="h-[56px] sm:h-[68px] lg:h-[82px] w-auto object-contain" fetchpriority="high">
       </a>
@@ -355,23 +348,17 @@
 
   <!-- ===== NAVIGATION — بار سفلية (mobile) — بلا "بروفيل" (موقع ثابت، بلا حسابات) (7) ===== -->
   <nav id="mobileTabBar" class="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-white/95 backdrop-blur border-t border-charcoal-800/10 flex items-center justify-around" style="padding-bottom: env(safe-area-inset-bottom);">
-    <button id="tabHomeBtn" class="flex flex-col items-center gap-0.5 px-6 py-2.5 text-green-700" aria-label="الرئيسية">
-      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-5 h-5">
-        <path stroke-linecap="round" stroke-linejoin="round" d="m2.25 12 8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25"/>
-      </svg>
+    <button id="tabHomeBtn" class="flex flex-col items-center gap-1 px-6 py-2.5 text-green-700" aria-label="الرئيسية">
+      <img id="navHomeIcon" src="" alt="" class="w-5 h-5 object-contain">
       <span class="text-[10px] font-semibold">الرئيسية</span>
     </button>
-    <button id="tabCatBtn" class="flex flex-col items-center gap-0.5 px-6 py-2.5 text-charcoal-800/55" aria-label="الأصناف">
-      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-5 h-5">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 0 1 6 3.75h2.25A2.25 2.25 0 0 1 10.5 6v2.25a2.25 2.25 0 0 1-2.25 2.25H6a2.25 2.25 0 0 1-2.25-2.25V6ZM3.75 15.75A2.25 2.25 0 0 1 6 13.5h2.25a2.25 2.25 0 0 1 2.25 2.25V18a2.25 2.25 0 0 1-2.25 2.25H6A2.25 2.25 0 0 1 3.75 18v-2.25ZM13.5 6a2.25 2.25 0 0 1 2.25-2.25H18A2.25 2.25 0 0 1 20.25 6v2.25A2.25 2.25 0 0 1 18 10.5h-2.25a2.25 2.25 0 0 1-2.25-2.25V6ZM13.5 15.75a2.25 2.25 0 0 1 2.25-2.25H18a2.25 2.25 0 0 1 2.25 2.25V18A2.25 2.25 0 0 1 18 20.25h-2.25A2.25 2.25 0 0 1 13.5 18v-2.25Z"/>
-      </svg>
+    <button id="tabCatBtn" class="flex flex-col items-center gap-1 px-6 py-2.5 text-charcoal-800/55" aria-label="الأصناف">
+      <img id="navCatIcon" src="" alt="" class="w-5 h-5 object-contain">
       <span class="text-[10px] font-semibold">الأصناف</span>
     </button>
-    <button id="tabCartBtn" class="relative flex flex-col items-center gap-0.5 px-6 py-2.5 text-charcoal-800/55" aria-label="السلة">
-      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-5 h-5">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 0 0-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 0 0-16.536-1.84M7.5 14.25 5.106 5.272M6 20.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Zm12.75 0a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z"/>
-      </svg>
-      <span id="tabCartBadge" class="hidden absolute top-1 right-4 min-w-[16px] h-4 px-1 rounded-full bg-terracotta-500 text-[9px] font-bold text-white flex items-center justify-center">0</span>
+    <button id="tabCartBtn" class="relative flex flex-col items-center gap-1 px-6 py-2.5 text-charcoal-800/55" aria-label="السلة">
+      <img id="navCartIcon" src="" alt="" class="w-5 h-5 object-contain">
+      <span id="tabCartBadge" class="hidden absolute top-0.5 right-4 min-w-[16px] h-4 px-1 rounded-full bg-terracotta-500 text-[9px] font-bold text-white flex items-center justify-center">0</span>
       <span class="text-[10px] font-semibold">السلة</span>
     </button>
   </nav>

@@ -107,6 +107,35 @@ const CATEGORY_META = {
 // ترتيب الشيبس الدائرية فالصفحة الرئيسية (Légumes → Fruits → Herbes → Racines، بحال التصميم)
 const CATEGORY_ICON_ORDER = ['legumes', 'fruits', 'herbes', 'racines'];
 
+/* ---------- روابط الصور — الشيبس الدائرية ديال الأصناف ----------
+   حط هنا رابط الصورة (URL) لي بغيتي تبان فكل شيب دائرية. إلا خليتي القيمة
+   فارغة ('')، الموقع كيرجع تلقائيا لصورة أوتوماتيكية (نفس الفكرة ديال
+   getProductImage) باش الصفحة تبقى دايما بصور، حتى قبل ما تعمر الروابط. */
+const CATEGORY_ICON_IMAGES = {
+  legumes: '',  // ⬅️ رابط صورة "خضرة"
+  fruits:  '',  // ⬅️ رابط صورة "فواكه"
+  herbes:  '',  // ⬅️ رابط صورة "عشاب وتوابل"
+  racines: '',  // ⬅️ رابط صورة "جذور ودرنات"
+};
+
+/* ---------- روابط الصور — أيقونات البار السفلية (الرئيسية / الأصناف / السلة) ----------
+   بدلهم بأي رابط صورة بغيتي (PNG/SVG شفافة أحسن). الافتراضي تحت هو أيقونات
+   خفيفة من خدمة Iconify (مجانية، بلا مفتاح API). */
+const NAV_ICON_IMAGES = {
+  home:       'https://api.iconify.design/mdi/home-variant.svg?color=%233E7C4A',
+  categories: 'https://api.iconify.design/mdi/view-grid-outline.svg?color=%233A3530',
+  cart:       'https://api.iconify.design/mdi/cart-outline.svg?color=%233A3530',
+};
+
+function renderNavIcons() {
+  const home = document.getElementById('navHomeIcon');
+  const cat  = document.getElementById('navCatIcon');
+  const cart = document.getElementById('navCartIcon');
+  if (home) home.src = NAV_ICON_IMAGES.home;
+  if (cat)  cat.src  = NAV_ICON_IMAGES.categories;
+  if (cart) cart.src = NAV_ICON_IMAGES.cart;
+}
+
 let CATEGORIES = [];
 function computeCategories() {
   const present = [...new Set(PRODUCTS.map(p => String(p.category || '').trim()).filter(Boolean))];
@@ -336,7 +365,8 @@ function renderCategoryIcons() {
 
   shown.forEach(cat => {
     const meta = CATEGORY_META[cat.id];
-    const src = catIconUrl(cat.id, meta?.query || cat.label);
+    const customUrl = CATEGORY_ICON_IMAGES[cat.id];
+    const src = customUrl && customUrl.trim() ? customUrl.trim() : catIconUrl(cat.id, meta?.query || cat.label);
     const btn = document.createElement('button');
     btn.className = 'flex flex-col items-center gap-1.5 shrink-0 w-16';
     btn.innerHTML = `
@@ -1089,7 +1119,6 @@ function bindEvents() {
   document.getElementById('cartOverlay').onclick = closeCartDrawer;
   document.getElementById('stickyBarBtn').onclick = openCartDrawer;
 
-  document.getElementById('menuBtn').onclick = openCatDrawer;
   document.getElementById('catDrawerClose').onclick = closeCatDrawer;
   document.getElementById('catDrawerOverlay').onclick = closeCatDrawer;
 
@@ -1176,6 +1205,7 @@ function bindEvents() {
 
 /* ---------- 11. INIT ---------- */
 function init() {
+  renderNavIcons();
   renderCategoryIcons();
   renderPacks();
   renderDailyDeals();
