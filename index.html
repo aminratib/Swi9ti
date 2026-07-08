@@ -129,6 +129,9 @@
   *::-webkit-scrollbar-thumb:hover {
     background: #D9622B;
   }
+  /* الباقات وعروض اليوم كيتحركو وحدهم — بلا سكرول بار تبان فالديسكتوب */
+  .marquee-wrap::-webkit-scrollbar { display: none; }
+  .marquee-wrap { scrollbar-width: none; }
 } 
   .scroll-snap { scroll-snap-type: x mandatory; }
   .scroll-snap > * { scroll-snap-align: start; }

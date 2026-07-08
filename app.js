@@ -88,7 +88,7 @@ const PACKS = [
   {
     id: 'pack1', name: 'باقة السلاطة', desc: 'كلشي لي خاصك لسلاطة طرية',
     price: 39, oldPrice: 55, discount: 29, unit: 'باقة', emoji: '🥗',
-    img: 'salad vegetables basket', photo: 'images/i1.png',
+    img: 'salad vegetables basket', photo: 'images/1.png', cartPhoto: 'images/i1.png',
     items: [
       { name: 'طماطم', qty: 1,   unit: 'kg' },
       { name: 'خيار',  qty: 1,   unit: 'kg' },
@@ -100,7 +100,7 @@ const PACKS = [
   {
     id: 'pack2', name: 'باقة الطاجين', desc: 'خضرة مقطرة للطاجين ديال نهار',
     price: 45, oldPrice: 60, discount: 25, unit: 'باقة', emoji: '🍲',
-    img: 'moroccan tagine vegetables', photo: 'images/i2.png',
+    img: 'moroccan tagine vegetables', photo: 'images/2.png', cartPhoto: 'images/i2.png',
     items: [
       { name: 'بطاطا', qty: 1,   unit: 'kg' },
       { name: 'جزر',   qty: 0.5, unit: 'kg' },
@@ -112,7 +112,7 @@ const PACKS = [
   {
     id: 'pack3', name: 'باقة الفواكه', desc: 'فواكه الموسم مختارة بالعين',
     price: 49, oldPrice: 65, discount: 24, unit: 'باقة', emoji: '🍉',
-    img: 'fresh fruit basket', photo: 'images/i3.png',
+    img: 'fresh fruit basket', photo: 'images/3.png', cartPhoto: 'images/i3.png',
     items: [
       { name: 'تفاح',   qty: 1, unit: 'kg' },
       { name: 'موز',    qty: 1, unit: 'kg' },
@@ -319,7 +319,8 @@ const saveCart  = () => localStorage.setItem('casabtata_cart', JSON.stringify(st
 // وموثوقة، ماشي بحال روابط ثابتة لي تقدر تنكسر). الـ lock=رقم كيخلي نفس
 // الصورة تبقى ثابتة لكل منتج (ماشي عشوائية فكل مرة كترفرش الصفحة).
 function getProductImageRaw(product) {
-  if (product.photo && product.photo.trim()) return product.photo.trim(); // أولوية لرابط "photo" (الباقات بالخصوص)
+  if (product.cartPhoto && product.cartPhoto.trim()) return product.cartPhoto.trim(); // صورة خاصة بالسلة فقط (الباقات)
+  if (product.photo && product.photo.trim()) return product.photo.trim(); // رابط صورة الباقة (كارطة + modal)
   if (product.img && /^https?:\/\//i.test(product.img)) return product.img; // رابط كامل مخصص جا من عمود "img" فـ Google Sheet
   const lockNumber = parseInt(String(product.id).replace(/\D/g, ''), 10) || 1;
   const keyword = encodeURIComponent(product.query || product.darija || product.name);
