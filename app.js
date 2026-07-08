@@ -87,7 +87,7 @@ let PRODUCTS = [
 const PACKS = [
   {
     id: 'pack1', name: 'باقة السلاطة', desc: 'كلشي لي خاصك لسلاطة طرية',
-    price: 39, oldPrice: 55, discount: 29, unit: 'باقة', emoji: 'images/i1.png',
+    price: 39, oldPrice: 55, discount: 29, unit: 'باقة', emoji: 'P1',
     img: 'salad vegetables basket', photo: 'images/1.png',
     items: [
       { name: 'طماطم', qty: 1,   unit: 'kg' },
@@ -99,7 +99,7 @@ const PACKS = [
   },
   {
     id: 'pack2', name: 'باقة الطاجين', desc: 'خضرة مقطرة للطاجين ديال نهار',
-    price: 45, oldPrice: 60, discount: 25, unit: 'باقة', emoji: 'images/i2.png',
+    price: 45, oldPrice: 60, discount: 25, unit: 'باقة', emoji: 'P2',
     img: 'moroccan tagine vegetables', photo: 'images/2.png',
     items: [
       { name: 'بطاطا', qty: 1,   unit: 'kg' },
@@ -111,7 +111,7 @@ const PACKS = [
   },
   {
     id: 'pack3', name: 'باقة الفواكه', desc: 'فواكه الموسم مختارة بالعين',
-    price: 49, oldPrice: 65, discount: 24, unit: 'باقة', emoji: 'images/i3.png',
+    price: 49, oldPrice: 65, discount: 24, unit: 'باقة', emoji: 'P3',
     img: 'fresh fruit basket', photo: 'images/3.png',
     items: [
       { name: 'تفاح',   qty: 1, unit: 'kg' },
