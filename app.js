@@ -77,10 +77,17 @@ let PRODUCTS = [
    باقات بثمن مخفض، كل باقة كتزاد للسلة كوحدة وحدة (بحال منتج) — ماشي
    مبنية من Google Sheet، معرفة هنا مباشرة. باش تزيد/تبدل باقة، غير بدل
    هاد array. */
+/* ---------- 1ter. باقات مميزة (Packs promotionnels) ----------
+   باقات بثمن مخفض، كل باقة كتزاد للسلة كوحدة وحدة (بحال منتج) — ماشي
+   مبنية من Google Sheet، معرفة هنا مباشرة.
+   ⬅️ باش تحط صورة ديالك لباقة: عمر خانة "photo" برابط الصورة (URL) — خاصها
+   تكون مرفوعة شي حد (Imgur, Google Drive بلينك عمومي, GitHub...), راه هاد
+   الموقع ماشي عندو سيرفر باش يخزن صور محليا. إلا خليتي "photo" فارغة (''),
+   الموقع كيرجع تلقائيا لصورة عامة كـ placeholder. */
 const PACKS = [
-  { id: 'pack1', name: 'باقة السلاطة',  desc: 'كلشي لي خاصك لسلاطة طرية',      price: 39, oldPrice: 55, discount: 29, unit: 'باقة', emoji: '🥗', img: 'LOGO.svg' },
-  { id: 'pack2', name: 'باقة الطاجين',  desc: 'خضرة مقطرة للطاجين ديال نهار', price: 45, oldPrice: 60, discount: 25, unit: 'باقة', emoji: '🍲', img: 'LOGO.svg' },
-  { id: 'pack3', name: 'باقة الفواكه',  desc: 'فواكه الموسم مختارة بالعين',   price: 49, oldPrice: 65, discount: 24, unit: 'باقة', emoji: '🍉', img: 'LOGO.svg' },
+  { id: 'pack1', name: 'باقة السلاطة',  desc: 'كلشي لي خاصك لسلاطة طرية',      price: 39, oldPrice: 55, discount: 29, unit: 'باقة', emoji: '🥗', img: 'salad vegetables basket',      photo: '' },
+  { id: 'pack2', name: 'باقة الطاجين',  desc: 'خضرة مقطرة للطاجين ديال نهار', price: 45, oldPrice: 60, discount: 25, unit: 'باقة', emoji: '🍲', img: 'moroccan tagine vegetables',    photo: '' },
+  { id: 'pack3', name: 'باقة الفواكه',  desc: 'فواكه الموسم مختارة بالعين',   price: 49, oldPrice: 65, discount: 24, unit: 'باقة', emoji: '🍉', img: 'fresh fruit basket',           photo: '' },
 ];
 
 /* ---- ملاحظة على الصور ----
@@ -112,9 +119,9 @@ const CATEGORY_ICON_ORDER = ['legumes', 'fruits', 'herbes', 'racines'];
    فارغة ('')، الموقع كيرجع تلقائيا لصورة أوتوماتيكية (نفس الفكرة ديال
    getProductImage) باش الصفحة تبقى دايما بصور، حتى قبل ما تعمر الروابط. */
 const CATEGORY_ICON_IMAGES = {
-  legumes: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRqn5PR_6pF7oY0dhvYQKBZQh6iJq2_ysDrTaPvQx81Cg&s=10',  // ⬅️ رابط صورة "خضرة"
+ legumes: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRqn5PR_6pF7oY0dhvYQKBZQh6iJq2_ysDrTaPvQx81Cg&s=10',  // ⬅️ رابط صورة "خضرة"
   fruits:  'https://thumbs.dreamstime.com/b/orange-fruit-isolated-white-background-61947616.jpg',  // ⬅️ رابط صورة "فواكه"
-  herbes:  'images/icon-3.png',  // ⬅️ رابط صورة "عشاب وتوابل"
+  herbes:  'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ3USQId7MYrq9Kx_Iex5amRxqsqthAGXSHQ6MyzRw1Qw&s=10',  // ⬅️ رابط صورة "عشاب وتوابل"
   racines: 'https://thumbs.dreamstime.com/b/potato-white-background-92849122.jpg',  // ⬅️ رابط صورة "جذور ودرنات"
 };
 
@@ -283,7 +290,7 @@ function getProductImageRaw(product) {
   if (product.img) return product.img; // أولوية لأي رابط مخصص جا من عمود "img" فـ Google Sheet
   const lockNumber = parseInt(String(product.id).replace(/\D/g, ''), 10) || 1;
   const keyword = encodeURIComponent(product.query || product.darija || product.name);
-  return `https://loremflickr.com/600/600/${keyword}?lock=${lockNumber}`;
+  return ``;
 }
 
 // ---- Proxy d'optimisation (images.weserv.nl) ----
@@ -399,34 +406,37 @@ function renderCategoryIcons() {
 }
 
 /* ---------- 4b. باقات مميزة — كاروسيل ---------- */
+function buildPackCard(pack) {
+  const bg = 'LOGO.svg';
+  const card = document.createElement('div');
+  card.className = 'relative shrink-0 w-[270px] sm:w-[320px] rounded-2xl overflow-hidden shadow-crate';
+  card.innerHTML = `
+    <div class="absolute inset-0 bg-cover bg-center" style="background-image:url('${bg}')"></div>
+    <div class="absolute inset-0 bg-gradient-to-t from-green-900/92 via-green-900/45 to-green-900/10"></div>
+    <div class="relative p-4 flex flex-col h-40 sm:h-44 justify-between">
+      <div class="flex items-start justify-between gap-2">
+        <div class="min-w-0">
+          <p class="font-display text-white text-lg font-semibold truncate">${pack.name}</p>
+          <p class="text-sand-50/80 text-xs mt-0.5 leading-snug">${pack.desc}</p>
+        </div>
+        <span class="bg-terracotta-500 text-white text-[11px] font-bold px-2 py-1 rounded-full shrink-0">-${pack.discount}%</span>
+      </div>
+      <div class="flex items-center justify-between gap-2">
+        <p class="text-saffron-300 font-bold text-lg">${pack.price} <span class="text-white/60 text-xs font-normal line-through">${pack.oldPrice}</span> درهم</p>
+        <button data-add-pack="${pack.id}" class="bg-white text-green-800 text-xs font-semibold px-4 py-2 rounded-full active:scale-95 transition shrink-0">زيد</button>
+      </div>
+    </div>
+  `;
+  return card;
+}
+
 function renderPacks() {
   const row = document.getElementById('packsCarousel');
   if (!row) return;
   row.innerHTML = '';
 
-  PACKS.forEach(pack => {
-    const bg = catIconUrl(pack.id, pack.img, 600);
-    const card = document.createElement('div');
-    card.className = 'relative shrink-0 w-[270px] sm:w-[320px] rounded-2xl overflow-hidden shadow-crate';
-    card.innerHTML = `
-      <div class="absolute inset-0 bg-cover bg-center" style="background-image:url('${bg}')"></div>
-      <div class="absolute inset-0 bg-gradient-to-t from-green-900/92 via-green-900/45 to-green-900/10"></div>
-      <div class="relative p-4 flex flex-col h-40 sm:h-44 justify-between">
-        <div class="flex items-start justify-between gap-2">
-          <div class="min-w-0">
-            <p class="font-display text-white text-lg font-semibold truncate">${pack.name}</p>
-            <p class="text-sand-50/80 text-xs mt-0.5 leading-snug">${pack.desc}</p>
-          </div>
-          <span class="bg-terracotta-500 text-white text-[11px] font-bold px-2 py-1 rounded-full shrink-0">-${pack.discount}%</span>
-        </div>
-        <div class="flex items-center justify-between gap-2">
-          <p class="text-saffron-300 font-bold text-lg">${pack.price} <span class="text-white/60 text-xs font-normal line-through">${pack.oldPrice}</span> درهم</p>
-          <button data-add-pack="${pack.id}" class="bg-white text-green-800 text-xs font-semibold px-4 py-2 rounded-full active:scale-95 transition shrink-0">زيد</button>
-        </div>
-      </div>
-    `;
-    row.appendChild(card);
-  });
+  // كنكرر اللائحة مرتين باش الحركة تبقى سلسة وبلا "قفزة" (seamless loop)
+  [...PACKS, ...PACKS].forEach(pack => row.appendChild(buildPackCard(pack)));
 
   document.querySelectorAll('[data-add-pack]').forEach(btn => {
     btn.onclick = () => {
@@ -434,39 +444,66 @@ function renderPacks() {
       showToast('الباقة تزادت للسلة!');
     };
   });
+
+  attachMarqueeTouchPause(row);
 }
 
-/* ---------- 4c. عروض اليوم — سطر سكرول أفقي ---------- */
+/* ---------- 4c. عروض اليوم — سطر كيتحرك وحدو ---------- */
+function buildDealCard(p) {
+  const card = document.createElement('div');
+  const qty = state.cart[p.id] || 0;
+  card.className = 'shrink-0 w-32 sm:w-36 bg-white rounded-2xl shadow-crate ring-1 ring-charcoal-800/[0.04] overflow-hidden flex flex-col';
+  card.innerHTML = `
+    <div class="relative aspect-square bg-sand-100 overflow-hidden">
+      <div data-skel class="absolute inset-0 flex items-center justify-center text-4xl">${p.emoji}</div>
+      <div data-img-slot="deal-${p.id}" class="absolute inset-0"></div>
+      <span class="absolute top-1.5 right-1.5 bg-terracotta-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full">حار 🔥</span>
+    </div>
+    <div class="p-2.5 flex flex-col gap-1.5 flex-1">
+      <h3 class="font-semibold text-xs leading-tight text-charcoal-800 truncate">${p.name}</h3>
+      <p class="text-green-700 font-bold text-xs">${p.price} MAD <span class="text-charcoal-800/40 font-normal">/${p.unit}</span></p>
+      <div class="mt-auto" data-qty-zone="${p.id}">
+        ${qty > 0 ? qtyStepperHTML(p.id, qty, p.unit) : addButtonHTML(p.id)}
+      </div>
+    </div>
+  `;
+  const slot = card.querySelector(`[data-img-slot="deal-${p.id}"]`);
+  if (slot) observeCardImage(slot, p);
+  return card;
+}
+
 function renderDailyDeals() {
   const row = document.getElementById('dailyDeals');
   if (!row) return;
   const deals = PRODUCTS.filter(p => p.promo).slice(0, 12);
   row.innerHTML = '';
 
-  deals.forEach(p => {
-    const qty = state.cart[p.id] || 0;
-    const card = document.createElement('div');
-    card.className = 'shrink-0 w-32 sm:w-36 bg-white rounded-2xl shadow-crate ring-1 ring-charcoal-800/[0.04] overflow-hidden flex flex-col';
-    card.innerHTML = `
-      <div class="relative aspect-square bg-sand-100 overflow-hidden">
-        <div data-skel class="absolute inset-0 flex items-center justify-center text-4xl">${p.emoji}</div>
-        <div data-img-slot="deal-${p.id}" class="absolute inset-0"></div>
-        <span class="absolute top-1.5 right-1.5 bg-terracotta-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full">حار 🔥</span>
-      </div>
-      <div class="p-2.5 flex flex-col gap-1.5 flex-1">
-        <h3 class="font-semibold text-xs leading-tight text-charcoal-800 truncate">${p.name}</h3>
-        <p class="text-green-700 font-bold text-xs">${p.price} درهم <span class="text-charcoal-800/40 font-normal">/${p.unit}</span></p>
-        <div class="mt-auto" data-qty-zone="${p.id}">
-          ${qty > 0 ? qtyStepperHTML(p.id, qty, p.unit) : addButtonHTML(p.id)}
-        </div>
-      </div>
-    `;
-    row.appendChild(card);
-    const slot = card.querySelector(`[data-img-slot="deal-${p.id}"]`);
-    if (slot) observeCardImage(slot, p);
-  });
+  // كنكرر اللائحة مرتين باش الحركة تبقى سلسة وبلا "قفزة" (seamless loop)
+  [...deals, ...deals].forEach(p => row.appendChild(buildDealCard(p)));
 
   attachQtyHandlers();
+  attachMarqueeTouchPause(row);
+}
+
+/* ---------- 4c-bis. توقيف الحركة عند اللمس (موبايل) باش الزبون يقدر يزيد بلا مشاكل ---------- */
+function attachMarqueeTouchPause(trackEl) {
+  const wrap = trackEl.closest('.marquee-wrap');
+  if (!wrap || wrap.dataset.pauseBound) return;
+  wrap.dataset.pauseBound = '1';
+  let resumeTimer = null;
+  const pause = () => {
+    clearTimeout(resumeTimer);
+    wrap.querySelectorAll('.marquee-track').forEach(t => t.classList.add('is-paused'));
+  };
+  const resume = () => {
+    clearTimeout(resumeTimer);
+    resumeTimer = setTimeout(() => {
+      wrap.querySelectorAll('.marquee-track').forEach(t => t.classList.remove('is-paused'));
+    }, 1800);
+  };
+  wrap.addEventListener('touchstart', pause, { passive: true });
+  wrap.addEventListener('touchend', resume, { passive: true });
+  wrap.addEventListener('touchcancel', resume, { passive: true });
 }
 
 /* ---------- 4bis. LAZY LOADING + BLUR-UP للصور ---------- */
