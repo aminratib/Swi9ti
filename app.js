@@ -78,9 +78,9 @@ let PRODUCTS = [
    مبنية من Google Sheet، معرفة هنا مباشرة. باش تزيد/تبدل باقة، غير بدل
    هاد array. */
 const PACKS = [
-  { id: 'pack1', name: 'باقة السلاطة',  desc: 'كلشي لي خاصك لسلاطة طرية',      price: 39, oldPrice: 55, discount: 29, unit: 'باقة', emoji: '🥗', img: 'salad vegetables basket' },
-  { id: 'pack2', name: 'باقة الطاجين',  desc: 'خضرة مقطرة للطاجين ديال نهار', price: 45, oldPrice: 60, discount: 25, unit: 'باقة', emoji: '🍲', img: 'moroccan tagine vegetables' },
-  { id: 'pack3', name: 'باقة الفواكه',  desc: 'فواكه الموسم مختارة بالعين',   price: 49, oldPrice: 65, discount: 24, unit: 'باقة', emoji: '🍉', img: 'fresh fruit basket' },
+  { id: 'pack1', name: 'باقة السلاطة',  desc: 'كلشي لي خاصك لسلاطة طرية',      price: 39, oldPrice: 55, discount: 29, unit: 'باقة', emoji: '🥗', img: 'LOGO.svg' },
+  { id: 'pack2', name: 'باقة الطاجين',  desc: 'خضرة مقطرة للطاجين ديال نهار', price: 45, oldPrice: 60, discount: 25, unit: 'باقة', emoji: '🍲', img: 'LOGO.svg' },
+  { id: 'pack3', name: 'باقة الفواكه',  desc: 'فواكه الموسم مختارة بالعين',   price: 49, oldPrice: 65, discount: 24, unit: 'باقة', emoji: '🍉', img: 'LOGO.svg' },
 ];
 
 /* ---- ملاحظة على الصور ----
@@ -96,12 +96,12 @@ const PACKS = [
    جديد ماشي موجود هنا (مثلاً "champignons")، الموقع غايبني ليه شيب تلقائيا
    بإيموجي 🧺 عام والاسم بحال ما كتبتيه بالضبط فـ Sheet — بلا ما تلمس الكود. */
 const CATEGORY_META = {
-  legumes:  { label: 'خضرة',                  emoji: '🍅', query: 'fresh vegetables' },
-  racines:  { label: 'جذور ودرنات',            emoji: '🥔', query: 'root vegetables' },
-  feuilles: { label: 'أوراق',                  emoji: '🥬', query: 'leafy greens' },
-  herbes:   { label: 'عشاب وتوابل',            emoji: '🌿', query: 'fresh herbs' },
-  agrumes:  { label: 'حوامض',                  emoji: '🍋', query: 'citrus fruit' },
-  fruits:   { label: 'فواكه',                  emoji: '🍎', query: 'fresh fruits' },
+  legumes:  { label: 'خضرة',                  emoji: '', query: 'fresh vegetables' },
+  racines:  { label: 'جذور ودرنات',            emoji: '', query: 'root vegetables' },
+  feuilles: { label: 'أوراق',                  emoji: '', query: 'leafy greens' },
+  herbes:   { label: 'عشاب وتوابل',            emoji: '', query: 'fresh herbs' },
+  agrumes:  { label: 'حوامض',                  emoji: '', query: 'citrus fruit' },
+  fruits:   { label: 'فواكه',                  emoji: '', query: 'fresh fruits' },
 };
 
 // ترتيب الشيبس الدائرية فالصفحة الرئيسية (Légumes → Fruits → Herbes → Racines، بحال التصميم)
@@ -112,10 +112,10 @@ const CATEGORY_ICON_ORDER = ['legumes', 'fruits', 'herbes', 'racines'];
    فارغة ('')، الموقع كيرجع تلقائيا لصورة أوتوماتيكية (نفس الفكرة ديال
    getProductImage) باش الصفحة تبقى دايما بصور، حتى قبل ما تعمر الروابط. */
 const CATEGORY_ICON_IMAGES = {
-  legumes: '',  // ⬅️ رابط صورة "خضرة"
-  fruits:  '',  // ⬅️ رابط صورة "فواكه"
-  herbes:  '',  // ⬅️ رابط صورة "عشاب وتوابل"
-  racines: '',  // ⬅️ رابط صورة "جذور ودرنات"
+  legumes: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRqn5PR_6pF7oY0dhvYQKBZQh6iJq2_ysDrTaPvQx81Cg&s=10',  // ⬅️ رابط صورة "خضرة"
+  fruits:  'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTCfOgVAyMWzXP_-en1CrPbndXKoBD5EDqSjcQDOZoDvQ&s=10',  // ⬅️ رابط صورة "فواكه"
+  herbes:  'https://png.pngtree.com/png-vector/20231123/ourmid/pngtree-freshly-harvested-herbs-on-white-background-nature-png-image_10637360.png',  // ⬅️ رابط صورة "عشاب وتوابل"
+  racines: 'https://t3.ftcdn.net/jpg/01/51/21/90/360_F_151219098_uZdemuk8HnmkEcCpueNxHexY71p34bSp.jpg',  // ⬅️ رابط صورة "جذور ودرنات"
 };
 
 /* ---------- روابط الصور — أيقونات البار السفلية (الرئيسية / الأصناف / السلة) ----------
@@ -140,11 +140,11 @@ let CATEGORIES = [];
 function computeCategories() {
   const present = [...new Set(PRODUCTS.map(p => String(p.category || '').trim()).filter(Boolean))];
   CATEGORIES = [
-    { id: 'tout', label: 'الكل', emoji: '🧺' },
+    { id: 'tout', label: 'الكل', emoji: '' },
     ...present.map(id => ({
       id,
       label: CATEGORY_META[id]?.label || id,
-      emoji: CATEGORY_META[id]?.emoji || '🧺',
+      emoji: CATEGORY_META[id]?.emoji || '',
     })),
     { id: 'promo', label: 'بروموسيون', emoji: '🔥' },
   ];
