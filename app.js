@@ -113,9 +113,9 @@ const CATEGORY_ICON_ORDER = ['legumes', 'fruits', 'herbes', 'racines'];
    getProductImage) باش الصفحة تبقى دايما بصور، حتى قبل ما تعمر الروابط. */
 const CATEGORY_ICON_IMAGES = {
   legumes: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRqn5PR_6pF7oY0dhvYQKBZQh6iJq2_ysDrTaPvQx81Cg&s=10',  // ⬅️ رابط صورة "خضرة"
-  fruits:  'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTCfOgVAyMWzXP_-en1CrPbndXKoBD5EDqSjcQDOZoDvQ&s=10',  // ⬅️ رابط صورة "فواكه"
-  herbes:  'https://png.pngtree.com/png-vector/20231123/ourmid/pngtree-freshly-harvested-herbs-on-white-background-nature-png-image_10637360.png',  // ⬅️ رابط صورة "عشاب وتوابل"
-  racines: 'https://t3.ftcdn.net/jpg/01/51/21/90/360_F_151219098_uZdemuk8HnmkEcCpueNxHexY71p34bSp.jpg',  // ⬅️ رابط صورة "جذور ودرنات"
+  fruits:  'https://thumbs.dreamstime.com/b/orange-fruit-isolated-white-background-61947616.jpg',  // ⬅️ رابط صورة "فواكه"
+  herbes:  'images/icon-3.png',  // ⬅️ رابط صورة "عشاب وتوابل"
+  racines: 'https://thumbs.dreamstime.com/b/potato-white-background-92849122.jpg',  // ⬅️ رابط صورة "جذور ودرنات"
 };
 
 /* ---------- روابط الصور — أيقونات البار السفلية (الرئيسية / الأصناف / السلة) ----------
