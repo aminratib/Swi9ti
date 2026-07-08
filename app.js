@@ -87,7 +87,7 @@ let PRODUCTS = [
 const PACKS = [
   {
     id: 'pack1', name: 'باقة السلاطة', desc: 'كلشي لي خاصك لسلاطة طرية',
-    price: 39, oldPrice: 55, discount: 29, unit: 'باقة', emoji: 'P1',
+    price: 39, oldPrice: 55, discount: 29, unit: 'باقة', emoji: '🥗',
     img: 'salad vegetables basket', photo: 'images/1.png',
     items: [
       { name: 'طماطم', qty: 1,   unit: 'kg' },
@@ -99,7 +99,7 @@ const PACKS = [
   },
   {
     id: 'pack2', name: 'باقة الطاجين', desc: 'خضرة مقطرة للطاجين ديال نهار',
-    price: 45, oldPrice: 60, discount: 25, unit: 'باقة', emoji: 'P2',
+    price: 45, oldPrice: 60, discount: 25, unit: 'باقة', emoji: '🍲',
     img: 'moroccan tagine vegetables', photo: 'images/2.png',
     items: [
       { name: 'بطاطا', qty: 1,   unit: 'kg' },
@@ -111,7 +111,7 @@ const PACKS = [
   },
   {
     id: 'pack3', name: 'باقة الفواكه', desc: 'فواكه الموسم مختارة بالعين',
-    price: 49, oldPrice: 65, discount: 24, unit: 'باقة', emoji: 'P3',
+    price: 49, oldPrice: 65, discount: 24, unit: 'باقة', emoji: '🍉',
     img: 'fresh fruit basket', photo: 'images/3.png',
     items: [
       { name: 'تفاح',   qty: 1, unit: 'kg' },
@@ -319,10 +319,11 @@ const saveCart  = () => localStorage.setItem('casabtata_cart', JSON.stringify(st
 // وموثوقة، ماشي بحال روابط ثابتة لي تقدر تنكسر). الـ lock=رقم كيخلي نفس
 // الصورة تبقى ثابتة لكل منتج (ماشي عشوائية فكل مرة كترفرش الصفحة).
 function getProductImageRaw(product) {
-  if (product.img) return product.img; // أولوية لأي رابط مخصص جا من عمود "img" فـ Google Sheet
+  if (product.photo && product.photo.trim()) return product.photo.trim(); // أولوية لرابط "photo" (الباقات بالخصوص)
+  if (product.img && /^https?:\/\//i.test(product.img)) return product.img; // رابط كامل مخصص جا من عمود "img" فـ Google Sheet
   const lockNumber = parseInt(String(product.id).replace(/\D/g, ''), 10) || 1;
   const keyword = encodeURIComponent(product.query || product.darija || product.name);
-  return ``;
+  return `https://loremflickr.com/480/480/${keyword}?lock=${lockNumber}`;
 }
 
 // ---- Proxy d'optimisation (images.weserv.nl) ----
@@ -331,6 +332,9 @@ function getProductImageRaw(product) {
 // (وزن أقل بكثير من JPEG) 3) تقدر تولي مبلورة (blur) باش نصاوبو تأثير
 // "blur-up" — نعرضو نسخة صغيرة مبلورة فبضع كيلوبايت قبل ما توصل النسخة الكاملة.
 function optimizedImg(rawUrl, { w, q = 75, blur = 0 } = {}) {
+  // صورة محلية (مسار نسبي بحال images/1.png) — كتحمل مباشرة بلا بروكسي، حيت
+  // البروكسي (images.weserv.nl) خاصو رابط كامل من الويب باش يقدر يجيب الصورة.
+  if (!/^https?:\/\//i.test(rawUrl)) return rawUrl;
   const params = new URLSearchParams({ url: rawUrl, output: 'webp', q: String(q) });
   if (w) params.set('w', String(w));
   if (blur) params.set('blur', String(blur));
@@ -550,6 +554,7 @@ function initMarqueeAutoScroll(wrap, direction = 'left', speedPxPerSec = 30) {
   let userActive = false;
   let hovering = false;
   let resumeTimer = null;
+  let programmatic = false; // باش نميزو السكرول لي درناه حنا (JS) من السكرول اليدوي ديال الزبون
 
   const markInteraction = () => { userActive = true; clearTimeout(resumeTimer); };
   const scheduleResume = () => {
@@ -563,7 +568,12 @@ function initMarqueeAutoScroll(wrap, direction = 'left', speedPxPerSec = 30) {
   ['pointerup', 'touchend', 'touchcancel'].forEach(evt =>
     wrap.addEventListener(evt, scheduleResume, { passive: true })
   );
-  wrap.addEventListener('scroll', () => { markInteraction(); scheduleResume(); }, { passive: true });
+  wrap.addEventListener('scroll', () => {
+    // إلا كان هاد السكرول درناه حنا (الحركة الأوتوماتيكية)، تجاهلو — ماشي تدخل يدوي
+    if (programmatic) { programmatic = false; return; }
+    markInteraction();
+    scheduleResume();
+  }, { passive: true });
   wrap.addEventListener('mouseenter', () => { hovering = true; });
   wrap.addEventListener('mouseleave', () => { hovering = false; scheduleResume(); });
 
@@ -581,6 +591,7 @@ function initMarqueeAutoScroll(wrap, direction = 'left', speedPxPerSec = 30) {
       let next = wrap.scrollLeft + delta;
       if (next <= 0) next += half;
       else if (next >= half) next -= half;
+      programmatic = true;
       wrap.scrollLeft = next;
     }
     requestAnimationFrame(frame);
