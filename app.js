@@ -85,9 +85,41 @@ let PRODUCTS = [
    الموقع ماشي عندو سيرفر باش يخزن صور محليا. إلا خليتي "photo" فارغة (''),
    الموقع كيرجع تلقائيا لصورة عامة كـ placeholder. */
 const PACKS = [
-  { id: 'pack1', name: 'باقة السلاطة',  desc: 'كلشي لي خاصك لسلاطة طرية',      price: 39, oldPrice: 55, discount: 29, unit: 'باقة', emoji: '🥗', img: 'salad vegetables basket',      photo: '' },
-  { id: 'pack2', name: 'باقة الطاجين',  desc: 'خضرة مقطرة للطاجين ديال نهار', price: 45, oldPrice: 60, discount: 25, unit: 'باقة', emoji: '🍲', img: 'moroccan tagine vegetables',    photo: '' },
-  { id: 'pack3', name: 'باقة الفواكه',  desc: 'فواكه الموسم مختارة بالعين',   price: 49, oldPrice: 65, discount: 24, unit: 'باقة', emoji: '🍉', img: 'fresh fruit basket',           photo: '' },
+  {
+    id: 'pack1', name: 'باقة السلاطة', desc: 'كلشي لي خاصك لسلاطة طرية',
+    price: 39, oldPrice: 55, discount: 29, unit: 'باقة', emoji: '🥗',
+    img: 'salad vegetables basket', photo: 'images/1.png',
+    items: [
+      { name: 'طماطم', qty: 1,   unit: 'kg' },
+      { name: 'خيار',  qty: 1,   unit: 'kg' },
+      { name: 'فلفل',  qty: 0.5, unit: 'kg' },
+      { name: 'خس',    qty: 1,   unit: 'راس' },
+    ],
+    freebies: ['نعناع مجاني 🌿', 'ليمونة مجانية 🍋'],
+  },
+  {
+    id: 'pack2', name: 'باقة الطاجين', desc: 'خضرة مقطرة للطاجين ديال نهار',
+    price: 45, oldPrice: 60, discount: 25, unit: 'باقة', emoji: '🍲',
+    img: 'moroccan tagine vegetables', photo: 'images/2.png',
+    items: [
+      { name: 'بطاطا', qty: 1,   unit: 'kg' },
+      { name: 'جزر',   qty: 0.5, unit: 'kg' },
+      { name: 'بصل',   qty: 0.5, unit: 'kg' },
+      { name: 'طماطم', qty: 0.5, unit: 'kg' },
+    ],
+    freebies: ['ثوم مجاني 🧄', 'عينة زيت الزيتون'],
+  },
+  {
+    id: 'pack3', name: 'باقة الفواكه', desc: 'فواكه الموسم مختارة بالعين',
+    price: 49, oldPrice: 65, discount: 24, unit: 'باقة', emoji: '🍉',
+    img: 'fresh fruit basket', photo: 'images/3.png',
+    items: [
+      { name: 'تفاح',   qty: 1, unit: 'kg' },
+      { name: 'موز',    qty: 1, unit: 'kg' },
+      { name: 'برتقال', qty: 1, unit: 'kg' },
+    ],
+    freebies: ['كيس عنب صغير مجاني 🍇'],
+  },
 ];
 
 /* ---- ملاحظة على الصور ----
@@ -407,9 +439,10 @@ function renderCategoryIcons() {
 
 /* ---------- 4b. باقات مميزة — كاروسيل ---------- */
 function buildPackCard(pack) {
-  const bg = 'LOGO.svg';
+  const bg = pack.photo && pack.photo.trim() ? pack.photo.trim() : catIconUrl(pack.id, pack.img, 600);
   const card = document.createElement('div');
-  card.className = 'relative shrink-0 w-[270px] sm:w-[320px] rounded-2xl overflow-hidden shadow-crate';
+  card.className = 'relative shrink-0 w-[270px] sm:w-[320px] rounded-2xl overflow-hidden shadow-crate cursor-pointer active:scale-[0.98] transition';
+  card.dataset.packCard = pack.id;
   card.innerHTML = `
     <div class="absolute inset-0 bg-cover bg-center" style="background-image:url('${bg}')"></div>
     <div class="absolute inset-0 bg-gradient-to-t from-green-900/92 via-green-900/45 to-green-900/10"></div>
@@ -439,13 +472,28 @@ function renderPacks() {
   [...PACKS, ...PACKS].forEach(pack => row.appendChild(buildPackCard(pack)));
 
   document.querySelectorAll('[data-add-pack]').forEach(btn => {
-    btn.onclick = () => {
+    btn.onclick = (e) => {
+      e.stopPropagation();
       updateQty(btn.dataset.addPack, 1);
       showToast('الباقة تزادت للسلة!');
     };
   });
 
-  attachMarqueeTouchPause(row);
+  document.querySelectorAll('[data-pack-card]').forEach(card => {
+    card.onclick = () => openPackModal(card.dataset.packCard);
+  });
+
+  const modalAddBtn = document.getElementById('packModalAdd');
+  if (modalAddBtn) {
+    modalAddBtn.onclick = (e) => {
+      e.stopPropagation();
+      updateQty(modalAddBtn.dataset.addPack, 1);
+      showToast('الباقة تزادت للسلة!');
+      closePackModal();
+    };
+  }
+
+  initMarqueeAutoScroll(row.closest('.marquee-wrap'), 'right', 34);
 }
 
 /* ---------- 4c. عروض اليوم — سطر كيتحرك وحدو ---------- */
@@ -482,28 +530,106 @@ function renderDailyDeals() {
   [...deals, ...deals].forEach(p => row.appendChild(buildDealCard(p)));
 
   attachQtyHandlers();
-  attachMarqueeTouchPause(row);
+  initMarqueeAutoScroll(row.closest('.marquee-wrap'), 'left', 30);
 }
 
-/* ---------- 4c-bis. توقيف الحركة عند اللمس (موبايل) باش الزبون يقدر يزيد بلا مشاكل ---------- */
-function attachMarqueeTouchPause(trackEl) {
-  const wrap = trackEl.closest('.marquee-wrap');
-  if (!wrap || wrap.dataset.pauseBound) return;
-  wrap.dataset.pauseBound = '1';
+/* ---------- 4c-bis. الحركة الأوتوماتيكية ديال الكاروسيل — بلا ما توقف السكرول اليدوي ----------
+   الزبون يقدر يسكرول بيدو (تاتش، ماوس، عجلة) فأي وقت. ملي يوقف، الحركة
+   الأوتوماتيكية كترجع تخدم وحدها من نفس البلاصة (بلا "قفزة") بعد شوية. */
+function initMarqueeAutoScroll(wrap, direction = 'left', speedPxPerSec = 30) {
+  if (!wrap || wrap.dataset.autoScrollBound) return;
+  wrap.dataset.autoScrollBound = '1';
+
+  // نبداو من نص المسافة (لليمين) ولا من البداية (لليسار) باش يكون عندو مجال
+  requestAnimationFrame(() => {
+    const half = wrap.scrollWidth / 2;
+    wrap.scrollLeft = direction === 'right' ? half : 0;
+  });
+
+  let lastTs = null;
+  let userActive = false;
+  let hovering = false;
   let resumeTimer = null;
-  const pause = () => {
+
+  const markInteraction = () => { userActive = true; clearTimeout(resumeTimer); };
+  const scheduleResume = () => {
     clearTimeout(resumeTimer);
-    wrap.querySelectorAll('.marquee-track').forEach(t => t.classList.add('is-paused'));
+    resumeTimer = setTimeout(() => { userActive = false; }, 1200);
   };
-  const resume = () => {
-    clearTimeout(resumeTimer);
-    resumeTimer = setTimeout(() => {
-      wrap.querySelectorAll('.marquee-track').forEach(t => t.classList.remove('is-paused'));
-    }, 1800);
-  };
-  wrap.addEventListener('touchstart', pause, { passive: true });
-  wrap.addEventListener('touchend', resume, { passive: true });
-  wrap.addEventListener('touchcancel', resume, { passive: true });
+
+  ['pointerdown', 'touchstart', 'wheel'].forEach(evt =>
+    wrap.addEventListener(evt, markInteraction, { passive: true })
+  );
+  ['pointerup', 'touchend', 'touchcancel'].forEach(evt =>
+    wrap.addEventListener(evt, scheduleResume, { passive: true })
+  );
+  wrap.addEventListener('scroll', () => { markInteraction(); scheduleResume(); }, { passive: true });
+  wrap.addEventListener('mouseenter', () => { hovering = true; });
+  wrap.addEventListener('mouseleave', () => { hovering = false; scheduleResume(); });
+
+  const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (reduceMotion) return;
+
+  function frame(ts) {
+    if (lastTs == null) lastTs = ts;
+    const dt = Math.min((ts - lastTs) / 1000, 0.05);
+    lastTs = ts;
+
+    if (!userActive && !hovering && wrap.scrollWidth > wrap.clientWidth) {
+      const half = wrap.scrollWidth / 2;
+      const delta = speedPxPerSec * dt * (direction === 'right' ? -1 : 1);
+      let next = wrap.scrollLeft + delta;
+      if (next <= 0) next += half;
+      else if (next >= half) next -= half;
+      wrap.scrollLeft = next;
+    }
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+}
+
+/* ---------- 4d. تفاصيل الباقة — Modal ---------- */
+function openPackModal(id) {
+  const pack = PACKS.find(p => p.id === id);
+  if (!pack) return;
+  const modal = document.getElementById('packModal');
+  if (!modal) return;
+
+  const bg = pack.photo && pack.photo.trim() ? pack.photo.trim() : catIconUrl(pack.id, pack.img, 700);
+  document.getElementById('packModalBanner').style.backgroundImage = `url('${bg}')`;
+  document.getElementById('packModalDiscount').textContent = `-${pack.discount}%`;
+  document.getElementById('packModalName').textContent = pack.name;
+  document.getElementById('packModalDesc').textContent = pack.desc;
+  document.getElementById('packModalPrice').innerHTML =
+    `${pack.price} <span class="text-charcoal-800/40 text-base font-normal line-through">${pack.oldPrice}</span> MAD`;
+  document.getElementById('packModalAdd').dataset.addPack = pack.id;
+
+  const itemsList = document.getElementById('packModalItems');
+  itemsList.innerHTML = (pack.items || []).map(it => `
+    <li class="flex items-center justify-between bg-white rounded-xl px-3.5 py-2.5 ring-1 ring-charcoal-800/[0.05]">
+      <span class="text-sm text-charcoal-800">${it.name}</span>
+      <span class="text-sm font-semibold text-green-800">${it.qty} ${it.unit}</span>
+    </li>
+  `).join('');
+
+  const freebiesWrap = document.getElementById('packModalFreebiesWrap');
+  const freebiesList = document.getElementById('packModalFreebies');
+  if (pack.freebies && pack.freebies.length) {
+    freebiesList.innerHTML = pack.freebies.map(f => `
+      <li class="flex items-center gap-2 bg-saffron-50 rounded-xl px-3.5 py-2.5 ring-1 ring-saffron-400/20 text-sm text-charcoal-800">${f}</li>
+    `).join('');
+    freebiesWrap.classList.remove('hidden');
+  } else {
+    freebiesWrap.classList.add('hidden');
+  }
+
+  modal.classList.remove('hidden');
+  document.body.style.overflow = 'hidden';
+}
+
+function closePackModal() {
+  document.getElementById('packModal').classList.add('hidden');
+  document.body.style.overflow = '';
 }
 
 /* ---------- 4bis. LAZY LOADING + BLUR-UP للصور ---------- */
@@ -1158,6 +1284,8 @@ function bindEvents() {
 
   document.getElementById('catDrawerClose').onclick = closeCatDrawer;
   document.getElementById('catDrawerOverlay').onclick = closeCatDrawer;
+  document.getElementById('packModalClose').onclick = closePackModal;
+  document.getElementById('packModalOverlay').onclick = closePackModal;
 
   // ── بار التنقل السفلية (mobile) — الرئيسية / الأصناف / السلة ──
   const tabHomeBtn = document.getElementById('tabHomeBtn');
