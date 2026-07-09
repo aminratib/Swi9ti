@@ -33,5 +33,48 @@
       "purpose": "maskable"
     }
   ],
-  "screenshots": []
+  "screenshots": [
+  {
+    "src": "images/screenshot-1.png",
+    "sizes": "1080x1920",
+    "type": "image/png",
+    "form_factor": "narrow",
+    "label": "الخضرة ديالك، على بعد كليك واحد"
+  },
+  {
+    "src": "images/screenshot-2.png",
+    "sizes": "1080x1920",
+    "type": "image/png",
+    "form_factor": "narrow",
+    "label": "باقات جاهزة، بثمن مخفض"
+  },
+  {
+    "src": "images/screenshot-3.png",
+    "sizes": "1080x1920",
+    "type": "image/png",
+    "form_factor": "narrow",
+    "label": "عروض ديال اليوم، ما تفوتهاش"
+  },
+  {
+    "src": "images/screenshot-4.png",
+    "sizes": "1080x1920",
+    "type": "image/png",
+    "form_factor": "narrow",
+    "label": "زيد للسلة فثانية وحدة"
+  },
+  {
+    "src": "images/screenshot-5.png",
+    "sizes": "1080x1920",
+    "type": "image/png",
+    "form_factor": "narrow",
+    "label": "حدد فين كاين، وحنا نجيوك"
+  },
+  {
+    "src": "images/screenshot-6.png",
+    "sizes": "1080x1920",
+    "type": "image/png",
+    "form_factor": "narrow",
+    "label": "الطلبية كاملة، غير صيفط عبر WhatsApp"
+  }
+]
 }
