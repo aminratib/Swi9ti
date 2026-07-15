@@ -3,6 +3,6 @@
       "target": {
         "namespace": "android_app",
         "package_name": "com.swi9ti.app",
-        "sha256_cert_fingerprints": ["F9:C8:78:F8:71:71:44:82:C6:63:5C:98:F4:68:9B:D3:2F:2C:E9:EE:9B:26:92:ED:42:33:28:F6:D3:43:6F:5C"]
+        "sha256_cert_fingerprints": ["9F:1D:BC:6D:27:7B:3F:21:E2:B4:72:F7:B7:BA:FB:D6:6E:79:AD:80:27:EC:BA:37:94:F8:7B:68:A4:FE:7E:C3"]
       }
     }]
