@@ -1,8 +1,0 @@
-[{
-      "relation": ["delegate_permission/common.handle_all_urls"],
-      "target": {
-        "namespace": "android_app",
-        "package_name": "com.swi9ti.app",
-        "sha256_cert_fingerprints": ["EB:F9:20:11:CB:60:B6:9F:C1:01:CE:40:FC:58:B8:AB:E3:14:70:92:9D:6A:6E:73:C8:D5:EE:54:10:5C:01:79"]
-      }
-    }]
