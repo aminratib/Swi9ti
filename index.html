@@ -239,6 +239,23 @@
     </div>
   </header>
 
+  <!-- ===== iOS "ADD TO HOME SCREEN" BANNER (App Store مازال جاي، فهاد الوقت PWA) ===== -->
+  <div id="iosInstallBanner" class="hidden bg-green-700 text-sand-50">
+    <div class="max-w-6xl mx-auto px-3 sm:px-4 py-2.5 flex items-center gap-3">
+      <div class="w-9 h-9 rounded-xl bg-white/15 flex items-center justify-center shrink-0">
+        <img src="icon-192.png" alt="" class="w-6 h-6 rounded-md object-contain">
+      </div>
+      <div class="flex-1 min-w-0">
+        <p class="text-xs font-semibold leading-tight">حمّل تطبيق Swi9ti فهاتفك</p>
+        <p class="text-[11px] text-sand-50/75 leading-tight truncate">توصل أسرع، بلا ما تفتح المتصفح</p>
+      </div>
+      <button id="iosInstallOpenBtn" type="button" class="shrink-0 bg-white text-green-800 text-xs font-bold px-3.5 py-2 rounded-full active:scale-95 transition">حمّل</button>
+      <button id="iosInstallDismissBtn" type="button" aria-label="سد" class="shrink-0 w-8 h-8 flex items-center justify-center text-sand-50/70 active:text-sand-50">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/></svg>
+      </button>
+    </div>
+  </div>
+
   <!-- ===== SEARCH BAR (1) ===== -->
   <div class="max-w-6xl mx-auto px-3 sm:px-4 pt-3 sm:hidden">
     <div class="relative">
@@ -613,6 +630,45 @@
         <p id="lightboxName" class="text-sand-50 font-display text-xl font-semibold"></p>
         <p id="lightboxPrice" class="text-saffron-300 font-semibold text-sm mt-1"></p>
       </div>
+    </div>
+  </div>
+
+  <!-- ===== iOS INSTALL INSTRUCTIONS MODAL ===== -->
+  <div id="iosInstallModal" class="hidden fixed inset-0 z-[90] flex items-end sm:items-center justify-center" role="dialog" aria-modal="true" aria-label="كيفاش تحمل التطبيق">
+    <div id="iosInstallModalOverlay" class="absolute inset-0 bg-charcoal-900/60 backdrop-blur-sm"></div>
+    <div class="relative w-full sm:max-w-sm max-h-[85vh] bg-sand-50 rounded-t-3xl sm:rounded-3xl shadow-2xl overflow-y-auto slide-up p-5">
+      <div class="flex items-center justify-between mb-4">
+        <div class="flex items-center gap-2.5">
+          <img src="icon-192.png" alt="" class="w-10 h-10 rounded-xl object-contain shadow-crate">
+          <div>
+            <p class="font-display text-green-900 text-base font-semibold">حمّل Swi9ti فهاتفك</p>
+            <p class="text-xs text-charcoal-800/55">فـ 3 خطوات، ما كتاخد حتى دقيقة</p>
+          </div>
+        </div>
+        <button id="iosInstallModalClose" type="button" aria-label="سد" class="w-9 h-9 rounded-full bg-charcoal-800/5 flex items-center justify-center shrink-0">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4 text-charcoal-800/60"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+
+      <ol class="flex flex-col gap-3.5">
+        <li class="flex items-start gap-3">
+          <span class="shrink-0 w-7 h-7 rounded-full bg-green-700 text-white text-xs font-bold flex items-center justify-center">1</span>
+          <p class="text-sm text-charcoal-800 pt-0.5">دوز فوق زر <strong>المشاركة</strong>
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="inline w-4 h-4 mx-1 -mt-0.5 text-green-700"><path stroke-linecap="round" stroke-linejoin="round" d="M12 16.5V9.75m0 0-3 3m3-3 3 3M6.75 19.5a2.25 2.25 0 0 1-2.25-2.25V7.5A2.25 2.25 0 0 1 6.75 5.25H9M15 5.25h2.25A2.25 2.25 0 0 1 19.5 7.5v9.75a2.25 2.25 0 0 1-2.25 2.25H15"/></svg>
+            فأسفل صفحة Safari
+          </p>
+        </li>
+        <li class="flex items-start gap-3">
+          <span class="shrink-0 w-7 h-7 rounded-full bg-green-700 text-white text-xs font-bold flex items-center justify-center">2</span>
+          <p class="text-sm text-charcoal-800 pt-0.5">قلب على <strong>"Add to Home Screen"</strong> (ضيف للشاشة الرئيسية)</p>
+        </li>
+        <li class="flex items-start gap-3">
+          <span class="shrink-0 w-7 h-7 rounded-full bg-green-700 text-white text-xs font-bold flex items-center justify-center">3</span>
+          <p class="text-sm text-charcoal-800 pt-0.5">كليك على <strong>"Add"</strong> (ضيف) فالزاوية، وها التطبيق ولا فهاتفك 🎉</p>
+        </li>
+      </ol>
+
+      <p class="text-[11px] text-charcoal-800/45 mt-4 text-center">التطبيق مازال كيتحضر لـ App Store — هادشي كيخليك تستافد منو دابا بحال أبليكاسيون حقيقية.</p>
     </div>
   </div>
 

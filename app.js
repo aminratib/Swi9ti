@@ -1407,3 +1407,48 @@ if ('serviceWorker' in navigator) {
       .catch(err => console.error('Erreur SW:', err));
   });
 }
+
+/* ---------- 12. iOS "AJOUTER À L'ÉCRAN D'ACCUEIL" ----------
+   Safari ma كيدعمش install prompt أوتوماتيكي بحال Android/Chrome (beforeinstallprompt),
+   و التطبيق مازال ماشي disponible فـ App Store. فهاد الوقت، كنبينو بانير خفيف
+   للمستخدمين ديال iPhone/iPad باش يعرفو كيفاش يزيدو Swi9ti للشاشة الرئيسية —
+   كتخدم بحال أبليكاسيون حقيقية (أيقونة، بلا بار المتصفح، ...). */
+(function initIosInstallPrompt() {
+  const banner = document.getElementById('iosInstallBanner');
+  if (!banner) return;
+
+  const ua = navigator.userAgent || '';
+  const isIos =
+    /iphone|ipad|ipod/i.test(ua) ||
+    // iPadOS 13+ كيصرح روحو iPad بحال Mac، هادي كتبينو
+    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  const isSafari = /safari/i.test(ua) && !/crios|fxios|edgios|opios/i.test(ua);
+  const isStandalone =
+    window.navigator.standalone === true ||
+    window.matchMedia('(display-mode: standalone)').matches;
+
+  let dismissed = false;
+  try { dismissed = localStorage.getItem('swi9ti_ios_install_dismissed') === '1'; } catch (e) {}
+
+  if (!isIos || !isSafari || isStandalone || dismissed) return;
+
+  banner.classList.remove('hidden');
+
+  const modal = document.getElementById('iosInstallModal');
+  const overlay = document.getElementById('iosInstallModalOverlay');
+  const openBtn = document.getElementById('iosInstallOpenBtn');
+  const closeBtn = document.getElementById('iosInstallModalClose');
+  const dismissBtn = document.getElementById('iosInstallDismissBtn');
+
+  const openModal = () => modal?.classList.remove('hidden');
+  const closeModal = () => modal?.classList.add('hidden');
+
+  openBtn?.addEventListener('click', openModal);
+  closeBtn?.addEventListener('click', closeModal);
+  overlay?.addEventListener('click', closeModal);
+
+  dismissBtn?.addEventListener('click', () => {
+    banner.classList.add('hidden');
+    try { localStorage.setItem('swi9ti_ios_install_dismissed', '1'); } catch (e) {}
+  });
+})();
