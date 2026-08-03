@@ -1408,47 +1408,102 @@ if ('serviceWorker' in navigator) {
   });
 }
 
-/* ---------- 12. iOS "AJOUTER À L'ÉCRAN D'ACCUEIL" ----------
-   Safari ma كيدعمش install prompt أوتوماتيكي بحال Android/Chrome (beforeinstallprompt),
-   و التطبيق مازال ماشي disponible فـ App Store. فهاد الوقت، كنبينو بانير خفيف
-   للمستخدمين ديال iPhone/iPad باش يعرفو كيفاش يزيدو Swi9ti للشاشة الرئيسية —
-   كتخدم بحال أبليكاسيون حقيقية (أيقونة، بلا بار المتصفح، ...). */
-(function initIosInstallPrompt() {
-  const banner = document.getElementById('iosInstallBanner');
-  if (!banner) return;
+/* ---------- 12. BARRE FLOTTANTE D'INSTALLATION (iOS + Android + Desktop) ----------
+   هدف: نعرضو بار أنيق وسلس لكل الزوار — لي كيدخلو من iPhone، Android، ولا الكمبيوتر —
+   باش "يحملو" Swi9ti (فالحقيقة: تثبيت PWA / إضافة للشاشة الرئيسية، ماشي تحميل حقيقي
+   من App Store/Play Store لي مازال جاي). كنستافدو من beforeinstallprompt فحيت
+   كاين (Chrome/Edge/Android) باش نعرضو popup التثبيت الرسمي ديال المتصفح، وكنبينو
+   إرشادات ديال 3 خطوات فالمنصات لي ما كيدعموهاش (iOS Safari، متصفحات قديمة، ...). */
+(function initInstallBar() {
+  const bar = document.getElementById('installBar');
+  if (!bar) return;
 
   const ua = navigator.userAgent || '';
   const isIos =
     /iphone|ipad|ipod/i.test(ua) ||
-    // iPadOS 13+ كيصرح روحو iPad بحال Mac، هادي كتبينو
-    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-  const isSafari = /safari/i.test(ua) && !/crios|fxios|edgios|opios/i.test(ua);
+    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1); // iPadOS 13+
+  const isAndroid = /android/i.test(ua);
   const isStandalone =
     window.navigator.standalone === true ||
     window.matchMedia('(display-mode: standalone)').matches;
 
   let dismissed = false;
-  try { dismissed = localStorage.getItem('swi9ti_ios_install_dismissed') === '1'; } catch (e) {}
+  try { dismissed = localStorage.getItem('swi9ti_install_dismissed') === '1'; } catch (e) {}
 
-  if (!isIos || !isSafari || isStandalone || dismissed) return;
+  if (isStandalone || dismissed) return;
 
-  banner.classList.remove('hidden');
-
-  const modal = document.getElementById('iosInstallModal');
-  const overlay = document.getElementById('iosInstallModalOverlay');
-  const openBtn = document.getElementById('iosInstallOpenBtn');
-  const closeBtn = document.getElementById('iosInstallModalClose');
-  const dismissBtn = document.getElementById('iosInstallDismissBtn');
-
-  const openModal = () => modal?.classList.remove('hidden');
-  const closeModal = () => modal?.classList.add('hidden');
-
-  openBtn?.addEventListener('click', openModal);
-  closeBtn?.addEventListener('click', closeModal);
-  overlay?.addEventListener('click', closeModal);
-
-  dismissBtn?.addEventListener('click', () => {
-    banner.classList.add('hidden');
-    try { localStorage.setItem('swi9ti_ios_install_dismissed', '1'); } catch (e) {}
+  let deferredPrompt = null;
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
   });
+  window.addEventListener('appinstalled', () => {
+    hideBar(true);
+    try { localStorage.setItem('swi9ti_install_dismissed', '1'); } catch (e) {}
+  });
+
+  const modal          = document.getElementById('installModal');
+  const modalOverlay    = document.getElementById('installModalOverlay');
+  const modalClose      = document.getElementById('installModalClose');
+  const stepsIos        = document.getElementById('installStepsIos');
+  const stepsAndroid    = document.getElementById('installStepsAndroid');
+  const stepsDesktop    = document.getElementById('installStepsDesktop');
+  const closeBtn        = document.getElementById('installBarClose');
+  const dismissBtn      = document.getElementById('installBarDismiss');
+  const installBtn      = document.getElementById('installBarInstall');
+
+  // ---- animation: entrée/sortie fluide de la barre ----
+  function showBar() {
+    bar.classList.remove('pointer-events-none', 'opacity-0', 'translate-y-6', 'scale-[0.97]');
+    bar.classList.add('opacity-100', 'translate-y-0', 'scale-100', 'pointer-events-auto');
+  }
+  function hideBar(persist) {
+    bar.classList.add('opacity-0', 'translate-y-6', 'scale-[0.97]', 'pointer-events-none');
+    bar.classList.remove('opacity-100', 'translate-y-0', 'scale-100');
+    if (persist) {
+      try { localStorage.setItem('swi9ti_install_dismissed', '1'); } catch (e) {}
+    }
+  }
+
+  // ---- modal d'instructions (steps selon la plateforme) ----
+  const allStepLists = [stepsIos, stepsAndroid, stepsDesktop];
+  function openModal() {
+    let target = stepsDesktop;
+    if (isIos) target = stepsIos;
+    else if (isAndroid) target = stepsAndroid;
+
+    allStepLists.forEach(el => {
+      if (!el) return;
+      if (el === target) { el.classList.remove('hidden'); el.classList.add('flex'); }
+      else { el.classList.add('hidden'); el.classList.remove('flex'); }
+    });
+    modal?.classList.remove('hidden');
+  }
+  function closeModal() { modal?.classList.add('hidden'); }
+
+  // ---- clic sur "حمّل التطبيق" ----
+  async function handleInstallClick() {
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      try {
+        const choice = await deferredPrompt.userChoice;
+        deferredPrompt = null;
+        if (choice.outcome === 'accepted') hideBar(true);
+      } catch (e) {
+        openModal(); // fallback إلا خابت مشكلة
+      }
+      return;
+    }
+    openModal();
+  }
+
+  installBtn?.addEventListener('click', handleInstallClick);
+  closeBtn?.addEventListener('click', () => hideBar(true));
+  dismissBtn?.addEventListener('click', () => hideBar(true));
+  modalClose?.addEventListener('click', closeModal);
+  modalOverlay?.addEventListener('click', closeModal);
+
+  // كنعرضو البار بعد تأخير خفيف باش الصفحة توليها الفرصة تتحمل مزيان أولا،
+  // وباش الدخول ديالو يبان smooth وماشي مفاجئ.
+  window.setTimeout(showBar, 1800);
 })();
