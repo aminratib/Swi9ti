@@ -965,7 +965,7 @@ function renderCartDrawer() {
 }
 
 /* ---------- 7. WHATSAPP ORDER ---------- */
-const WA_NUMBER = '212625185245';
+const WA_NUMBER = '212694536496';
 
 // ⬅️ لصق هنا الرابط ديال Google Apps Script (Web App) لي عطاكم فـ الخطوة 2
 // كيبان بحال: https://script.google.com/macros/s/XXXXXXXXXXXX/exec
