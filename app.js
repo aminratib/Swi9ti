@@ -872,7 +872,7 @@ function cartEntries() {
   }
   return entries;
 }
-const DELIVERY = 20;
+const DELIVERY = 9;
 function cartTotal() {
   return cartEntries().reduce((sum, item) => sum + item.price * item.qty, 0) + DELIVERY;
 }
@@ -1021,7 +1021,7 @@ function buildWhatsAppMessage(clientInfo) {
   });
   msg += `━━━━━━━━━━━━━━━━\n`;
   msg += `💰 *المجموع: ${total} درهم*\n`;
-  msg += `🚚 التوصيل: *20 درهم* 🎉\n`;
+  msg += `🚚 التوصيل: *9 درهم* 🎉\n`;
   msg += `━━━━━━━━━━━━━━━━\n`;
   msg += `👤 *الاسم:* ${clientInfo.name}\n`;
   msg += `📞 *الهاتف:* ${clientInfo.phone}\n`;
