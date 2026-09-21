@@ -131,7 +131,7 @@ const PACKS = [
     freebies: ['نعناع مجاني 🌿', '2 ليمونات مجانا 🍋'],
   },
   {
-    id: 'pack3', name: 'باقة الكرم', desc: ' خضرة كاملة وفواكه للعائلة والضيوف',
+    id: 'pack3', name: 'باقة الكرم', desc: ' خضرة وفواكه للعائلة والضيوف',
     price: 299, oldPrice: 369, discount: 19, unit: 'باقة', emoji: '👑',
     img: 'premium fruit vegetables hamper', photo: 'images/3.png', cartPhoto: 'images/i3.png',
     items: [
