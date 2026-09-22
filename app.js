@@ -1203,63 +1203,47 @@ function captureLocation() {
     return;
   }
 
-  const showPermissionDeniedHelp = () => {
-    btn.disabled = false;
-    label.textContent = 'حدد موقعي بدقة على الخريطة';
-    errorEl.querySelector('span').textContent =
-      'الموقع محظور فهاد المتصفح — دوز لـ (⚙️ إعدادات الموقع) جنب الرابط وفعّل "الموقع/Location"، من بعد عاود المحاولة. إلا كنتي فتطبيق بحال فيسبوك/إنستغرام، حل الرابط فـ Chrome أو Safari مباشرة.';
-    errorEl.classList.remove('hidden');
-  };
-
-  const requestPosition = () => {
-    label.textContent = 'كنحددو الموقع...';
-    btn.disabled = true;
-
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        state.geo = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-        label.textContent = 'تم تحديد الموقع';
-        statusEl.classList.remove('hidden');
-        btn.disabled = false;
-        btn.classList.add('ring-2', 'ring-green-600');
-        document.getElementById('formError').classList.add('hidden');
-        setTimeout(() => { if (state.formStep === 3) nextStep(); }, 650);
-      },
-      (error) => {
-        console.warn('Swi9ti geolocation error:', error.code, error.message);
-        if (error.code === error.PERMISSION_DENIED) {
-          showPermissionDeniedHelp();
-          return;
-        }
-        btn.disabled = false;
-        label.textContent = 'حدد موقعي بدقة على الخريطة';
-        let msg = 'ما قدرناش نحددو الموقع — عاود المحاولة';
-        if (error.code === error.POSITION_UNAVAILABLE) {
-          msg = 'ما قدرناش نلقاو موقعك — تأكد أن الـ GPS مفعّل فالهاتف';
-        } else if (error.code === error.TIMEOUT) {
-          msg = 'التحديد داز عليه الوقت — عاود المحاولة فبلاصة فيها استقبال أحسن';
-        }
-        errorEl.querySelector('span').textContent = msg;
-        errorEl.classList.remove('hidden');
-      },
-      { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
-    );
-  };
-
-  // إلا الإذن محظور من قبل، نبينو المساعدة مباشرة بلا ما ننتظرو الـ timeout
-  if (navigator.permissions && navigator.permissions.query) {
-    navigator.permissions.query({ name: 'geolocation' }).then((result) => {
-      if (result.state === 'denied') {
-        showPermissionDeniedHelp();
-      } else {
-        requestPosition();
-      }
-    }).catch(requestPosition); // Safari ne supporte pas toujours cette API → fallback direct
-  } else {
-    requestPosition();
+  // Avertissement utile en dev : geolocation exige HTTPS (ou localhost)
+  if (location.protocol !== 'https:' && location.hostname !== 'localhost') {
+    console.warn('Geolocation nécessite HTTPS — le popup ne s\'affichera pas sur http://');
   }
+
+  label.textContent = 'كنحددو الموقع...';
+  btn.disabled = true;
+
+  // On demande directement — c'est getCurrentPosition qui affiche le popup natif
+  navigator.geolocation.getCurrentPosition(
+    (pos) => {
+      state.geo = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+      label.textContent = 'تم تحديد الموقع';
+      statusEl.classList.remove('hidden');
+      btn.disabled = false;
+      btn.classList.add('ring-2', 'ring-green-600');
+      document.getElementById('formError').classList.add('hidden');
+      setTimeout(() => { if (state.formStep === 3) nextStep(); }, 650);
+    },
+    (error) => {
+      console.warn('Swi9ti geolocation error:', error.code, error.message);
+      btn.disabled = false;
+      label.textContent = 'حدد موقعي بدقة على الخريطة';
+
+      let msg = 'ما قدرناش نحددو الموقع — عاود المحاولة';
+      if (error.code === error.PERMISSION_DENIED) {
+        msg = 'الموقع محظور فهاد المتصفح — دوز لـ (⚙️ إعدادات الموقع) جنب الرابط وفعّل "الموقع/Location"، من بعد عاود المحاولة. إلا كنتي فتطبيق بحال فيسبوك/إنستغرام، حل الرابط فـ Chrome أو Safari مباشرة.';
+      } else if (error.code === error.POSITION_UNAVAILABLE) {
+        msg = 'ما قدرناش نلقاو موقعك — تأكد أن الـ GPS مفعّل فالهاتف';
+      } else if (error.code === error.TIMEOUT) {
+        msg = 'التحديد داز عليه الوقت — عاود المحاولة فبلاصة فيها استقبال أحسن';
+      }
+      errorEl.querySelector('span').textContent = msg;
+      errorEl.classList.remove('hidden');
+    },
+    { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+  );
 }
 
+// ⚠️ C'EST ÇA QUI MANQUAIT — attacher la fonction au clic
+document.getElementById('geoBtn').addEventListener('click', captureLocation);
 function showWAModal() {
   const entries = cartEntries();
   if (entries.length === 0) return;
