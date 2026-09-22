@@ -1197,76 +1197,67 @@ function captureLocation() {
   const errorEl = document.getElementById('geoError');
   errorEl.classList.add('hidden');
 
-  const showGeoError = (msg) => {
-    errorEl.querySelector('span').textContent = msg + ' — ولا كتب العنوان يدويا فالخانة لي فوق';
+  if (!navigator.geolocation) {
+    errorEl.querySelector('span').textContent = 'الهاتف ديالك ما كيدعمش تحديد الموقع';
+    errorEl.classList.remove('hidden');
+    return;
+  }
+
+  const showPermissionDeniedHelp = () => {
+    btn.disabled = false;
+    label.textContent = 'حدد موقعي بدقة على الخريطة';
+    errorEl.querySelector('span').textContent =
+      'الموقع محظور فهاد المتصفح — دوز لـ (⚙️ إعدادات الموقع) جنب الرابط وفعّل "الموقع/Location"، من بعد عاود المحاولة. إلا كنتي فتطبيق بحال فيسبوك/إنستغرام، حل الرابط فـ Chrome أو Safari مباشرة.';
     errorEl.classList.remove('hidden');
   };
 
-  if (!navigator.geolocation) {
-    showGeoError('الهاتف ديالك ما كيدعمش تحديد الموقع');
-    return;
-  }
+  const requestPosition = () => {
+    label.textContent = 'كنحددو الموقع...';
+    btn.disabled = true;
 
-  // ⚠️ fix: على بعض المتصفحات (خصوصا فـ mode desktop ولا إلا الموقع
-  // كيتفتح غير بالـ HTTP بلا HTTPS، ولا جوا iframe لي ما عندهاش الصلاحية)
-  // الـ API ديال geolocation ما كيرجعش والو — لا success ولا error — والزر
-  // كيبقى "كنحددو الموقع..." معلق للأبد. هاد السطر كيبان الخطأ مباشرة.
-  if (window.isSecureContext === false) {
-    showGeoError('خاصك تفتح الموقع بـ HTTPS باش تقدر تحدد الموقع');
-    return;
-  }
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        state.geo = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+        label.textContent = 'تم تحديد الموقع';
+        statusEl.classList.remove('hidden');
+        btn.disabled = false;
+        btn.classList.add('ring-2', 'ring-green-600');
+        document.getElementById('formError').classList.add('hidden');
+        setTimeout(() => { if (state.formStep === 3) nextStep(); }, 650);
+      },
+      (error) => {
+        console.warn('Swi9ti geolocation error:', error.code, error.message);
+        if (error.code === error.PERMISSION_DENIED) {
+          showPermissionDeniedHelp();
+          return;
+        }
+        btn.disabled = false;
+        label.textContent = 'حدد موقعي بدقة على الخريطة';
+        let msg = 'ما قدرناش نحددو الموقع — عاود المحاولة';
+        if (error.code === error.POSITION_UNAVAILABLE) {
+          msg = 'ما قدرناش نلقاو موقعك — تأكد أن الـ GPS مفعّل فالهاتف';
+        } else if (error.code === error.TIMEOUT) {
+          msg = 'التحديد داز عليه الوقت — عاود المحاولة فبلاصة فيها استقبال أحسن';
+        }
+        errorEl.querySelector('span').textContent = msg;
+        errorEl.classList.remove('hidden');
+      },
+      { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+    );
+  };
 
-  label.textContent = 'كنحددو الموقع...';
-  btn.disabled = true;
-
-  let settled = false; // كنتأكدو ما نديرو الحالة جوج مرات (API + الفيلي سايف)
-
-  // ⚠️ fix: option "timeout" ديال getCurrentPosition خاصها فالنظرية ديما
-  // تصاوب error callback من بعد 15 ثانية، ولكن فبعض المتصفحات/الحالات (mode
-  // desktop، iframe، امتداد كيبلوكي الطلب) الكولباك ما كيتصاوبش والو —
-  // فهاد الفيلي سايف (watchdog) كيضمن أن الزر ما يبقاش معلق للأبد.
-  const watchdog = setTimeout(() => {
-    if (settled) return;
-    settled = true;
-    btn.disabled = false;
-    label.textContent = 'حدد موقعي بدقة على الخريطة';
-    showGeoError('ما قدرناش نحددو الموقع — المتصفح ما جاوبش');
-  }, 16000);
-
-  navigator.geolocation.getCurrentPosition(
-    (pos) => {
-      if (settled) return;
-      settled = true;
-      clearTimeout(watchdog);
-      state.geo = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-      label.textContent = 'تم تحديد الموقع';
-      statusEl.classList.remove('hidden');
-      btn.disabled = false;
-      btn.classList.add('ring-2', 'ring-green-600');
-      document.getElementById('formError').classList.add('hidden');
-      setTimeout(() => { if (state.formStep === 3) nextStep(); }, 650);
-    },
-    (error) => {                                   // ⬅️ on récupère l'objet erreur
-      if (settled) return;
-      settled = true;
-      clearTimeout(watchdog);
-      btn.disabled = false;
-      label.textContent = 'حدد موقعي بدقة على الخريطة';
-
-      console.warn('Swi9ti geolocation error:', error.code, error.message); // pour diagnostiquer
-
-      let msg = 'ما قدرناش نحددو الموقع — عاود المحاولة';
-      if (error.code === error.PERMISSION_DENIED) {
-        msg = 'خاصك تسمح بالوصول للموقع من إعدادات المتصفح (🔒 جنب الرابط)';
-      } else if (error.code === error.POSITION_UNAVAILABLE) {
-        msg = 'ما قدرناش نلقاو موقعك — تأكد أن الـ GPS مفعّل';
-      } else if (error.code === error.TIMEOUT) {
-        msg = 'التحديد داز عليه الوقت — عاود المحاولة';
+  // إلا الإذن محظور من قبل، نبينو المساعدة مباشرة بلا ما ننتظرو الـ timeout
+  if (navigator.permissions && navigator.permissions.query) {
+    navigator.permissions.query({ name: 'geolocation' }).then((result) => {
+      if (result.state === 'denied') {
+        showPermissionDeniedHelp();
+      } else {
+        requestPosition();
       }
-      showGeoError(msg);
-    },
-    { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
-  );
+    }).catch(requestPosition); // Safari ne supporte pas toujours cette API → fallback direct
+  } else {
+    requestPosition();
+  }
 }
 
 function showWAModal() {
