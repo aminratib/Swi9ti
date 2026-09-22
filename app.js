@@ -1242,8 +1242,6 @@ function captureLocation() {
   );
 }
 
-// ⚠️ C'EST ÇA QUI MANQUAIT — attacher la fonction au clic
-document.getElementById('geoBtn').addEventListener('click', captureLocation);
 function showWAModal() {
   const entries = cartEntries();
   if (entries.length === 0) return;
