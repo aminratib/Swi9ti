@@ -1027,7 +1027,7 @@ function sendOrderToSheet(clientInfo) {
     // ما يبقاش +212 كيتقرا كخطأ #NAME? ولا كيبان بصيغة غريبة فالخانة. هاد
     // الأبوستروف كتبان غير فـ Sheet، ما عندهاش علاقة برسالة واتساب.
     phone: `'${clientInfo.phone}`,
-    location: clientInfo.sheetLocation || clientInfo.location,
+    location: clientInfo.location,
     mapsLink: clientInfo.mapsLink || '',
     availability,
     cartDetails,
@@ -1282,12 +1282,8 @@ function sendToWhatsApp() {
   const name     = document.getElementById('clientName').value.trim();
   const phone    = document.getElementById('clientPhone').value.trim();
   const typedLocation = document.getElementById('clientLocation').value.trim();
-  const mapsLink = state.geo ? `https://www.google.com/maps?q=${state.geo.lat},${state.geo.lng}` : '';
-  // location: نص مقروء كيتبان فرسالة واتساب (الرابط كيبان فسطر خاص بوحدو تحته)
+  // إلا الزبون حدد الموقع بالـ GPS وما كتبش العنوان يدويا، كنستعملو وصف بديل
   const location = typedLocation || (state.geo ? 'الموقع محدد بدقة على الخريطة (شوف الرابط تحت)' : '');
-  // sheetLocation: هو لي كيتصيفط لـ Excel/Google Sheet فخانة العنوان — الرابط
-  // مباشرة إلا الزبون استعمل GPS، باش يكون قابل للنقر مباشرة من غير نص زايد
-  const sheetLocation = typedLocation || mapsLink;
   const day      = state.selectedDay;
   const slot     = state.selectedSlot;
 
@@ -1297,7 +1293,8 @@ function sendToWhatsApp() {
     return;
   }
 
-  const clientInfo = { name, phone: `+212 ${phone}`, location, sheetLocation, day, slot, mapsLink };
+  const mapsLink = state.geo ? `https://www.google.com/maps?q=${state.geo.lat},${state.geo.lng}` : '';
+  const clientInfo = { name, phone: `+212 ${phone}`, location, day, slot, mapsLink };
 
   const msg = buildWhatsAppMessage(clientInfo);
   const encoded = encodeURIComponent(msg);
