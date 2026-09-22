@@ -1192,7 +1192,7 @@ function renderReview() {
 
 function captureLocation() {
   const btn = document.getElementById('geoBtn');
-  const label = document.getElementById('geoBtnLabel');
+  
   const statusEl = document.getElementById('geoStatus');
   const errorEl = document.getElementById('geoError');
   errorEl.classList.add('hidden');
