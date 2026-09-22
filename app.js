@@ -1418,10 +1418,10 @@ function bindEvents() {
     if (e.key === 'Enter') { e.preventDefault(); nextStep(); }
   });
 
-  // const locationInput = document.getElementById('clientLocation');
-  // locationInput.addEventListener('keydown', e => {
-  //   if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); nextStep(); }
-  // });
+  const locationInput = document.getElementById('clientLocation');
+  locationInput.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); nextStep(); }
+  });
 
   let debounce;
   const onSearch = (val) => {
@@ -1453,7 +1453,7 @@ function init() {
   renderProducts();
   renderCartBadges();
   renderCartDrawer();
-  // bindEvents();
+  bindEvents();
 
   // كنبداو بالأثمنة الافتراضية (فوق)، من بعد كنبدلوهم بالأثمنة الطرية من Google Sheet.
   loadProductsFromSheet();
