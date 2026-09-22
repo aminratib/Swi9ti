@@ -1034,13 +1034,22 @@ function sendOrderToSheet(clientInfo) {
     totalToPay,
   };
 
+  // ⚠️ mode:'no-cors' كيخلي الجواب "opaque" — ما نقدروش نعرفو واش Apps Script
+  // قبل الطلب ولا لا (حتى redirect لصفحة تسجيل الدخول كيبان "نجح" من هنا).
+  // إلا الرابط ما توصلش للـ Sheet، خاصك تتأكد من: Deploy > Manage deployments
+  // فـ Apps Script، "Execute as: Me" و "Who has access: Anyone" — ماشي
+  // "Anyone within [organization]" — وبعد كل تعديل فالكود خاص تعاود Deploy
+  // (New deployment) حيت التعديلات ما كتخدمش أوتوماتيك على الرابط القديم.
+  console.info('Swi9ti: كنصيفطو الطلبية لـ Google Sheet…', payload);
   fetch(ORDERS_SCRIPT_URL, {
     method: 'POST',
     mode: 'no-cors',
     headers: { 'Content-Type': 'text/plain;charset=utf-8' },
     body: JSON.stringify(payload),
+  }).then(() => {
+    console.info('Swi9ti: الطلب تصيفط لـ Apps Script (ما نقدروش نأكدو النجاح 100% بسبب no-cors — تأكد من الـ Sheet ولا من Executions فـ Apps Script).');
   }).catch(err => {
-    console.warn('Swi9ti: ما قدرناش نسجلو الطلبية فـ Google Sheet.', err);
+    console.warn('Swi9ti: ما قدرناش نسجلو الطلبية فـ Google Sheet — مشكل شبكة/رابط.', err);
   });
 }
 
@@ -1188,32 +1197,75 @@ function captureLocation() {
   const errorEl = document.getElementById('geoError');
   errorEl.classList.add('hidden');
 
-  if (!navigator.geolocation) {
-    errorEl.querySelector('span').textContent = 'الهاتف ديالك ما كيدعمش تحديد الموقع';
+  const showGeoError = (msg) => {
+    errorEl.querySelector('span').textContent = msg + ' — ولا كتب العنوان يدويا فالخانة لي فوق';
     errorEl.classList.remove('hidden');
+  };
+
+  if (!navigator.geolocation) {
+    showGeoError('الهاتف ديالك ما كيدعمش تحديد الموقع');
+    return;
+  }
+
+  // ⚠️ fix: على بعض المتصفحات (خصوصا فـ mode desktop ولا إلا الموقع
+  // كيتفتح غير بالـ HTTP بلا HTTPS، ولا جوا iframe لي ما عندهاش الصلاحية)
+  // الـ API ديال geolocation ما كيرجعش والو — لا success ولا error — والزر
+  // كيبقى "كنحددو الموقع..." معلق للأبد. هاد السطر كيبان الخطأ مباشرة.
+  if (window.isSecureContext === false) {
+    showGeoError('خاصك تفتح الموقع بـ HTTPS باش تقدر تحدد الموقع');
     return;
   }
 
   label.textContent = 'كنحددو الموقع...';
   btn.disabled = true;
 
+  let settled = false; // كنتأكدو ما نديرو الحالة جوج مرات (API + الفيلي سايف)
+
+  // ⚠️ fix: option "timeout" ديال getCurrentPosition خاصها فالنظرية ديما
+  // تصاوب error callback من بعد 15 ثانية، ولكن فبعض المتصفحات/الحالات (mode
+  // desktop، iframe، امتداد كيبلوكي الطلب) الكولباك ما كيتصاوبش والو —
+  // فهاد الفيلي سايف (watchdog) كيضمن أن الزر ما يبقاش معلق للأبد.
+  const watchdog = setTimeout(() => {
+    if (settled) return;
+    settled = true;
+    btn.disabled = false;
+    label.textContent = 'حدد موقعي بدقة على الخريطة';
+    showGeoError('ما قدرناش نحددو الموقع — المتصفح ما جاوبش');
+  }, 16000);
+
   navigator.geolocation.getCurrentPosition(
     (pos) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(watchdog);
       state.geo = { lat: pos.coords.latitude, lng: pos.coords.longitude };
       label.textContent = 'تم تحديد الموقع';
       statusEl.classList.remove('hidden');
       btn.disabled = false;
       btn.classList.add('ring-2', 'ring-green-600');
       document.getElementById('formError').classList.add('hidden');
-      // ما خصوش يعمر العنوان يدويا — كنقدمو أوتوماتيكيا للخطوة لي مورا
       setTimeout(() => { if (state.formStep === 3) nextStep(); }, 650);
     },
-    () => {
+    (error) => {                                   // ⬅️ on récupère l'objet erreur
+      if (settled) return;
+      settled = true;
+      clearTimeout(watchdog);
       btn.disabled = false;
       label.textContent = 'حدد موقعي بدقة على الخريطة';
-      errorEl.classList.remove('hidden');
+
+      console.warn('Swi9ti geolocation error:', error.code, error.message); // pour diagnostiquer
+
+      let msg = 'ما قدرناش نحددو الموقع — عاود المحاولة';
+      if (error.code === error.PERMISSION_DENIED) {
+        msg = 'خاصك تسمح بالوصول للموقع من إعدادات المتصفح (🔒 جنب الرابط)';
+      } else if (error.code === error.POSITION_UNAVAILABLE) {
+        msg = 'ما قدرناش نلقاو موقعك — تأكد أن الـ GPS مفعّل';
+      } else if (error.code === error.TIMEOUT) {
+        msg = 'التحديد داز عليه الوقت — عاود المحاولة';
+      }
+      showGeoError(msg);
     },
-    { enableHighAccuracy: true, timeout: 10000 }
+    { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
   );
 }
 
