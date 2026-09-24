@@ -344,7 +344,7 @@ const STEP_LABELS = {
   5: 'الفترة المناسبة',
   6: 'تأكيد الطلبية',
 };
-const DAY_OPTIONS = ['اليوم', 'غدا', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت', 'الأحد'];
+const DAY_OPTIONS = [ 'غدا', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت', 'الأحد'];
 
 const saveCart  = () => localStorage.setItem('casabtata_cart', JSON.stringify(state.cart));
 
@@ -408,10 +408,10 @@ function renderCategories() {
   CATEGORIES.forEach(cat => {
     const active = state.category === cat.id;
     const chip = document.createElement('button');
-    chip.className = `shrink-0 px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition border flex items-center gap-1.5 ${
-      active ? 'bg-green-700 text-white border-green-700' : 'bg-white text-charcoal-800/70 border-charcoal-800/10 active:bg-charcoal-800/5'
+    chip.className = `shrink-0 px-[18px] py-2 rounded-full text-[13px] font-semibold whitespace-nowrap transition border ${
+      active ? 'bg-white text-green-700 border-green-700 ring-1 ring-green-700' : 'bg-white text-charcoal-800/70 border-charcoal-800/10 active:bg-charcoal-800/5'
     }`;
-    chip.innerHTML = `${categoryGlyph(cat)}<span>${cat.label}</span>`;
+    chip.innerHTML = `<span>${cat.label}</span>`;
     chip.onclick = () => { state.category = cat.id; renderCategories(); renderProducts(); };
     row.appendChild(chip);
 
@@ -447,13 +447,13 @@ function renderCategoryIcons() {
     const customUrl = CATEGORY_ICON_IMAGES[cat.id];
     const src = customUrl && customUrl.trim() ? customUrl.trim() : catIconUrl(cat.id, meta?.query || cat.label);
     const btn = document.createElement('button');
-    btn.className = 'flex flex-col items-center gap-1.5 shrink-0 w-16';
+    btn.className = 'flex flex-col items-center gap-2 shrink-0 w-[68px]';
     btn.innerHTML = `
-      <span class="relative w-14 h-14 rounded-full overflow-hidden bg-sand-100 ring-1 ring-charcoal-800/10 flex items-center justify-center text-2xl">
+      <span class="cat-orb relative w-[64px] h-[64px] rounded-full overflow-hidden bg-white flex items-center justify-center text-2xl">
         <span>${meta?.emoji || cat.emoji}</span>
         <img src="${src}" alt="${cat.label}" loading="lazy" decoding="async" class="absolute inset-0 w-full h-full object-cover" onerror="this.remove()">
       </span>
-      <span class="text-[11px] font-medium text-charcoal-800/80 text-center leading-tight">${cat.label}</span>
+      <span class="text-[12px] font-medium text-charcoal-800/80 text-center leading-tight">${cat.label}</span>
     `;
     btn.onclick = () => {
       state.category = cat.id;
@@ -466,12 +466,12 @@ function renderCategoryIcons() {
 
   // "زيادة" — كتفتح درج الأصناف بأكملها
   const more = document.createElement('button');
-  more.className = 'flex flex-col items-center gap-1.5 shrink-0 w-16';
+  more.className = 'flex flex-col items-center gap-2 shrink-0 w-[68px]';
   more.innerHTML = `
-    <span class="w-14 h-14 rounded-full bg-green-50 ring-1 ring-green-600/15 flex items-center justify-center text-green-700">
+    <span class="cat-orb w-[64px] h-[64px] rounded-full bg-white flex items-center justify-center text-charcoal-800/70">
       ${CATEGORY_ICONS.tout}
     </span>
-    <span class="text-[11px] font-medium text-charcoal-800/80">زيادة</span>
+    <span class="text-[12px] font-medium text-charcoal-800/80">زيادة</span>
   `;
   more.onclick = openCatDrawer;
   row.appendChild(more);
@@ -481,22 +481,19 @@ function renderCategoryIcons() {
 function buildPackCard(pack) {
   const bg = pack.photo && pack.photo.trim() ? pack.photo.trim() : catIconUrl(pack.id, pack.img, 600);
   const card = document.createElement('div');
-  card.className = 'relative shrink-0 w-[270px] sm:w-[320px] rounded-2xl overflow-hidden shadow-crate cursor-pointer active:scale-[0.98] transition';
+  card.className = 'pack-card relative shrink-0 w-[88vw] max-w-[350px] sm:w-[360px] h-[176px] rounded-[22px] overflow-hidden cursor-pointer active:scale-[0.98] transition';
   card.dataset.packCard = pack.id;
   card.innerHTML = `
-    <div class="absolute inset-0 bg-cover bg-center" style="background-image:url('${bg}')"></div>
-    <div class="absolute inset-0 bg-gradient-to-t from-green-900/92 via-green-900/45 to-green-900/10"></div>
-    <div class="relative p-4 flex flex-col h-40 sm:h-44 justify-between">
-      <div class="flex items-start justify-between gap-2">
-        <div class="min-w-0">
-          <p class="font-display text-white text-lg font-semibold truncate">${pack.name}</p>
-          <p class="text-sand-50/80 text-xs mt-0.5 leading-snug">${pack.desc}</p>
-        </div>
-        <span class="bg-terracotta-500 text-white text-[11px] font-bold px-2 py-1 rounded-full shrink-0">-${pack.discount}%</span>
+    <div class="pack-photo absolute inset-y-0 right-0 w-[58%] bg-cover bg-center" style="background-image:url('${bg}')"></div>
+    <span class="absolute top-0 right-0 bg-terracotta-500 text-white text-[12px] font-bold px-3 py-1.5 rounded-bl-2xl">-${pack.discount}%</span>
+    <div class="relative h-full w-[64%] p-4 flex flex-col justify-between">
+      <div>
+        <p class="text-white text-[21px] font-extrabold leading-tight">${pack.name}</p>
+        <p class="text-white/75 text-[12px] mt-1 leading-snug line-clamp-2">${pack.desc}</p>
       </div>
-      <div class="flex items-center justify-between gap-2">
-        <p class="text-saffron-300 font-bold text-lg">${pack.price} <span class="text-white/60 text-xs font-normal line-through">${pack.oldPrice}</span> درهم</p>
-        <button data-add-pack="${pack.id}" class="bg-white text-green-800 text-xs font-semibold px-4 py-2 rounded-full active:scale-95 transition shrink-0">زيد</button>
+      <div>
+        <p class="text-white flex items-baseline gap-1.5"><span class="text-[24px] font-extrabold">${pack.price} درهم</span> <span class="text-white/55 text-xs line-through">${pack.oldPrice}</span></p>
+        <button data-add-pack="${pack.id}" class="mt-2 bg-white text-green-800 text-[13px] font-bold px-6 py-2 rounded-full active:scale-95 transition">زيد</button>
       </div>
     </div>
   `;
@@ -533,24 +530,36 @@ function renderPacks() {
     };
   }
 
-  initMarqueeAutoScroll(row.closest('.marquee-wrap'), 'right', 34);
+  const dots = document.getElementById('packsDots');
+  const packWrap = row.closest('.marquee-wrap');
+  if (dots && packWrap) {
+    dots.innerHTML = PACKS.map((_, i) => `<span class="pack-dot${i === 0 ? ' is-on' : ''}"></span>`).join('');
+    packWrap.addEventListener('scroll', () => {
+      const half = packWrap.scrollWidth / 2;
+      if (!half) return;
+      const idx = Math.round(((packWrap.scrollLeft % half) / half) * PACKS.length) % PACKS.length;
+      dots.querySelectorAll('.pack-dot').forEach((d, k) => d.classList.toggle('is-on', k === idx));
+    }, { passive: true });
+  }
+
+  initMarqueeAutoScroll(packWrap, 'right', 34);
 }
 
 /* ---------- 4c. عروض اليوم — سطر كيتحرك وحدو ---------- */
 function buildDealCard(p) {
   const card = document.createElement('div');
   const qty = state.cart[p.id] || 0;
-  card.className = 'shrink-0 w-32 sm:w-36 bg-white rounded-2xl shadow-crate ring-1 ring-charcoal-800/[0.04] overflow-hidden flex flex-col';
+  card.className = 'pcard shrink-0 w-[140px] sm:w-[150px] flex flex-col';
   card.innerHTML = `
-    <div class="relative aspect-square bg-sand-100 overflow-hidden">
+    <div class="relative aspect-square rounded-xl bg-sand-100 overflow-hidden">
       <div data-skel class="absolute inset-0 flex items-center justify-center text-4xl">${p.emoji}</div>
       <div data-img-slot="deal-${p.id}" class="absolute inset-0"></div>
       <span class="absolute top-1.5 right-1.5 bg-terracotta-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full">حار 🔥</span>
     </div>
-    <div class="p-2.5 flex flex-col gap-1.5 flex-1">
-      <h3 class="font-semibold text-xs leading-tight text-charcoal-800 truncate">${p.name}</h3>
-      <p class="text-green-700 font-bold text-xs">${p.price} MAD <span class="text-charcoal-800/40 font-normal">/${p.unit}</span></p>
-      <div class="mt-auto" data-qty-zone="${p.id}">
+    <div class="px-1 pt-2 pb-0.5 flex flex-col gap-1 flex-1">
+      <h3 class="font-semibold text-[13px] leading-tight text-charcoal-800 truncate">${p.name}</h3>
+      <p class="text-green-800 font-extrabold text-[13px]">${p.price} MAD<span class="text-charcoal-800/45 font-medium text-[11px]">/${p.unit}</span></p>
+      <div class="mt-auto pt-1" data-qty-zone="${p.id}">
         ${qty > 0 ? qtyStepperHTML(p.id, qty, p.unit) : addButtonHTML(p.id)}
       </div>
     </div>
@@ -779,22 +788,21 @@ function renderProducts() {
   list.forEach((p, i) => {
     const qty = state.cart[p.id] || 0;
     const card = document.createElement('div');
-    card.className = 'rise-in group bg-white rounded-2xl shadow-crate ring-1 ring-charcoal-800/[0.04] overflow-hidden flex flex-col transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5 hover:ring-charcoal-800/[0.08]';
+    card.className = 'rise-in pcard group flex flex-col';
     card.style.animationDelay = `${Math.min(i * 35, 300)}ms`;
     card.innerHTML = `
-      <div data-lightbox-trigger="${p.id}" class="relative aspect-square bg-sand-100 overflow-hidden cursor-zoom-in active:scale-[0.97] transition-transform" role="button" tabindex="0" aria-label="كبّر صورة ${p.name}">
-        <div data-skel class="absolute inset-0 flex items-center justify-center text-5xl">${p.emoji}</div>
+      <div data-lightbox-trigger="${p.id}" class="relative aspect-square rounded-xl bg-sand-100 overflow-hidden cursor-zoom-in" role="button" tabindex="0" aria-label="كبّر صورة ${p.name}">
+        <div data-skel class="absolute inset-0 flex items-center justify-center text-4xl">${p.emoji}</div>
         <div data-img-slot="${p.id}" class="absolute inset-0"></div>
-        ${p.promo ? `<span class="absolute top-2 left-2 bg-terracotta-500 text-white text-[10px] font-bold px-2 py-1 rounded-full">بروم</span>` : ''}
-        <span class="absolute bottom-1.5 right-1.5 w-6 h-6 rounded-full bg-charcoal-800/35 backdrop-blur-sm text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3.5 h-3.5"><path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607ZM10.5 7.5v6m-3-3h6"/></svg>
-        </span>
+        ${p.promo ? `<span class="absolute top-1.5 left-1.5 bg-terracotta-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full">بروم</span>` : ''}
       </div>
-      <div class="p-3 flex flex-col gap-2 flex-1">
-        <h3 class="font-semibold text-sm leading-tight text-charcoal-800">${p.name}</h3>
-        <p class="text-green-700 font-bold text-sm"> ${p.price} MAD <span class="text-charcoal-800/40 font-normal text-xs">/ ${p.unit}</span></p>
-        <div class="mt-auto pt-1" data-qty-zone="${p.id}">
-          ${qty > 0 ? qtyStepperHTML(p.id, qty, p.unit) : addButtonHTML(p.id)}
+      <div class="px-1 pt-2 pb-0.5 flex flex-col gap-1.5 flex-1">
+        <h3 class="font-semibold text-[13px] leading-tight text-charcoal-800 line-clamp-2 min-h-[2.5em]">${p.name}</h3>
+        <div class="mt-auto flex items-center justify-between gap-1.5 flex-wrap">
+          <p class="text-green-800 font-bold text-[12px] leading-tight">${p.price} MAD<span class="text-charcoal-800/45 font-medium text-[10px]">/${p.unit}</span></p>
+          <div class="ml-auto" data-qty-zone="${p.id}" data-variant="compact">
+            ${qty > 0 ? qtyStepperHTML(p.id, qty, p.unit, true) : addButtonHTML(p.id, true)}
+          </div>
         </div>
       </div>
     `;
@@ -846,19 +854,19 @@ const PLUS_ICON = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="
 /* Heroicon: minus */
 const MINUS_ICON = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.2" stroke="currentColor" class="w-3.5 h-3.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 12h-15"/></svg>`;
 
-function addButtonHTML(id) {
-  return `<button data-add="${id}" aria-label="زيد للسلة" class="w-full bg-green-700 hover:bg-green-600 text-white text-sm font-semibold py-2.5 rounded-full transition active:scale-95 flex items-center justify-center gap-1.5">
-    ${PLUS_ICON} زيد للسلة
-  </button>`;
+function addButtonHTML(id, compact = false) {
+  if (compact) return `<button data-add="${id}" aria-label="زيد للسلة" class="w-8 h-8 rounded-[10px] bg-green-700 hover:bg-green-600 text-white flex items-center justify-center transition active:scale-90">${PLUS_ICON}</button>`;
+  return `<button data-add="${id}" aria-label="زيد للسلة" class="w-full bg-green-700 hover:bg-green-600 text-white text-[13px] font-bold py-2.5 rounded-xl transition active:scale-95">زيد للسلة</button>`;
 }
-function qtyStepperHTML(id, qty, unit) {
-  return `<div class="flex items-center justify-between bg-green-50 rounded-full p-1">
-    <button data-dec="${id}" aria-label="نقص" class="w-8 h-8 rounded-full bg-white text-green-700 flex items-center justify-center shadow-sm active:scale-90">${MINUS_ICON}</button>
-    <span class="flex flex-col items-center leading-none px-1" aria-live="polite">
-      <span class="text-sm font-semibold text-green-900">${qty}</span>
-      ${unit ? `<span class="text-[9px] text-green-700/70 font-medium">${unit}</span>` : ''}
+function qtyStepperHTML(id, qty, unit, compact = false) {
+  const b = compact ? 'w-7 h-7 rounded-lg' : 'w-8 h-8 rounded-xl';
+  return `<div class="flex items-center ${compact ? 'gap-1' : 'justify-between'} bg-green-50 ${compact ? 'rounded-xl' : 'rounded-2xl'} p-1">
+    <button data-dec="${id}" aria-label="نقص" class="${b} bg-white text-green-700 flex items-center justify-center shadow-sm active:scale-90">${MINUS_ICON}</button>
+    <span class="flex flex-col items-center leading-none px-1 min-w-[22px]" aria-live="polite">
+      <span class="text-sm font-bold text-green-900">${qty}</span>
+      ${unit && !compact ? `<span class="text-[9px] text-green-700/70 font-medium">${unit}</span>` : ''}
     </span>
-    <button data-inc="${id}" aria-label="زيد" class="w-8 h-8 rounded-full bg-green-700 text-white flex items-center justify-center shadow-sm active:scale-90">${PLUS_ICON}</button>
+    <button data-inc="${id}" aria-label="زيد" class="${b} bg-green-700 text-white flex items-center justify-center shadow-sm active:scale-90">${PLUS_ICON}</button>
   </div>`;
 }
 
@@ -886,7 +894,8 @@ function refreshQtyZone(id) {
   const qty = state.cart[id] || 0;
   const product = productById(id);
   zones.forEach(zone => {
-    zone.innerHTML = qty > 0 ? qtyStepperHTML(id, qty, product && product.unit) : addButtonHTML(id);
+    const compact = zone.dataset.variant === 'compact';
+    zone.innerHTML = qty > 0 ? qtyStepperHTML(id, qty, product && product.unit, compact) : addButtonHTML(id, compact);
   });
   attachQtyHandlers();
 }

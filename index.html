@@ -28,7 +28,7 @@
 <meta name="twitter:image" content="https://swi9ti.com/LOGO1.svg">
 
 <!-- ===== PWA / Mobile ===== -->
-<meta name="theme-color" content="#FBF6EC">
+<meta name="theme-color" content="#FBFAF7">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -196,10 +196,25 @@
   input, select, textarea, button { font-size: max(16px, 1em); } /* stops iOS auto-zoom on focus */
   a, button { -webkit-tap-highlight-color: transparent; }
   :focus-visible { outline: 2px solid #3E7C4A; outline-offset: 2px; }
+
+  /* ===== SWI9TI — Premium mobile (mêmes couleurs, rendu haut de gamme) ===== */
+  :root { --ink:#2A2622; --card-sh:0 1px 2px rgba(31,61,43,.05), 0 8px 22px -10px rgba(31,61,43,.20); }
+  .pcard { background:#fff; border-radius:18px; padding:8px; border:1px solid rgba(31,61,43,.06); box-shadow:var(--card-sh); }
+  .cat-orb { box-shadow:0 1px 2px rgba(31,61,43,.06), 0 8px 18px -8px rgba(31,61,43,.28); border:1px solid rgba(31,61,43,.07); }
+  .pack-card { background:linear-gradient(135deg,#2F6B3C 0%,#1F4A2B 100%); box-shadow:0 14px 28px -14px rgba(31,61,43,.55); }
+  .pack-photo { -webkit-mask-image:linear-gradient(to right,transparent 0%,#000 38%); mask-image:linear-gradient(to right,transparent 0%,#000 38%); }
+  .pack-dot { width:6px; height:6px; border-radius:999px; background:#D3D8D0; transition:background-color .25s; }
+  .pack-dot.is-on { background:#326239; }
+  .trust-bar > div + div { border-inline-start:1px solid rgba(31,61,43,.10); }
+  #mobileTabBar button { -webkit-tap-highlight-color:transparent; }
+  @media (max-width:1023px) {
+    .font-display { font-family:'Plus Jakarta Sans',system-ui,sans-serif; font-weight:800; letter-spacing:-.01em; }
+  }
+
 </style>
 </head>
 
-<body class="bg-sand-50 text-charcoal-800 font-body antialiased pb-24 lg:pb-0">
+<body class="bg-[#FBFAF7] lg:bg-sand-50 text-charcoal-800 font-body antialiased pb-24 lg:pb-0">
 
 
   <!-- ===== PRELOADER ===== -->
@@ -212,8 +227,8 @@
   </div>
 
   <!-- ===== TOP BAR ===== -->
-  <header class="sticky top-0 z-40 bg-sand-50/95 backdrop-blur border-b border-charcoal-800/10">
-    <div class="max-w-6xl mx-auto px-3 sm:px-4 py-2.5 flex items-center gap-3">
+  <header class="sticky top-0 z-40 bg-[#FBFAF7]/95 lg:bg-sand-50/95 backdrop-blur lg:border-b lg:border-charcoal-800/10">
+    <div class="max-w-6xl mx-auto px-4 py-2.5 flex items-center gap-3">
 
       <a href="#" class="flex items-center justify-center shrink-0" aria-label="Swi9ti — الصفحة الرئيسية">
         <img src="LOGO.svg" alt="Swi9ti" width="82" height="82" class="h-[56px] sm:h-[68px] lg:h-[82px] w-auto object-contain" fetchpriority="high">
@@ -230,8 +245,8 @@
       <div class="flex-1 sm:hidden"></div>
 
       <!-- Cart btn — Heroicons: shopping-cart -->
-      <button id="cartBtn" class="relative p-2.5 rounded-full bg-green-700 text-sand-50 shrink-0 min-w-[44px] min-h-[44px] flex items-center justify-center active:scale-95 transition" aria-label="فتح السلة ديالك">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-5 h-5">
+      <button id="cartBtn" class="relative p-2.5 rounded-full lg:bg-green-700 text-charcoal-800 lg:text-sand-50 shrink-0 min-w-[44px] min-h-[44px] flex items-center justify-center active:scale-95 transition" aria-label="فتح السلة ديالك">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-[26px] h-[26px] lg:w-5 lg:h-5">
           <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 0 0-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 0 0-16.536-1.84M7.5 14.25 5.106 5.272M6 20.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Zm12.75 0a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z"/>
         </svg>
         <span id="cartCount" class="absolute -top-1.5 -right-1.5 min-w-[20px] h-5 px-1 rounded-full bg-terracotta-500 text-[11px] font-bold flex items-center justify-center text-white hidden" aria-live="polite">0</span>
@@ -240,33 +255,34 @@
   </header>
 
   <!-- ===== SEARCH BAR (1) ===== -->
-  <div class="max-w-6xl mx-auto px-3 sm:px-4 pt-3 sm:hidden">
+  <div class="max-w-6xl mx-auto px-4 pt-3 sm:hidden">
     <div class="relative">
-      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="absolute left-3 top-1/2 -translate-y-1/2 text-charcoal-800/40 w-5 h-5">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="absolute left-4 top-1/2 -translate-y-1/2 text-charcoal-800/45 w-6 h-6">
         <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"/>
       </svg>
       <input id="searchInputMobile" type="search" placeholder="قلب على منتج…" aria-label="قلب على الخضرة" autocomplete="off"
-        class="w-full bg-white shadow-crate rounded-full pl-10 pr-4 py-2.5 text-sm outline-none ring-1 ring-charcoal-800/10 focus:ring-green-600 transition">
+        class="w-full h-[52px] bg-white rounded-2xl pl-12 pr-4 text-[15px] outline-none ring-1 ring-charcoal-800/[0.07] focus:ring-2 focus:ring-green-600 transition shadow-[0_6px_20px_-10px_rgba(31,61,43,0.25)] placeholder:text-charcoal-800/40">
     </div>
   </div>
 
   <!-- ===== CATEGORIES — شيبس دائرية (2) ===== -->
-  <nav class="max-w-6xl mx-auto px-3 sm:px-4 pt-3.5">
-    <div id="categoryIconsRow" class="flex gap-4 overflow-x-auto scroll-snap pb-1 -mx-1 px-1 sm:justify-center"></div>
+  <nav class="max-w-6xl mx-auto px-4 pt-4">
+    <div id="categoryIconsRow" class="flex justify-between gap-2 overflow-x-auto scroll-snap pb-1 -mx-1 px-1 sm:justify-center sm:gap-6"></div>
   </nav>
 
   <!-- ===== PACKS PROMOTIONNELS — كاروسيل، كيتحرك وحدو للّيمين (3) ===== -->
-  <section class="max-w-6xl mx-auto px-3 sm:px-4 pt-4">
+  <section class="max-w-6xl mx-auto px-4 pt-4">
     <div class="marquee-wrap">
       <div id="packsCarousel" class="marquee-track gap-3 pb-1"></div>
     </div>
+    <div id="packsDots" class="flex justify-center gap-1.5 pt-3"></div>
   </section>
 
   <!-- ===== OFFRES DU JOUR — كيتحرك وحدو لليسار (4) ===== -->
-  <section class="max-w-6xl mx-auto px-3 sm:px-4 pt-5">
+  <section class="max-w-6xl mx-auto px-4 pt-5">
     <div class="flex items-baseline justify-between mb-3">
-      <h2 class="font-display text-lg sm:text-xl font-semibold text-green-900 flex items-center gap-1.5">عروض اليوم 🔥</h2>
-      <button id="seeAllDealsBtn" class="text-xs text-green-700 font-semibold shrink-0">شوف الكل</button>
+      <h2 class="font-display text-[19px] sm:text-xl text-green-900 flex items-center gap-1.5">عروض اليوم 🔥</h2>
+      <button id="seeAllDealsBtn" class="text-[13px] text-green-700 font-semibold shrink-0">شوف الكل</button>
     </div>
     <div class="marquee-wrap">
       <div id="dailyDeals" class="marquee-track gap-3 pb-1"></div>
@@ -274,13 +290,13 @@
   </section>
 
   <!-- ===== CATALOGUE — جميع المنتجات (5) ===== -->
-  <main id="catalogue" class="max-w-6xl mx-auto px-3 sm:px-4 pt-5 pb-24 sm:pb-6">
+  <main id="catalogue" class="max-w-6xl mx-auto px-4 pt-6 pb-5 sm:pb-6">
     <div class="flex items-baseline justify-between mb-4">
-      <h2 class="font-display text-2xl font-semibold text-green-900" id="sectionTitle">جميع المنتجات</h2>
-      <span id="resultCount" class="text-xs text-charcoal-800/50"></span>
+      <h2 class="font-display text-[19px] sm:text-2xl text-green-900" id="sectionTitle">جميع المنتجات</h2>
+      <span id="resultCount" class="text-[13px] text-green-700 font-semibold"></span>
     </div>
     <div id="categoryRow" class="flex gap-2 overflow-x-auto scroll-snap pb-1 -mx-1 px-1 mb-4"></div>
-    <div id="productGrid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2.5 sm:gap-3.5"></div>
+    <div id="productGrid" class="grid grid-cols-3 lg:grid-cols-4 gap-2.5 sm:gap-3.5"></div>
     <div id="emptyState" class="hidden text-center py-16 fade-in">
       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.3" stroke="currentColor" class="w-14 h-14 mx-auto mb-3 text-charcoal-800/25">
         <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"/>
@@ -291,8 +307,8 @@
   </main>
 
   <!-- ===== التوصيل والضمانات (6) ===== -->
-  <section class="hidden sm:block max-w-6xl mx-auto px-3 sm:px-4 pb-6">
-    <div class="grid grid-cols-3 gap-2 sm:gap-4 bg-white rounded-2xl shadow-crate ring-1 ring-charcoal-800/[0.04] p-3.5 sm:p-5">
+  <section class="max-w-6xl mx-auto px-4 pb-6">
+    <div class="trust-bar grid grid-cols-3 gap-0 sm:gap-4 bg-white rounded-[20px] shadow-crate ring-1 ring-charcoal-800/[0.04] py-4 px-1 sm:p-5">
       <div class="flex flex-col items-center text-center gap-1.5">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor" class="w-6 h-6 sm:w-7 sm:h-7 text-green-700">
           <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 18.75a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 0 1-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 0 0-3.213-9.193 2.056 2.056 0 0 0-1.58-.86H14.25M16.5 18.75h-2.25m0-11.177v-.958c0-.568-.422-1.048-.987-1.106a48.554 48.554 0 0 0-10.026 0 1.106 1.106 0 0 0-.987 1.106v7.635m12-6.677v6.677m0 4.5v-4.5m0 0h-12"/>
@@ -317,7 +333,7 @@
   <!-- ===== FOOTER ===== -->
   <footer class="hidden sm:block bg-green-900 text-sand-50/80 relative">
     <div class="awning h-2.5 w-full opacity-90"></div>
-    <div class="max-w-6xl mx-auto px-3 sm:px-4 py-7 grid sm:grid-cols-3 gap-6 text-sm">
+    <div class="max-w-6xl mx-auto px-4 py-7 grid sm:grid-cols-3 gap-6 text-sm">
       <div>
         <div class="flex items-center gap-2 mb-2">
           <img src="LOGO.svg" alt="Swi9ti" width="48" height="48" loading="lazy" class="w-12 h-12 rounded-lg object-contain">
@@ -335,7 +351,7 @@
     </div>
 
     <!-- Founders section -->
-    <div class="border-t border-sand-50/10 max-w-6xl mx-auto px-3 sm:px-4 py-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+    <div class="border-t border-sand-50/10 max-w-6xl mx-auto px-4 py-4 flex flex-col sm:flex-row items-center justify-between gap-3">
       <p class="text-sand-50/40 text-xs text-center sm:text-left">© 2020 Swi9ti — مصنوع بـ🍅 فكازا</p>
       <div class="flex items-center gap-3 text-xs text-sand-50/50">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 text-saffron-400 shrink-0">
@@ -361,19 +377,19 @@
   </div>
 
   <!-- ===== NAVIGATION — بار سفلية (mobile) — بلا "بروفيل" (موقع ثابت، بلا حسابات) (7) ===== -->
-  <nav id="mobileTabBar" class="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-white/95 backdrop-blur border-t border-charcoal-800/10 flex items-center justify-around" style="padding-bottom: env(safe-area-inset-bottom);">
-    <button id="tabHomeBtn" class="flex flex-col items-center gap-1 px-6 py-2.5 text-green-700" aria-label="الرئيسية">
-      <img id="navHomeIcon" src="" alt="" class="w-5 h-5 object-contain">
-      <span class="text-[10px] font-semibold">الرئيسية</span>
+  <nav id="mobileTabBar" class="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-white/95 backdrop-blur border-t border-charcoal-800/[0.06] shadow-[0_-10px_30px_-12px_rgba(31,61,43,0.14)] rounded-t-[22px] flex items-stretch" style="padding-bottom: env(safe-area-inset-bottom);">
+    <button id="tabHomeBtn" class="flex-1 flex flex-col items-center gap-1 px-2 pt-3 pb-2.5 text-green-700" aria-label="الرئيسية">
+      <img id="navHomeIcon" src="" alt="" class="w-6 h-6 object-contain">
+      <span class="text-[11px] font-semibold">الرئيسية</span>
     </button>
-    <button id="tabCatBtn" class="flex flex-col items-center gap-1 px-6 py-2.5 text-charcoal-800/55" aria-label="الأصناف">
-      <img id="navCatIcon" src="" alt="" class="w-5 h-5 object-contain">
-      <span class="text-[10px] font-semibold">الأصناف</span>
+    <button id="tabCatBtn" class="flex-1 flex flex-col items-center gap-1 px-2 pt-3 pb-2.5 text-charcoal-800/55" aria-label="الأصناف">
+      <img id="navCatIcon" src="" alt="" class="w-6 h-6 object-contain">
+      <span class="text-[11px] font-semibold">الأصناف</span>
     </button>
-    <button id="tabCartBtn" class="relative flex flex-col items-center gap-1 px-6 py-2.5 text-charcoal-800/55" aria-label="السلة">
-      <img id="navCartIcon" src="" alt="" class="w-5 h-5 object-contain">
-      <span id="tabCartBadge" class="hidden absolute top-0.5 right-4 min-w-[16px] h-4 px-1 rounded-full bg-terracotta-500 text-[9px] font-bold text-white flex items-center justify-center">0</span>
-      <span class="text-[10px] font-semibold">السلة</span>
+    <button id="tabCartBtn" class="relative flex-1 flex flex-col items-center gap-1 px-2 pt-3 pb-2.5 text-charcoal-800/55" aria-label="السلة">
+      <img id="navCartIcon" src="" alt="" class="w-6 h-6 object-contain">
+      <span id="tabCartBadge" class="hidden absolute top-1.5 left-1/2 ml-1.5 min-w-[16px] h-4 px-1 rounded-full bg-terracotta-500 text-[9px] font-bold text-white flex items-center justify-center">0</span>
+      <span class="text-[11px] font-semibold">السلة</span>
     </button>
   </nav>
 
