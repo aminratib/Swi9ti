@@ -199,10 +199,10 @@
 
   /* ===== SWI9TI — Premium mobile (mêmes couleurs, rendu haut de gamme) ===== */
   :root { --ink:#2A2622; --card-sh:0 1px 2px rgba(31,61,43,.05), 0 8px 22px -10px rgba(31,61,43,.20); }
-  .pcard { background:#fff; border-radius:18px; padding:8px; border:1px solid rgba(31,61,43,.06); box-shadow:var(--card-sh); }
+  .pcard { background:#fff; border-radius:18px; padding:0; overflow:hidden; border:1px solid rgba(31,61,43,.06); box-shadow:var(--card-sh); }
   .cat-orb { box-shadow:0 1px 2px rgba(31,61,43,.06), 0 8px 18px -8px rgba(31,61,43,.28); border:1px solid rgba(31,61,43,.07); }
   .pack-card { background:linear-gradient(135deg,#2F6B3C 0%,#1F4A2B 100%); box-shadow:0 14px 28px -14px rgba(31,61,43,.55); }
-  .pack-photo { -webkit-mask-image:linear-gradient(to right,transparent 0%,#000 38%); mask-image:linear-gradient(to right,transparent 0%,#000 38%); }
+  .pack-shade { background:linear-gradient(to right,rgba(20,52,30,.55) 0%,rgba(20,52,30,.25) 45%,rgba(20,52,30,0) 70%); }
   .pack-dot { width:6px; height:6px; border-radius:999px; background:#D3D8D0; transition:background-color .25s; }
   .pack-dot.is-on { background:#326239; }
   .trust-bar > div + div { border-inline-start:1px solid rgba(31,61,43,.10); }
@@ -296,7 +296,7 @@
       <span id="resultCount" class="text-[13px] text-green-700 font-semibold"></span>
     </div>
     <div id="categoryRow" class="flex gap-2 overflow-x-auto scroll-snap pb-1 -mx-1 px-1 mb-4"></div>
-    <div id="productGrid" class="grid grid-cols-3 lg:grid-cols-4 gap-2.5 sm:gap-3.5"></div>
+    <div id="productGrid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-3.5"></div>
     <div id="emptyState" class="hidden text-center py-16 fade-in">
       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.3" stroke="currentColor" class="w-14 h-14 mx-auto mb-3 text-charcoal-800/25">
         <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"/>

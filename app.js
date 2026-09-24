@@ -484,7 +484,8 @@ function buildPackCard(pack) {
   card.className = 'pack-card relative shrink-0 w-[88vw] max-w-[350px] sm:w-[360px] h-[176px] rounded-[22px] overflow-hidden cursor-pointer active:scale-[0.98] transition';
   card.dataset.packCard = pack.id;
   card.innerHTML = `
-    <div class="pack-photo absolute inset-y-0 right-0 w-[58%] bg-cover bg-center" style="background-image:url('${bg}')"></div>
+    <div class="absolute inset-0 bg-cover" style="background-image:url('${bg}'); background-position:right center"></div>
+    <div class="pack-shade absolute inset-0"></div>
     <span class="absolute top-0 right-0 bg-terracotta-500 text-white text-[12px] font-bold px-3 py-1.5 rounded-bl-2xl">-${pack.discount}%</span>
     <div class="relative h-full w-[64%] p-4 flex flex-col justify-between">
       <div>
@@ -551,12 +552,12 @@ function buildDealCard(p) {
   const qty = state.cart[p.id] || 0;
   card.className = 'pcard shrink-0 w-[140px] sm:w-[150px] flex flex-col';
   card.innerHTML = `
-    <div class="relative aspect-square rounded-xl bg-sand-100 overflow-hidden">
+    <div class="relative aspect-square bg-sand-100 overflow-hidden">
       <div data-skel class="absolute inset-0 flex items-center justify-center text-4xl">${p.emoji}</div>
       <div data-img-slot="deal-${p.id}" class="absolute inset-0"></div>
       <span class="absolute top-1.5 right-1.5 bg-terracotta-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full">حار 🔥</span>
     </div>
-    <div class="px-1 pt-2 pb-0.5 flex flex-col gap-1 flex-1">
+    <div class="px-2.5 pt-2.5 pb-2.5 flex flex-col gap-1 flex-1">
       <h3 class="font-semibold text-[13px] leading-tight text-charcoal-800 truncate">${p.name}</h3>
       <p class="text-green-800 font-extrabold text-[13px]">${p.price} MAD<span class="text-charcoal-800/45 font-medium text-[11px]">/${p.unit}</span></p>
       <div class="mt-auto pt-1" data-qty-zone="${p.id}">
@@ -791,15 +792,15 @@ function renderProducts() {
     card.className = 'rise-in pcard group flex flex-col';
     card.style.animationDelay = `${Math.min(i * 35, 300)}ms`;
     card.innerHTML = `
-      <div data-lightbox-trigger="${p.id}" class="relative aspect-square rounded-xl bg-sand-100 overflow-hidden cursor-zoom-in" role="button" tabindex="0" aria-label="كبّر صورة ${p.name}">
+      <div data-lightbox-trigger="${p.id}" class="relative aspect-square bg-sand-100 overflow-hidden cursor-zoom-in" role="button" tabindex="0" aria-label="كبّر صورة ${p.name}">
         <div data-skel class="absolute inset-0 flex items-center justify-center text-4xl">${p.emoji}</div>
         <div data-img-slot="${p.id}" class="absolute inset-0"></div>
         ${p.promo ? `<span class="absolute top-1.5 left-1.5 bg-terracotta-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full">بروم</span>` : ''}
       </div>
-      <div class="px-1 pt-2 pb-0.5 flex flex-col gap-1.5 flex-1">
-        <h3 class="font-semibold text-[13px] leading-tight text-charcoal-800 line-clamp-2 min-h-[2.5em]">${p.name}</h3>
+      <div class="px-3 pt-2.5 pb-3 flex flex-col gap-2 flex-1">
+        <h3 class="font-semibold text-[14px] leading-tight text-charcoal-800 line-clamp-2 min-h-[2.5em]">${p.name}</h3>
         <div class="mt-auto flex items-center justify-between gap-1.5 flex-wrap">
-          <p class="text-green-800 font-bold text-[12px] leading-tight">${p.price} MAD<span class="text-charcoal-800/45 font-medium text-[10px]">/${p.unit}</span></p>
+          <p class="text-green-800 font-bold text-[13px] leading-tight">${p.price} MAD<span class="text-charcoal-800/45 font-medium text-[11px]">/${p.unit}</span></p>
           <div class="ml-auto" data-qty-zone="${p.id}" data-variant="compact">
             ${qty > 0 ? qtyStepperHTML(p.id, qty, p.unit, true) : addButtonHTML(p.id, true)}
           </div>
