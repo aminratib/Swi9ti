@@ -408,7 +408,7 @@ function renderCategories() {
   CATEGORIES.forEach(cat => {
     const active = state.category === cat.id;
     const chip = document.createElement('button');
-    chip.className = `shrink-0 px-[18px] py-2 rounded-full text-[13px] font-semibold whitespace-nowrap transition border ${
+    chip.className = `shrink-0 px-5 py-2.5 rounded-full text-[15px] font-semibold whitespace-nowrap transition border ${
       active ? 'bg-white text-green-700 border-green-700 ring-1 ring-green-700' : 'bg-white text-charcoal-800/70 border-charcoal-800/10 active:bg-charcoal-800/5'
     }`;
     chip.innerHTML = `<span>${cat.label}</span>`;
@@ -453,7 +453,7 @@ function renderCategoryIcons() {
         <span>${meta?.emoji || cat.emoji}</span>
         <img src="${src}" alt="${cat.label}" loading="lazy" decoding="async" class="absolute inset-0 w-full h-full object-cover" onerror="this.remove()">
       </span>
-      <span class="text-[12px] font-medium text-charcoal-800/80 text-center leading-tight">${cat.label}</span>
+      <span class="text-[13px] font-semibold text-charcoal-800/85 text-center leading-tight">${cat.label}</span>
     `;
     btn.onclick = () => {
       state.category = cat.id;
@@ -471,7 +471,7 @@ function renderCategoryIcons() {
     <span class="cat-orb w-[64px] h-[64px] rounded-full bg-white flex items-center justify-center text-charcoal-800/70">
       ${CATEGORY_ICONS.tout}
     </span>
-    <span class="text-[12px] font-medium text-charcoal-800/80">زيادة</span>
+    <span class="text-[13px] font-semibold text-charcoal-800/85">زيادة</span>
   `;
   more.onclick = openCatDrawer;
   row.appendChild(more);
@@ -481,20 +481,19 @@ function renderCategoryIcons() {
 function buildPackCard(pack) {
   const bg = pack.photo && pack.photo.trim() ? pack.photo.trim() : catIconUrl(pack.id, pack.img, 600);
   const card = document.createElement('div');
-  card.className = 'pack-card relative shrink-0 w-[88vw] max-w-[350px] sm:w-[360px] h-[176px] rounded-[22px] overflow-hidden cursor-pointer active:scale-[0.98] transition';
+  card.className = 'pack-card relative shrink-0 w-[88vw] max-w-[350px] sm:w-[360px] h-[190px] rounded-[22px] overflow-hidden cursor-pointer active:scale-[0.98] transition';
   card.dataset.packCard = pack.id;
   card.innerHTML = `
-    <div class="absolute inset-0 bg-cover" style="background-image:url('${bg}'); background-position:right center"></div>
-    <div class="pack-shade absolute inset-0"></div>
+    <div class="pack-photo absolute inset-y-0 right-0 w-[56%]" style="background-image:url('${bg}')"></div>
     <span class="absolute top-0 right-0 bg-terracotta-500 text-white text-[12px] font-bold px-3 py-1.5 rounded-bl-2xl">-${pack.discount}%</span>
     <div class="relative h-full w-[64%] p-4 flex flex-col justify-between">
       <div>
-        <p class="text-white text-[21px] font-extrabold leading-tight">${pack.name}</p>
-        <p class="text-white/75 text-[12px] mt-1 leading-snug line-clamp-2">${pack.desc}</p>
+        <p class="text-white text-[22px] font-extrabold leading-tight">${pack.name}</p>
+        <p class="text-white/80 text-[13px] mt-1 leading-snug line-clamp-2">${pack.desc}</p>
       </div>
       <div>
-        <p class="text-white flex items-baseline gap-1.5"><span class="text-[24px] font-extrabold">${pack.price} درهم</span> <span class="text-white/55 text-xs line-through">${pack.oldPrice}</span></p>
-        <button data-add-pack="${pack.id}" class="mt-2 bg-white text-green-800 text-[13px] font-bold px-6 py-2 rounded-full active:scale-95 transition">زيد</button>
+        <p class="text-white flex items-baseline gap-1.5"><span class="text-[26px] font-extrabold">${pack.price} درهم</span> <span class="text-white/60 text-sm line-through">${pack.oldPrice}</span></p>
+        <button data-add-pack="${pack.id}" class="mt-2 bg-white text-green-800 text-[15px] font-bold px-7 py-2.5 rounded-full active:scale-95 transition">زيد</button>
       </div>
     </div>
   `;
@@ -550,16 +549,16 @@ function renderPacks() {
 function buildDealCard(p) {
   const card = document.createElement('div');
   const qty = state.cart[p.id] || 0;
-  card.className = 'pcard shrink-0 w-[140px] sm:w-[150px] flex flex-col';
+  card.className = 'pcard shrink-0 w-[158px] sm:w-[160px] flex flex-col';
   card.innerHTML = `
     <div class="relative aspect-square bg-sand-100 overflow-hidden">
       <div data-skel class="absolute inset-0 flex items-center justify-center text-4xl">${p.emoji}</div>
       <div data-img-slot="deal-${p.id}" class="absolute inset-0"></div>
-      <span class="absolute top-1.5 right-1.5 bg-terracotta-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full">حار 🔥</span>
+      <span class="absolute top-1.5 right-1.5 bg-terracotta-500 text-white text-[11px] font-bold px-2 py-0.5 rounded-full">حار 🔥</span>
     </div>
     <div class="px-2.5 pt-2.5 pb-2.5 flex flex-col gap-1 flex-1">
-      <h3 class="font-semibold text-[13px] leading-tight text-charcoal-800 truncate">${p.name}</h3>
-      <p class="text-green-800 font-extrabold text-[13px]">${p.price} MAD<span class="text-charcoal-800/45 font-medium text-[11px]">/${p.unit}</span></p>
+      <h3 class="font-bold text-[15px] leading-tight text-charcoal-800 truncate">${p.name}</h3>
+      <p class="text-green-800 font-extrabold text-[15px]">${p.price} MAD<span class="text-charcoal-800/50 font-medium text-[12px]">/${p.unit}</span></p>
       <div class="mt-auto pt-1" data-qty-zone="${p.id}">
         ${qty > 0 ? qtyStepperHTML(p.id, qty, p.unit) : addButtonHTML(p.id)}
       </div>
@@ -734,9 +733,7 @@ function loadCardImage(slot, p) {
   img.loading = 'lazy';
   img.className = 'w-full h-full object-cover transition-transform duration-300 group-hover:scale-105';
   img.style.opacity = '0';
-  img.style.filter = 'blur(18px)';
-  img.style.transform = 'scale(1.1)';
-  img.style.transition = 'opacity .35s ease, filter .5s ease, transform .5s ease';
+  img.style.transition = 'opacity .25s ease';
 
   // 1) نسخة صغيرة مبلورة — توصل بزربة (بضع كيلوبايت) وتغطي الفراغ فوريا
   const ph = new Image();
@@ -754,8 +751,6 @@ function loadCardImage(slot, p) {
     img.src = fullSrc;
     if (!img.isConnected) slot.appendChild(img);
     img.style.opacity = '1';
-    img.style.filter = 'blur(0)';
-    img.style.transform = 'scale(1)';
     if (skel) skel.remove();
   };
   full.onerror = () => {
@@ -789,18 +784,17 @@ function renderProducts() {
   list.forEach((p, i) => {
     const qty = state.cart[p.id] || 0;
     const card = document.createElement('div');
-    card.className = 'rise-in pcard group flex flex-col';
-    card.style.animationDelay = `${Math.min(i * 35, 300)}ms`;
+    card.className = 'pcard group flex flex-col';
     card.innerHTML = `
       <div data-lightbox-trigger="${p.id}" class="relative aspect-square bg-sand-100 overflow-hidden cursor-zoom-in" role="button" tabindex="0" aria-label="كبّر صورة ${p.name}">
         <div data-skel class="absolute inset-0 flex items-center justify-center text-4xl">${p.emoji}</div>
         <div data-img-slot="${p.id}" class="absolute inset-0"></div>
-        ${p.promo ? `<span class="absolute top-1.5 left-1.5 bg-terracotta-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full">بروم</span>` : ''}
+        ${p.promo ? `<span class="absolute top-1.5 left-1.5 bg-terracotta-500 text-white text-[11px] font-bold px-2 py-0.5 rounded-full">بروم</span>` : ''}
       </div>
       <div class="px-3 pt-2.5 pb-3 flex flex-col gap-2 flex-1">
-        <h3 class="font-semibold text-[14px] leading-tight text-charcoal-800 line-clamp-2 min-h-[2.5em]">${p.name}</h3>
+        <h3 class="font-semibold text-[15px] font-bold leading-snug text-charcoal-800 line-clamp-2 min-h-[2.6em]">${p.name}</h3>
         <div class="mt-auto flex items-center justify-between gap-1.5 flex-wrap">
-          <p class="text-green-800 font-bold text-[13px] leading-tight">${p.price} MAD<span class="text-charcoal-800/45 font-medium text-[11px]">/${p.unit}</span></p>
+          <p class="text-green-800 font-extrabold text-[15px] leading-tight">${p.price} MAD<span class="text-charcoal-800/50 font-medium text-[12px]">/${p.unit}</span></p>
           <div class="ml-auto" data-qty-zone="${p.id}" data-variant="compact">
             ${qty > 0 ? qtyStepperHTML(p.id, qty, p.unit, true) : addButtonHTML(p.id, true)}
           </div>
@@ -851,21 +845,21 @@ function closeLightbox() {
 }
 
 /* Heroicon: plus */
-const PLUS_ICON = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.2" stroke="currentColor" class="w-3.5 h-3.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>`;
+const PLUS_ICON = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.2" stroke="currentColor" class="w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>`;
 /* Heroicon: minus */
-const MINUS_ICON = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.2" stroke="currentColor" class="w-3.5 h-3.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 12h-15"/></svg>`;
+const MINUS_ICON = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.2" stroke="currentColor" class="w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 12h-15"/></svg>`;
 
 function addButtonHTML(id, compact = false) {
-  if (compact) return `<button data-add="${id}" aria-label="زيد للسلة" class="w-8 h-8 rounded-[10px] bg-green-700 hover:bg-green-600 text-white flex items-center justify-center transition active:scale-90">${PLUS_ICON}</button>`;
-  return `<button data-add="${id}" aria-label="زيد للسلة" class="w-full bg-green-700 hover:bg-green-600 text-white text-[13px] font-bold py-2.5 rounded-xl transition active:scale-95">زيد للسلة</button>`;
+  if (compact) return `<button data-add="${id}" aria-label="زيد للسلة" class="w-10 h-10 rounded-xl bg-green-700 hover:bg-green-600 text-white flex items-center justify-center transition active:scale-90">${PLUS_ICON}</button>`;
+  return `<button data-add="${id}" aria-label="زيد للسلة" class="w-full bg-green-700 hover:bg-green-600 text-white text-[15px] font-bold py-3 rounded-xl transition active:scale-95">زيد للسلة</button>`;
 }
 function qtyStepperHTML(id, qty, unit, compact = false) {
-  const b = compact ? 'w-7 h-7 rounded-lg' : 'w-8 h-8 rounded-xl';
+  const b = compact ? 'w-9 h-9 rounded-lg' : 'w-10 h-10 rounded-xl';
   return `<div class="flex items-center ${compact ? 'gap-1' : 'justify-between'} bg-green-50 ${compact ? 'rounded-xl' : 'rounded-2xl'} p-1">
     <button data-dec="${id}" aria-label="نقص" class="${b} bg-white text-green-700 flex items-center justify-center shadow-sm active:scale-90">${MINUS_ICON}</button>
     <span class="flex flex-col items-center leading-none px-1 min-w-[22px]" aria-live="polite">
-      <span class="text-sm font-bold text-green-900">${qty}</span>
-      ${unit && !compact ? `<span class="text-[9px] text-green-700/70 font-medium">${unit}</span>` : ''}
+      <span class="text-base font-bold text-green-900">${qty}</span>
+      ${unit && !compact ? `<span class="text-[10px] text-green-700/70 font-medium">${unit}</span>` : ''}
     </span>
     <button data-inc="${id}" aria-label="زيد" class="${b} bg-green-700 text-white flex items-center justify-center shadow-sm active:scale-90">${PLUS_ICON}</button>
   </div>`;
@@ -959,20 +953,20 @@ function renderCartDrawer() {
   } else {
     wrap.innerHTML = entries.map(item => `
       <div class="flex items-center gap-3">
-        <div class="w-14 h-14 rounded-xl bg-sand-100 shrink-0 overflow-hidden flex items-center justify-center text-2xl" id="cart-img-${item.id}">
+        <div class="w-16 h-16 rounded-xl bg-sand-100 shrink-0 overflow-hidden flex items-center justify-center text-2xl" id="cart-img-${item.id}">
           ${item.emoji}
         </div>
         <div class="flex-1 min-w-0">
-          <p class="text-sm font-semibold text-charcoal-800 truncate">${item.name}</p>
-          <p class="text-xs text-charcoal-800/50">${item.price} درهم / ${item.unit}</p>
+          <p class="text-[16px] font-bold text-charcoal-800 truncate">${item.name}</p>
+          <p class="text-[13px] text-charcoal-800/60">${item.price} درهم / ${item.unit}</p>
         </div>
         <div class="flex items-center gap-2 bg-green-50 rounded-full p-1 shrink-0">
-          <button data-cart-dec="${item.id}" class="w-7 h-7 rounded-full bg-white text-green-700 flex items-center justify-center shadow-sm active:scale-90">${MINUS_ICON}</button>
+          <button data-cart-dec="${item.id}" class="w-9 h-9 rounded-full bg-white text-green-700 flex items-center justify-center shadow-sm active:scale-90">${MINUS_ICON}</button>
           <span class="flex flex-col items-center leading-none w-8">
-            <span class="text-sm font-semibold text-green-900">${item.qty}</span>
-            <span class="text-[9px] text-green-700/70 font-medium">${item.unit}</span>
+            <span class="text-base font-bold text-green-900">${item.qty}</span>
+            <span class="text-[10px] text-green-700/70 font-medium">${item.unit}</span>
           </span>
-          <button data-cart-inc="${item.id}" class="w-7 h-7 rounded-full bg-green-700 text-white flex items-center justify-center shadow-sm active:scale-90">${PLUS_ICON}</button>
+          <button data-cart-inc="${item.id}" class="w-9 h-9 rounded-full bg-green-700 text-white flex items-center justify-center shadow-sm active:scale-90">${PLUS_ICON}</button>
         </div>
       </div>
     `).join('');
