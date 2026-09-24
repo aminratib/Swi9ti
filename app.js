@@ -931,8 +931,18 @@ function cartEntries() {
   return entries;
 }
 const DELIVERY = 9;
+// Livraison gratuite dès qu'il y a au moins un pack dans le panier
+// (le prix du pack inclut déjà la livraison). Panier vide → 0.
+function deliveryFee() {
+  const entries = cartEntries();
+  if (entries.length === 0) return 0;
+  return entries.some(item => PACKS.some(p => p.id === item.id)) ? 0 : DELIVERY;
+}
+function cartSubtotal() {
+  return cartEntries().reduce((sum, item) => sum + item.price * item.qty, 0);
+}
 function cartTotal() {
-  return cartEntries().reduce((sum, item) => sum + item.price * item.qty, 0) + DELIVERY;
+  return cartSubtotal() + deliveryFee();
 }
 function cartCount() {
   return Object.values(state.cart).reduce((a, b) => a + b, 0);
@@ -1016,7 +1026,12 @@ function renderCartDrawer() {
   document.querySelectorAll('[data-cart-dec]').forEach(b => b.onclick = () => updateQty(b.dataset.cartDec, -1));
 
   const total = cartTotal();
-  document.getElementById('cartSubtotal').textContent = `${total} درهم`;
+  document.getElementById('cartSubtotal').textContent = `${cartSubtotal()} درهم`;
+  const feeEl = document.getElementById('cartDelivery');
+  if (feeEl) {
+    const fee = deliveryFee();
+    feeEl.textContent = entries.length === 0 ? '—' : (fee === 0 ? 'مجانا 🎉' : `${fee} درهم`);
+  }
   document.getElementById('cartTotal').textContent = `${total} درهم`;
   document.getElementById('checkoutBtn').disabled = entries.length === 0;
   document.getElementById('checkoutBtn').classList.toggle('opacity-40', entries.length === 0);
@@ -1088,7 +1103,8 @@ function buildWhatsAppMessage(clientInfo) {
   });
   msg += `━━━━━━━━━━━━━━━━\n`;
   msg += `💰 *المجموع: ${total} درهم*\n`;
-  msg += `🚚 التوصيل: *9 درهم* 🎉\n`;
+  const fee = deliveryFee();
+  msg += `🚚 التوصيل: *${fee === 0 ? 'مجاني' : fee + ' درهم'}* 🎉\n`;
   msg += `━━━━━━━━━━━━━━━━\n`;
   msg += `👤 *الاسم:* ${clientInfo.name}\n`;
   msg += `📞 *الهاتف:* ${clientInfo.phone}\n`;
@@ -1157,12 +1173,17 @@ function goToStep(n) {
   });
 }
 
+function getManualAddress() {
+  const el = document.getElementById('clientAddress');
+  return el ? el.value.trim() : '';
+}
+
 function currentStepValid() {
   const n = state.formStep;
   if (n === 1) return document.getElementById('clientName').value.trim().length >= 2;
   if (n === 2) return /^[0-9]{9}$/.test(document.getElementById('clientPhone').value.trim());
   // العنوان دابا كيتحدد غير بالـ GPS — بلا كتابة يدوية
-  if (n === 3) return !!state.geo;
+  if (n === 3) return !!state.geo || getManualAddress().length >= 8;
   if (n === 4) return !!state.selectedDay;
   if (n === 5) return !!state.selectedSlot;
   return true;
@@ -1196,9 +1217,11 @@ function renderReview() {
   const name = document.getElementById('clientName').value.trim();
   const phone = document.getElementById('clientPhone').value.trim();
   const mapsLink = state.geo ? `https://www.google.com/maps?q=${state.geo.lat},${state.geo.lng}` : '';
-  const location = mapsLink
-    ? `<a href="${mapsLink}" target="_blank" rel="noopener" class="text-green-700 underline">شوف الموقع على الخريطة</a>`
-    : '—';
+  const addr = getManualAddress().replace(/</g, '&lt;');
+  const location = [
+    addr,
+    mapsLink ? `<a href="${mapsLink}" target="_blank" rel="noopener" class="text-green-700 underline">شوف الموقع على الخريطة</a>` : '',
+  ].filter(Boolean).join('<br>') || '—';
   const rows = [
     [REVIEW_ICONS.user, 'الاسم', name],
     [REVIEW_ICONS.phone, 'الهاتف', `+212 ${phone}`],
@@ -1222,8 +1245,10 @@ function captureLocation() {
   errorEl.classList.add('hidden');
 
   const showGeoError = (msg) => {
-    errorEl.querySelector('span').textContent = msg + ' — ولا كتب العنوان يدويا فالخانة لي فوق';
+    errorEl.querySelector('span').textContent = msg + ' — كتب العنوان ديالك يدويا فالخانة لي تحت';
     errorEl.classList.remove('hidden');
+    const addrEl = document.getElementById('clientAddress');
+    if (addrEl) addrEl.focus();
   };
 
   if (!navigator.geolocation) {
@@ -1255,7 +1280,7 @@ function captureLocation() {
     btn.disabled = false;
     label.textContent = 'حدد موقعي بدقة على الخريطة';
     showGeoError('ما قدرناش نحددو الموقع — المتصفح ما جاوبش');
-  }, 16000);
+  }, 12000);
 
   navigator.geolocation.getCurrentPosition(
     (pos) => {
@@ -1289,7 +1314,8 @@ function captureLocation() {
       }
       showGeoError(msg);
     },
-    { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+    // Haute précision seulement sur téléphone (sur PC elle fait souvent attendre pour rien)
+    { enableHighAccuracy: !!(window.matchMedia && matchMedia('(pointer: coarse)').matches), timeout: 10000, maximumAge: 60000 }
   );
 }
 
@@ -1301,11 +1327,13 @@ function showWAModal() {
   const total = cartTotal();
   summaryEl.innerHTML = entries.map(item =>
     `<div class="flex justify-between py-0.5"><span>${item.emoji} ${item.name} × ${item.qty}</span><span class="font-semibold">${item.price * item.qty} درهم</span></div>`
-  ).join('') + `<div class="border-t border-charcoal-800/10 mt-2 pt-2 flex justify-between font-bold text-green-800"><span>المجموع</span><span>${total} درهم</span></div>`;
+  ).join('') + `<div class="flex justify-between py-0.5 text-green-700"><span>🚚 التوصيل</span><span class="font-semibold">${deliveryFee() === 0 ? 'مجاني' : deliveryFee() + ' درهم'}</span></div><div class="border-t border-charcoal-800/10 mt-2 pt-2 flex justify-between font-bold text-green-800"><span>المجموع</span><span>${total} درهم</span></div>`;
 
   // Reset wizard
   document.getElementById('clientName').value = '';
   document.getElementById('clientPhone').value = '';
+  const addrReset = document.getElementById('clientAddress');
+  if (addrReset) addrReset.value = '';
   document.getElementById('geoStatus').classList.add('hidden');
   document.getElementById('geoError').classList.add('hidden');
   document.getElementById('geoBtnLabel').textContent = 'حدد موقعي بدقة على الخريطة 📍';
@@ -1334,14 +1362,17 @@ function sendToWhatsApp() {
   const day   = state.selectedDay;
   const slot  = state.selectedSlot;
 
-  if (!name || !phone || !state.geo || !day || !slot) {
-    goToStep(!name ? 1 : !phone ? 2 : !state.geo ? 3 : !day ? 4 : 5);
+  const manualAddress = getManualAddress();
+  const hasLocation = !!state.geo || manualAddress.length >= 8;
+  if (!name || !phone || !hasLocation || !day || !slot) {
+    goToStep(!name ? 1 : !phone ? 2 : !hasLocation ? 3 : !day ? 4 : 5);
     document.getElementById('formError').classList.remove('hidden');
     return;
   }
 
-  const mapsLink = `https://www.google.com/maps?q=${state.geo.lat},${state.geo.lng}`;
-  const location = 'الموقع محدد بدقة على الخريطة (شوف الرابط تحت)';
+  const mapsLink = state.geo ? `https://www.google.com/maps?q=${state.geo.lat},${state.geo.lng}` : '';
+  const location = manualAddress
+    || 'الموقع محدد بدقة على الخريطة (شوف الرابط تحت)';
   const clientInfo = { name, phone: `+212 ${phone}`, location, day, slot, mapsLink };
 
   const msg = buildWhatsAppMessage(clientInfo);
@@ -1461,6 +1492,11 @@ function bindEvents() {
   });
   phoneInput.addEventListener('keydown', e => {
     if (e.key === 'Enter') { e.preventDefault(); nextStep(); }
+  });
+
+  const addressInput = document.getElementById('clientAddress');
+  if (addressInput) addressInput.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); nextStep(); }
   });
 
   let debounce;
@@ -1608,5 +1644,5 @@ if ('serviceWorker' in navigator) {
 
   // كنعرضو البار بعد تأخير خفيف باش الصفحة توليها الفرصة تتحمل مزيان أولا，
   // وباش الدخول ديالو يبان smooth وماشي مفاجئ.
-  window.setTimeout(showBar, 1800);
+  window.setTimeout(showBar, 12000); // plus tard, et masquée automatiquement quand un panneau/modal est ouvert (voir CSS)
 })();
