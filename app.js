@@ -1004,7 +1004,7 @@ const WA_NUMBER = '212694536496';
 
 // ⬅️ لصق هنا الرابط ديال Google Apps Script (Web App) لي عطاكم فـ الخطوة 2
 // كيبان بحال: https://script.google.com/macros/s/XXXXXXXXXXXX/exec
-const ORDERS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwhQ33c3ZEhrfUtb-zLVHj4_TLCzAfAqBOHPRFPf9sTH0o-mNo4gt8aj_ZxQ8kzEeiypg/exec';
+const ORDERS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx-Y-5T1lHGgEJUfgFbEnEf9hL8_Etf9uTvXeXTGIxrXmdoleCXGWNrLtKWkrmEmqIGNw/exec';
 
 function sendOrderToSheet(clientInfo) {
   if (!ORDERS_SCRIPT_URL || ORDERS_SCRIPT_URL.includes('COLLEZ_ICI')) {
