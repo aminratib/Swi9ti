@@ -1027,7 +1027,7 @@ function sendOrderToSheet(clientInfo) {
     // ما يبقاش +212 كيتقرا كخطأ #NAME? ولا كيبان بصيغة غريبة فالخانة. هاد
     // الأبوستروف كتبان غير فـ Sheet، ما عندهاش علاقة برسالة واتساب.
     phone: `'${clientInfo.phone}`,
-    location: clientInfo.sheetLocation || clientInfo.location,
+    location: clientInfo.location,
     mapsLink: clientInfo.mapsLink || '',
     availability,
     cartDetails,
@@ -1130,10 +1130,7 @@ function goToStep(n) {
   requestAnimationFrame(() => {
     if (n === 1) document.getElementById('clientName').focus();
     if (n === 2) document.getElementById('clientPhone').focus();
-    // ⚠️ ماشي focus أوتوماتيك على خانة العنوان فالخطوة 3: كيحل الكيبورد
-    // وحدو، وعلى iPhone/Safari الكليك الأول على زر GPS كيبقى غير كيسد
-    // الكيبورد بلا ما يفعّل الزر — خاص الزبون يدوز كليكين. بلا focus هنا،
-    // كليك GPS كيخدم من أول مرة.
+    if (n === 3) document.getElementById('geoBtn').focus();
   });
 }
 
@@ -1141,8 +1138,8 @@ function currentStepValid() {
   const n = state.formStep;
   if (n === 1) return document.getElementById('clientName').value.trim().length >= 2;
   if (n === 2) return /^[0-9]{9}$/.test(document.getElementById('clientPhone').value.trim());
-  // إلا الزبون حدد موقعه بالخريطة (GPS)، ما بقاش خاصو يعمر خانة العنوان يدويا
-  if (n === 3) return !!state.geo || document.getElementById('clientLocation').value.trim().length >= 3;
+  // العنوان دابا كيتحدد غير بالـ GPS — بلا كتابة يدوية
+  if (n === 3) return !!state.geo;
   if (n === 4) return !!state.selectedDay;
   if (n === 5) return !!state.selectedSlot;
   return true;
@@ -1175,8 +1172,10 @@ const REVIEW_ICONS = {
 function renderReview() {
   const name = document.getElementById('clientName').value.trim();
   const phone = document.getElementById('clientPhone').value.trim();
-  const typedLocation = document.getElementById('clientLocation').value.trim();
-  const location = typedLocation || (state.geo ? 'الموقع محدد بدقة على الخريطة' : '');
+  const mapsLink = state.geo ? `https://www.google.com/maps?q=${state.geo.lat},${state.geo.lng}` : '';
+  const location = mapsLink
+    ? `<a href="${mapsLink}" target="_blank" rel="noopener" class="text-green-700 underline">شوف الموقع على الخريطة</a>`
+    : '—';
   const rows = [
     [REVIEW_ICONS.user, 'الاسم', name],
     [REVIEW_ICONS.phone, 'الهاتف', `+212 ${phone}`],
@@ -1184,7 +1183,6 @@ function renderReview() {
     [REVIEW_ICONS.calendar, 'اليوم', state.selectedDay],
     [REVIEW_ICONS.clock, 'الفترة', state.selectedSlot],
   ];
-  if (state.geo) rows.push([REVIEW_ICONS.check, 'الموقع على الخريطة', 'محدد بدقة']);
   document.getElementById('reviewSummary').innerHTML = rows.map(([icon, label, val]) => `
     <div class="flex items-start justify-between gap-3">
       <span class="text-charcoal-800/50 shrink-0 flex items-center gap-1.5">${icon} ${label}</span>
@@ -1200,23 +1198,47 @@ function captureLocation() {
   const errorEl = document.getElementById('geoError');
   errorEl.classList.add('hidden');
 
-  if (!navigator.geolocation) {
-    errorEl.querySelector('span').textContent = 'الهاتف ديالك ما كيدعمش تحديد الموقع';
+  const showGeoError = (msg) => {
+    errorEl.querySelector('span').textContent = msg + ' — ولا كتب العنوان يدويا فالخانة لي فوق';
     errorEl.classList.remove('hidden');
+  };
+
+  if (!navigator.geolocation) {
+    showGeoError('الهاتف ديالك ما كيدعمش تحديد الموقع');
     return;
   }
 
-  // Avertissement utile en dev : geolocation exige HTTPS (ou localhost)
-  if (location.protocol !== 'https:' && location.hostname !== 'localhost') {
-    console.warn('Geolocation nécessite HTTPS — le popup ne s\'affichera pas sur http://');
+  // ⚠️ fix: على بعض المتصفحات (خصوصا فـ mode desktop ولا إلا الموقع
+  // كيتفتح غير بالـ HTTP بلا HTTPS، ولا جوا iframe لي ما عندهاش الصلاحية)
+  // الـ API ديال geolocation ما كيرجعش والو — لا success ولا error — والزر
+  // كيبقى "كنحددو الموقع..." معلق للأبد. هاد السطر كيبان الخطأ مباشرة.
+  if (window.isSecureContext === false) {
+    showGeoError('خاصك تفتح الموقع بـ HTTPS باش تقدر تحدد الموقع');
+    return;
   }
 
   label.textContent = 'كنحددو الموقع...';
   btn.disabled = true;
 
-  // On demande directement — c'est getCurrentPosition qui affiche le popup natif
+  let settled = false; // كنتأكدو ما نديرو الحالة جوج مرات (API + الفيلي سايف)
+
+  // ⚠️ fix: option "timeout" ديال getCurrentPosition خاصها فالنظرية ديما
+  // تصاوب error callback من بعد 15 ثانية، ولكن فبعض المتصفحات/الحالات (mode
+  // desktop، iframe، امتداد كيبلوكي الطلب) الكولباك ما كيتصاوبش والو —
+  // فهاد الفيلي سايف (watchdog) كيضمن أن الزر ما يبقاش معلق للأبد.
+  const watchdog = setTimeout(() => {
+    if (settled) return;
+    settled = true;
+    btn.disabled = false;
+    label.textContent = 'حدد موقعي بدقة على الخريطة';
+    showGeoError('ما قدرناش نحددو الموقع — المتصفح ما جاوبش');
+  }, 16000);
+
   navigator.geolocation.getCurrentPosition(
     (pos) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(watchdog);
       state.geo = { lat: pos.coords.latitude, lng: pos.coords.longitude };
       label.textContent = 'تم تحديد الموقع';
       statusEl.classList.remove('hidden');
@@ -1225,21 +1247,24 @@ function captureLocation() {
       document.getElementById('formError').classList.add('hidden');
       setTimeout(() => { if (state.formStep === 3) nextStep(); }, 650);
     },
-    (error) => {
-      console.warn('Swi9ti geolocation error:', error.code, error.message);
+    (error) => {                                   // ⬅️ on récupère l'objet erreur
+      if (settled) return;
+      settled = true;
+      clearTimeout(watchdog);
       btn.disabled = false;
       label.textContent = 'حدد موقعي بدقة على الخريطة';
 
+      console.warn('Swi9ti geolocation error:', error.code, error.message); // pour diagnostiquer
+
       let msg = 'ما قدرناش نحددو الموقع — عاود المحاولة';
       if (error.code === error.PERMISSION_DENIED) {
-        msg = 'الموقع محظور فهاد المتصفح — دوز لـ (⚙️ إعدادات الموقع) جنب الرابط وفعّل "الموقع/Location"، من بعد عاود المحاولة. إلا كنتي فتطبيق بحال فيسبوك/إنستغرام، حل الرابط فـ Chrome أو Safari مباشرة.';
+        msg = 'خاصك تسمح بالوصول للموقع من إعدادات المتصفح (🔒 جنب الرابط)';
       } else if (error.code === error.POSITION_UNAVAILABLE) {
-        msg = 'ما قدرناش نلقاو موقعك — تأكد أن الـ GPS مفعّل فالهاتف';
+        msg = 'ما قدرناش نلقاو موقعك — تأكد أن الـ GPS مفعّل';
       } else if (error.code === error.TIMEOUT) {
-        msg = 'التحديد داز عليه الوقت — عاود المحاولة فبلاصة فيها استقبال أحسن';
+        msg = 'التحديد داز عليه الوقت — عاود المحاولة';
       }
-      errorEl.querySelector('span').textContent = msg;
-      errorEl.classList.remove('hidden');
+      showGeoError(msg);
     },
     { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
   );
@@ -1258,7 +1283,6 @@ function showWAModal() {
   // Reset wizard
   document.getElementById('clientName').value = '';
   document.getElementById('clientPhone').value = '';
-  document.getElementById('clientLocation').value = '';
   document.getElementById('geoStatus').classList.add('hidden');
   document.getElementById('geoError').classList.add('hidden');
   document.getElementById('geoBtnLabel').textContent = 'حدد موقعي بدقة على الخريطة 📍';
@@ -1282,25 +1306,20 @@ function hideWAModal() {
 }
 
 function sendToWhatsApp() {
-  const name     = document.getElementById('clientName').value.trim();
-  const phone    = document.getElementById('clientPhone').value.trim();
-  const typedLocation = document.getElementById('clientLocation').value.trim();
-  const mapsLink = state.geo ? `https://www.google.com/maps?q=${state.geo.lat},${state.geo.lng}` : '';
-  // location: نص مقروء كيتبان فرسالة واتساب (الرابط كيبان فسطر خاص بوحدو تحته)
-  const location = typedLocation || (state.geo ? 'الموقع محدد بدقة على الخريطة (شوف الرابط تحت)' : '');
-  // sheetLocation: هو لي كيتصيفط لـ Excel/Google Sheet فخانة العنوان — الرابط
-  // مباشرة إلا الزبون استعمل GPS، باش يكون قابل للنقر مباشرة من غير نص زايد
-  const sheetLocation = typedLocation || mapsLink;
-  const day      = state.selectedDay;
-  const slot     = state.selectedSlot;
+  const name  = document.getElementById('clientName').value.trim();
+  const phone = document.getElementById('clientPhone').value.trim();
+  const day   = state.selectedDay;
+  const slot  = state.selectedSlot;
 
-  if (!name || !phone || !location || !day || !slot) {
-    goToStep(!name ? 1 : !phone ? 2 : !location ? 3 : !day ? 4 : 5);
+  if (!name || !phone || !state.geo || !day || !slot) {
+    goToStep(!name ? 1 : !phone ? 2 : !state.geo ? 3 : !day ? 4 : 5);
     document.getElementById('formError').classList.remove('hidden');
     return;
   }
 
-  const clientInfo = { name, phone: `+212 ${phone}`, location, sheetLocation, day, slot, mapsLink };
+  const mapsLink = `https://www.google.com/maps?q=${state.geo.lat},${state.geo.lng}`;
+  const location = 'الموقع محدد بدقة على الخريطة (شوف الرابط تحت)';
+  const clientInfo = { name, phone: `+212 ${phone}`, location, day, slot, mapsLink };
 
   const msg = buildWhatsAppMessage(clientInfo);
   const encoded = encodeURIComponent(msg);
@@ -1419,11 +1438,6 @@ function bindEvents() {
   });
   phoneInput.addEventListener('keydown', e => {
     if (e.key === 'Enter') { e.preventDefault(); nextStep(); }
-  });
-
-  const locationInput = document.getElementById('clientLocation');
-  locationInput.addEventListener('keydown', e => {
-    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); nextStep(); }
   });
 
   let debounce;
