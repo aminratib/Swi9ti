@@ -408,8 +408,8 @@ function renderCategories() {
   CATEGORIES.forEach(cat => {
     const active = state.category === cat.id;
     const chip = document.createElement('button');
-    chip.className = `shrink-0 px-5 py-2.5 rounded-full text-[15px] font-semibold whitespace-nowrap transition border ${
-      active ? 'bg-white text-green-700 border-green-700 ring-1 ring-green-700' : 'bg-white text-charcoal-800/70 border-charcoal-800/10 active:bg-charcoal-800/5'
+    chip.className = `shrink-0 px-5 py-2.5 rounded-full text-[15px] font-semibold whitespace-nowrap transition border-2 ${
+      active ? 'bg-green-50 text-green-700 border-green-700' : 'bg-white text-charcoal-800/70 border-charcoal-800/10 active:bg-charcoal-800/5'
     }`;
     chip.innerHTML = `<span>${cat.label}</span>`;
     chip.onclick = () => { state.category = cat.id; renderCategories(); renderProducts(); };
