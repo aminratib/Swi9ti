@@ -478,13 +478,19 @@ function renderCategoryIcons() {
 }
 
 /* ---------- 4b. باقات مميزة — كاروسيل ---------- */
-function buildPackCard(pack) {
-  const bg = pack.photo && pack.photo.trim() ? pack.photo.trim() : catIconUrl(pack.id, pack.img, 600);
+function buildPackCard(pack, index = 0) {
+  const rawBg = pack.photo && pack.photo.trim() ? pack.photo.trim()
+    : `https://loremflickr.com/600/600/${encodeURIComponent(pack.img)}?lock=${String(pack.id).split('').reduce((a, c) => a + c.charCodeAt(0), 0) || 1}`;
+  const bgPlaceholder = optimizedImg(rawBg, { w: 24, q: 35, blur: 3 });
+  const bgFull = optimizedImg(rawBg, { w: 600, q: 78 });
+
   const card = document.createElement('div');
-  card.className = 'pack-card relative shrink-0 w-[88vw] max-w-[350px] sm:w-[360px] h-[190px] rounded-[22px] overflow-hidden cursor-pointer active:scale-[0.98] transition';
+  card.className = 'pack-card relative shrink-0 w-[88vw] max-w-[350px] sm:w-[360px] h-[190px] rounded-[22px] overflow-hidden cursor-pointer active:scale-[0.98] transition rise-in';
+  card.style.animationDelay = `${Math.min(index, 8) * 60}ms`;
   card.dataset.packCard = pack.id;
   card.innerHTML = `
-    <div class="pack-photo absolute inset-y-0 right-0 w-[56%]" style="background-image:url('${bg}')"></div>
+    <div class="pack-photo absolute inset-y-0 right-0 w-[56%] transition-[filter,transform] duration-500 ease-out"
+         style="background-image:url('${bgPlaceholder}'); filter:blur(9px); transform:scale(1.1);"></div>
     <span class="absolute top-0 right-0 bg-terracotta-500 text-white text-[12px] font-bold px-3 py-1.5 rounded-bl-2xl">-${pack.discount}%</span>
     <div class="relative h-full w-[64%] p-4 flex flex-col justify-between">
       <div>
@@ -497,6 +503,17 @@ function buildPackCard(pack) {
       </div>
     </div>
   `;
+
+  // Blur-up : نبدلو التصوير المبلور بالكامل الواضح بمجرد ما يتحمل، مع فيد سلس
+  const photoEl = card.querySelector('.pack-photo');
+  const full = new Image();
+  full.onload = () => {
+    photoEl.style.backgroundImage = `url('${bgFull}')`;
+    photoEl.style.filter = 'blur(0px)';
+    photoEl.style.transform = 'scale(1)';
+  };
+  full.src = bgFull;
+
   return card;
 }
 
@@ -506,7 +523,7 @@ function renderPacks() {
   row.innerHTML = '';
 
   // كنكرر اللائحة مرتين باش الحركة تبقى سلسة وبلا "قفزة" (seamless loop)
-  [...PACKS, ...PACKS].forEach(pack => row.appendChild(buildPackCard(pack)));
+  [...PACKS, ...PACKS].forEach((pack, i) => row.appendChild(buildPackCard(pack, i)));
 
   document.querySelectorAll('[data-add-pack]').forEach(btn => {
     btn.onclick = (e) => {
@@ -546,10 +563,11 @@ function renderPacks() {
 }
 
 /* ---------- 4c. عروض اليوم — سطر كيتحرك وحدو ---------- */
-function buildDealCard(p) {
+function buildDealCard(p, index = 0) {
   const card = document.createElement('div');
   const qty = state.cart[p.id] || 0;
-  card.className = 'pcard shrink-0 w-[158px] sm:w-[160px] flex flex-col';
+  card.className = 'pcard shrink-0 w-[158px] sm:w-[160px] flex flex-col rise-in';
+  card.style.animationDelay = `${Math.min(index, 8) * 50}ms`;
   card.innerHTML = `
     <div class="relative aspect-square bg-sand-100 overflow-hidden">
       <div data-skel class="absolute inset-0 flex items-center justify-center text-4xl">${p.emoji}</div>
@@ -576,7 +594,7 @@ function renderDailyDeals() {
   row.innerHTML = '';
 
   // كنكرر اللائحة مرتين باش الحركة تبقى سلسة وبلا "قفزة" (seamless loop)
-  [...deals, ...deals].forEach(p => row.appendChild(buildDealCard(p)));
+  [...deals, ...deals].forEach((p, i) => row.appendChild(buildDealCard(p, i)));
 
   attachQtyHandlers();
   initMarqueeAutoScroll(row.closest('.marquee-wrap'), 'left', 30);
@@ -784,7 +802,8 @@ function renderProducts() {
   list.forEach((p, i) => {
     const qty = state.cart[p.id] || 0;
     const card = document.createElement('div');
-    card.className = 'pcard group flex flex-col';
+    card.className = 'pcard group flex flex-col rise-in';
+    card.style.animationDelay = `${Math.min(i % 12, 10) * 45}ms`;
     card.innerHTML = `
       <div data-lightbox-trigger="${p.id}" class="relative aspect-square bg-sand-100 overflow-hidden cursor-zoom-in" role="button" tabindex="0" aria-label="كبّر صورة ${p.name}">
         <div data-skel class="absolute inset-0 flex items-center justify-center text-4xl">${p.emoji}</div>
@@ -1587,7 +1606,7 @@ if ('serviceWorker' in navigator) {
   modalClose?.addEventListener('click', closeModal);
   modalOverlay?.addEventListener('click', closeModal);
 
-  // كنعرضو البار بعد تأخير خفيف باش الصفحة توليها الفرصة تتحمل مزيان أولا،
+  // كنعرضو البار بعد تأخير خفيف باش الصفحة توليها الفرصة تتحمل مزيان أولا，
   // وباش الدخول ديالو يبان smooth وماشي مفاجئ.
   window.setTimeout(showBar, 1800);
 })();
