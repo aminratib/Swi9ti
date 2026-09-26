@@ -663,6 +663,57 @@ function initMarqueeAutoScroll(wrap, direction = 'left', speedPxPerSec = 30) {
 }
 
 /* ---------- 4d. تفاصيل الباقة — Modal ---------- */
+// كل مكون فالباقة عندو "query" ديالو الخاص (بحال المنتجات ديال الكتالوگ) —
+// هاد الشي كيضمن صورة صحيحة ودايما مرتبطة بالاسم الصحيح، بلا ما نعتمدو على
+// بحث غامض (fuzzy) فـ PRODUCTS اللي كيتبدل من Google Sheet وكيقدر يبدل
+// ترتيبو/أسماءو، وهو لي كان كيسبب خلط الصور مع الأسماء.
+const PACK_ITEM_META = {
+  'طماطم':        { query: 'tomato',            emoji: '🍅' },
+  'بطاطا':        { query: 'potato',             emoji: '🥔' },
+  'بصل':          { query: 'onion',              emoji: '🧅' },
+  'جزر':          { query: 'carrot',             emoji: '🥕' },
+  'خيار':         { query: 'cucumber',           emoji: '🥒' },
+  'ڭرعة خضرا':    { query: 'zucchini',           emoji: '🥒' },
+  'فلفلة خضرا':   { query: 'bell pepper',        emoji: '🫑' },
+  'فلفلة حمرا':   { query: 'bell pepper',        emoji: '🫑' },
+  'معدنوس':       { query: 'parsley',            emoji: '🌿' },
+  'قزبر':         { query: 'coriander leaves',   emoji: '🌿' },
+  'برتقال':       { query: 'orange',             emoji: '🍊' },
+  'دنجال':        { query: 'eggplant',           emoji: '🍆' },
+  'تومة':         { query: 'garlic',             emoji: '🧄' },
+  'خس':           { query: 'lettuce',            emoji: '🥬' },
+  'تفاح أحمر':    { query: 'apple',              emoji: '🍎' },
+  'ليمون':        { query: 'lemon',              emoji: '🍋' },
+  'خوخ':          { query: 'peach',              emoji: '🍑' },
+};
+
+function productForPackItem(itemName) {
+  const meta = PACK_ITEM_META[itemName];
+  // 1) تطابق تام (100%) مع منتج موجود دابا فالكتالوگ (يمكن جاي من Google Sheet)
+  const exact = PRODUCTS.find(p => p.darija === itemName || p.name === itemName);
+  if (exact) {
+    const hasCustomPhoto = (exact.cartPhoto && exact.cartPhoto.trim())
+      || (exact.photo && exact.photo.trim())
+      || (exact.img && /^https?:\/\//i.test(exact.img));
+    // إلا عندو صورة مخصصة (مرفوعة يدويا)، نخليوها كيفما هي. وإلا، خانة "query"
+    // ديالو يمكن فارغة ولا مكتوبة بالعربية فالـ Sheet (السبب لي كيخلي البحث عن
+    // الصورة يفشل ديما) — كنبدلوها بكلمة موثوقة معروفة عندنا لهاد المكون بالضبط.
+    if (hasCustomPhoto || !meta) return exact;
+    return { ...exact, query: meta.query };
+  }
+  // 2) وإلا، صورة موثوقة وخاصة بهاد المكون بالضبط. رقم "lock" كيتصاوب من
+  // مجموع رموز الحروف ديال الاسم (ماشي من الأرقام لي فالـ id، حيت "pk-طماطم"
+  // ما فيهاش أي رقم، وهو لي كان كيخلي كلشي كيرجع لنفس الـ lock ب 1).
+  const hash = itemName.split('').reduce((a, c) => a + c.charCodeAt(0), 0) || 1;
+  return {
+    id: `pk${hash}`,
+    name: itemName,
+    darija: itemName,
+    query: meta ? meta.query : itemName,
+    emoji: meta ? meta.emoji : '🥬',
+  };
+}
+
 function openPackModal(id) {
   const pack = PACKS.find(p => p.id === id);
   if (!pack) return;
@@ -678,13 +729,31 @@ function openPackModal(id) {
     `${pack.price} <span class="text-charcoal-800/40 text-base font-normal line-through">${pack.oldPrice}</span> MAD`;
   document.getElementById('packModalAdd').dataset.addPack = pack.id;
 
+  // شبكة بصرية: صورة حقيقية لكل منتج (نفس الصور اللي فالكتالوگ) + كمية فبادج صغير
   const itemsList = document.getElementById('packModalItems');
-  itemsList.innerHTML = (pack.items || []).map(it => `
-    <li class="flex items-center justify-between bg-white rounded-xl px-3.5 py-2.5 ring-1 ring-charcoal-800/[0.05]">
-      <span class="text-sm text-charcoal-800">${it.name}</span>
-      <span class="text-sm font-semibold text-green-800">${it.qty} ${it.unit}</span>
-    </li>
-  `).join('');
+  const items = pack.items || [];
+  itemsList.innerHTML = items.map((it, idx) => {
+    const prod = productForPackItem(it.name);
+    return `
+      <li class="flex flex-col items-center gap-1.5 rise-in" style="animation-delay:${Math.min(idx, 10) * 40}ms">
+        <div class="relative w-full aspect-square rounded-2xl overflow-hidden bg-sand-100 ring-1 ring-charcoal-800/[0.06] shadow-sm">
+          <div data-skel class="absolute inset-0 flex items-center justify-center text-xl">${prod.emoji || '🥬'}</div>
+          <div data-pack-img-slot="pmi-${idx}" class="absolute inset-0"></div>
+          <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/75 via-black/40 to-transparent pt-4 pb-1.5">
+            <p class="text-white text-[13px] font-extrabold text-center leading-none tracking-wide">${it.qty} <span class="font-bold text-[11px]">${it.unit}</span></p>
+          </div>
+        </div>
+        <span class="text-[11px] font-semibold text-charcoal-800/80 text-center leading-tight line-clamp-1 w-full">${it.name}</span>
+      </li>
+    `;
+  }).join('');
+  items.forEach((it, idx) => {
+    const slot = itemsList.querySelector(`[data-pack-img-slot="pmi-${idx}"]`);
+    if (!slot) return;
+    // كنبدلو بشوية دفعة (staggered) عوض ما نطلقو كامل الصور فنفس اللحظة —
+    // هاد الشي كيبعد الحمل على خدمة تحسين الصور وكيقلل من فشل التحميل.
+    setTimeout(() => loadCardImage(slot, productForPackItem(it.name)), idx * 90);
+  });
 
   const freebiesWrap = document.getElementById('packModalFreebiesWrap');
   const freebiesList = document.getElementById('packModalFreebies');
@@ -763,19 +832,40 @@ function loadCardImage(slot, p) {
   };
   ph.src = placeholderSrc;
 
-  // 2) الصورة الكاملة فالخلفية — بمجرد ما توصل، كتبدل الـ blur وكتبان واضحة
-  const full = new Image();
-  full.onload = () => {
-    img.src = fullSrc;
-    if (!img.isConnected) slot.appendChild(img);
-    img.style.opacity = '1';
-    if (skel) skel.remove();
+  // 2) الصورة الكاملة فالخلفية — بمجرد ما توصل، كتبدل الـ blur وكتبان واضحة.
+  // إلا فشلات (bحال خدمة تحسين الصور images.weserv.nl لي كتحدد عدد الطلبات فنفس
+  // الوقت وكترفض بعضها ملي كنطلقو بزاف دفعة وحدة)، كنعاودو المحاولة 3 مرات
+  // بفارق زمني كيزيد شويا فكل مرة. المحاولة الأخيرة كتكون بالصورة الخام مباشرة
+  // (بلا خدمة التحسين) — احتياط إلا كان الحصار جاي من الخدمة ديال التحسين بالضبط.
+  const rawSrc = getProductImageRaw(p);
+  const MAX_ATTEMPTS = 4;
+  const tryLoadFull = (attempt) => {
+    const full = new Image();
+    full.onload = () => {
+      img.src = full.src;
+      if (!img.isConnected) slot.appendChild(img);
+      img.style.opacity = '1';
+      if (skel) skel.remove();
+    };
+    full.onerror = () => {
+      if (attempt < MAX_ATTEMPTS) {
+        setTimeout(() => tryLoadFull(attempt + 1), 500 * attempt);
+      } else if (skel) {
+        // الصورة ما وصلاتش نهائيا — نخليو الإيموجي (skeleton) بادي عوض ما نبقاو بفراغ
+        skel.removeAttribute('data-skel');
+        console.warn('Swi9ti: تعذر تحميل صورة', p.name, '— جرب:', fullSrc, 'و', rawSrc);
+      }
+    };
+    if (attempt === MAX_ATTEMPTS) {
+      full.src = rawSrc; // آخر محاولة: مباشرة من المصدر، بلا بروكسي التحسين
+    } else if (attempt === 1) {
+      full.src = fullSrc;
+    } else {
+      // نزيدو باراميتر باش ما يستافدش من نتيجة الخطأ المخبأة (cache) فالمحاولة الجداد
+      full.src = `${fullSrc}${fullSrc.includes('?') ? '&' : '?'}retry=${attempt}`;
+    }
   };
-  full.onerror = () => {
-    // الصورة ما وصلاتش — نخليو الإيموجي (skeleton) بادي عوض ما نبقاو بفراغ
-    if (skel) skel.removeAttribute('data-skel');
-  };
-  full.src = fullSrc;
+  tryLoadFull(1);
 }
 
 /* ---------- 5. GRILLE PRODUITS ---------- */
