@@ -1,0 +1,4 @@
+User-agent: *
+Allows: /
+
+Sitemap: https://swi9ti.com/sitemap.xml
