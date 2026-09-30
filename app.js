@@ -349,28 +349,69 @@ const DAY_OPTIONS = [ 'غدا', 'الاثنين', 'الثلاثاء', 'الأر�
 const saveCart  = () => localStorage.setItem('casabtata_cart', JSON.stringify(state.cart));
 
 /* ---------- 3. صور المنتجات (كلها روابط من الويب، بلا تخزين محلي) ---------- */
-// كل منتج (p1 → p40) عندو حقل query بالإنجليزية، وكنستعملوه باش نبنيو رابط
-// صورة حقيقية من LoremFlickr (خدمة صور مجانية كتخدم بالكلمة المفتاحية، خفيفة
-// وموثوقة، ماشي بحال روابط ثابتة لي تقدر تنكسر). الـ lock=رقم كيخلي نفس
-// الصورة تبقى ثابتة لكل منتج (ماشي عشوائية فكل مرة كترفرش الصفحة).
-function getProductImageRaw(product) {
+// ⚠️ تصليح مهم: كنا كنستعملو LoremFlickr باش نبنيو صورة أوتوماتيكية من كلمة
+// "query" ديال كل منتج. من أواخر 2024، Flickr سد الوصول ديال LoremFlickr لـ
+// API ديالو (rate limit)، وهاد الشي خلا loremflickr.com يرجع خطأ 401 على أي
+// كلمة مفتاحية (طماطم، بصل، بطاطا...) — هو بالضبط لي كان كيسبب الصور اللي ما
+// كتطلعش فالكونصول. الخدمة ماتات نهائيا لهاد الاستعمال، ماشي مشكل مؤقت.
+// عوضناها بـ Wikimedia Commons: أرشيف صور مجاني وموثوق تابع لمؤسسة ويكيميديا،
+// عندو API عمومي بلا حاجة لمفتاح (API key)، وكيدوم من سنين بلا ما يتبدل.
+const _imgCacheMem = new Map(); // كاش فالذاكرة (نفس الجلسة) — بلا ما نعاودو نبحثو على نفس الكلمة مرتين
+const IMG_CACHE_KEY = 'casabtata_img_cache_v1';
+function _loadImgCache() {
+  try { return JSON.parse(localStorage.getItem(IMG_CACHE_KEY) || '{}'); } catch { return {}; }
+}
+function _saveImgCache(map) {
+  try { localStorage.setItem(IMG_CACHE_KEY, JSON.stringify(map)); } catch { /* localStorage ماكاينش، ماشي مشكل */ }
+}
+
+// كنبحثو فـ Wikimedia Commons على كلمة مفتاحية ونرجعو رابط أول صورة (thumbnail
+// بالمقاس لي بغينا). النتيجة كتتخبى (كاش) فـ localStorage باش ما نبحثوش عليها
+// مرة أخرى فالزيارات الجايين.
+async function fetchWikimediaImage(keyword) {
+  const key = String(keyword || '').trim().toLowerCase();
+  if (!key) return null;
+  if (_imgCacheMem.has(key)) return _imgCacheMem.get(key);
+  const stored = _loadImgCache();
+  if (Object.prototype.hasOwnProperty.call(stored, key)) {
+    _imgCacheMem.set(key, stored[key]);
+    return stored[key];
+  }
+  try {
+    const api = `https://commons.wikimedia.org/w/api.php?action=query&generator=search&gsrsearch=${encodeURIComponent(key + ' filetype:bitmap')}&gsrlimit=1&gsrnamespace=6&prop=imageinfo&iiprop=url&iiurlwidth=900&format=json&origin=*`;
+    const res = await fetch(api);
+    const data = await res.json();
+    const pages = data && data.query && data.query.pages;
+    const page = pages ? Object.values(pages)[0] : null;
+    const info = page && page.imageinfo && page.imageinfo[0];
+    const url = (info && (info.thumburl || info.url)) || null;
+    _imgCacheMem.set(key, url);
+    _saveImgCache({ ..._loadImgCache(), [key]: url });
+    return url;
+  } catch (e) {
+    return null; // مشكل شبكة عابر — الكود اللي طالبها غايرجع للإيموجي بلا ما يوقف الصفحة
+  }
+}
+
+// رابط الصورة "الخام" — نفس الأولويات القديمة (cartPhoto → photo → img مخصص
+// جا من Google Sheet → وأخيرا بحث تلقائي بالـ query على Wikimedia Commons).
+async function getProductImageRaw(product) {
   if (product.cartPhoto && product.cartPhoto.trim()) return product.cartPhoto.trim(); // صورة خاصة بالسلة فقط (الباقات)
   if (product.photo && product.photo.trim()) return product.photo.trim(); // رابط صورة الباقة (كارطة + modal)
   if (product.img && /^https?:\/\//i.test(product.img)) return product.img; // رابط كامل مخصص جا من عمود "img" فـ Google Sheet
-  const lockNumber = parseInt(String(product.id).replace(/\D/g, ''), 10) || 1;
-  const keyword = encodeURIComponent(product.query || product.darija || product.name);
-  return `https://loremflickr.com/480/480/${keyword}?lock=${lockNumber}`;
+  const keyword = product.query || product.darija || product.name;
+  return await fetchWikimediaImage(keyword);
 }
 
 // ---- Proxy d'optimisation (images.weserv.nl) ----
-// كنمرو أي صورة (LoremFlickr ولا رابط من Google Sheet) من هاد الخدمة المجانية
-// باش: 1) تصغر لقدّ لي محتاجينه بالضبط (ماشي 600×600 كل مرة) 2) تتحول لـ WebP
+// كنمرو أي صورة (Wikimedia ولا رابط من Google Sheet) من هاد الخدمة المجانية
+// باش: 1) تصغر لقدّ لي محتاجينه بالضبط (ماشي 900×900 كل مرة) 2) تتحول لـ WebP
 // (وزن أقل بكثير من JPEG) 3) تقدر تولي مبلورة (blur) باش نصاوبو تأثير
 // "blur-up" — نعرضو نسخة صغيرة مبلورة فبضع كيلوبايت قبل ما توصل النسخة الكاملة.
 function optimizedImg(rawUrl, { w, q = 75, blur = 0 } = {}) {
   // صورة محلية (مسار نسبي بحال images/1.png) — كتحمل مباشرة بلا بروكسي، حيت
   // البروكسي (images.weserv.nl) خاصو رابط كامل من الويب باش يقدر يجيب الصورة.
-  if (!/^https?:\/\//i.test(rawUrl)) return rawUrl;
+  if (!rawUrl || !/^https?:\/\//i.test(rawUrl)) return rawUrl;
   const params = new URLSearchParams({ url: rawUrl, output: 'webp', q: String(q) });
   if (w) params.set('w', String(w));
   if (blur) params.set('blur', String(blur));
@@ -378,14 +419,16 @@ function optimizedImg(rawUrl, { w, q = 75, blur = 0 } = {}) {
 }
 
 // الصورة الكاملة (تتعرض فالكارطة/الكارت/اللايتبوكس) — حجم قابل للتخصيص
-function getProductImage(product, size = 480) {
-  return optimizedImg(getProductImageRaw(product), { w: size, q: 76 });
+async function getProductImage(product, size = 480) {
+  const raw = await getProductImageRaw(product);
+  return raw ? optimizedImg(raw, { w: size, q: 76 }) : null;
 }
 
 // نسخة صغيرة جدا ومبلورة (~1-2 كيلوبايت) كتتحمل بزربة وكتبان كـ"blur-up"
 // placeholder قبل ما توصل الصورة الحقيقية
-function getProductImagePlaceholder(product) {
-  return optimizedImg(getProductImageRaw(product), { w: 24, q: 40, blur: 3 });
+async function getProductImagePlaceholder(product) {
+  const raw = await getProductImageRaw(product);
+  return raw ? optimizedImg(raw, { w: 24, q: 40, blur: 3 }) : null;
 }
 
 /* ---------- 4. CATÉGORIES ---------- */
@@ -426,10 +469,9 @@ function renderCategories() {
 }
 
 /* ---------- 4a. الشيبس الدائرية ديال الأصناف (فوق الصفحة الرئيسية) ---------- */
-function catIconUrl(seed, query, w = 96) {
-  const lock = String(seed).split('').reduce((a, c) => a + c.charCodeAt(0), 0) || 1;
-  const raw = `https://loremflickr.com/200/200/${encodeURIComponent(query)}?lock=${lock}`;
-  return optimizedImg(raw, { w, q: 72 });
+async function catIconUrl(seed, query, w = 96) {
+  const raw = await fetchWikimediaImage(query); // بحث Wikimedia (شوف القسم 3) — seed خلاصناه بلا استعمال (كانت غير باش نبنيو lock لـ LoremFlickr)
+  return raw ? optimizedImg(raw, { w, q: 72 }) : null;
 }
 
 function renderCategoryIcons() {
@@ -445,13 +487,12 @@ function renderCategoryIcons() {
   shown.forEach(cat => {
     const meta = CATEGORY_META[cat.id];
     const customUrl = CATEGORY_ICON_IMAGES[cat.id];
-    const src = customUrl && customUrl.trim() ? customUrl.trim() : catIconUrl(cat.id, meta?.query || cat.label);
     const btn = document.createElement('button');
     btn.className = 'flex flex-col items-center gap-2 shrink-0 w-[68px]';
     btn.innerHTML = `
       <span class="cat-orb relative w-[64px] h-[64px] rounded-full overflow-hidden bg-white flex items-center justify-center text-2xl">
         <span>${meta?.emoji || cat.emoji}</span>
-        <img src="${src}" alt="${cat.label}" loading="lazy" decoding="async" class="absolute inset-0 w-full h-full object-cover" onerror="this.remove()">
+        <img alt="${cat.label}" loading="lazy" decoding="async" class="absolute inset-0 w-full h-full object-cover hidden" onerror="this.remove()">
       </span>
       <span class="text-[13px] font-semibold text-charcoal-800/85 text-center leading-tight">${cat.label}</span>
     `;
@@ -462,6 +503,19 @@ function renderCategoryIcons() {
       document.getElementById('catalogue').scrollIntoView({ behavior: 'smooth' });
     };
     row.appendChild(btn);
+
+    const imgEl = btn.querySelector('img');
+    if (customUrl && customUrl.trim()) {
+      imgEl.src = customUrl.trim();
+      imgEl.classList.remove('hidden');
+    } else {
+      // بحث أوتوماتيكي (async) — الإيموجي بادي فالخلفية حتى توصل الصورة
+      catIconUrl(cat.id, meta?.query || cat.label).then(src => {
+        if (!src || !imgEl.isConnected) return;
+        imgEl.src = src;
+        imgEl.classList.remove('hidden');
+      });
+    }
   });
 
   // "زيادة" — كتفتح درج الأصناف بأكملها
@@ -479,10 +533,10 @@ function renderCategoryIcons() {
 
 /* ---------- 4b. باقات مميزة — كاروسيل ---------- */
 function buildPackCard(pack, index = 0) {
-  const rawBg = pack.photo && pack.photo.trim() ? pack.photo.trim()
-    : `https://loremflickr.com/600/600/${encodeURIComponent(pack.img)}?lock=${String(pack.id).split('').reduce((a, c) => a + c.charCodeAt(0), 0) || 1}`;
-  const bgPlaceholder = optimizedImg(rawBg, { w: 24, q: 35, blur: 3 });
-  const bgFull = optimizedImg(rawBg, { w: 600, q: 78 });
+  const hasPhoto = pack.photo && pack.photo.trim();
+  const rawBg = hasPhoto ? pack.photo.trim() : null; // إلا ماكاينش، كنكملو أوتوماتيكيا تحت (Wikimedia)
+  const bgPlaceholder = rawBg ? optimizedImg(rawBg, { w: 24, q: 35, blur: 3 }) : '';
+  const bgFull = rawBg ? optimizedImg(rawBg, { w: 600, q: 78 }) : '';
 
   const card = document.createElement('div');
   card.className = 'pack-card relative shrink-0 w-[88vw] max-w-[350px] sm:w-[360px] h-[190px] rounded-[22px] overflow-hidden cursor-pointer active:scale-[0.98] transition rise-in';
@@ -506,13 +560,26 @@ function buildPackCard(pack, index = 0) {
 
   // Blur-up : نبدلو التصوير المبلور بالكامل الواضح بمجرد ما يتحمل، مع فيد سلس
   const photoEl = card.querySelector('.pack-photo');
-  const full = new Image();
-  full.onload = () => {
-    photoEl.style.backgroundImage = `url('${bgFull}')`;
-    photoEl.style.filter = 'blur(0px)';
-    photoEl.style.transform = 'scale(1)';
+  const showFull = (src) => {
+    const full = new Image();
+    full.onload = () => {
+      photoEl.style.backgroundImage = `url('${src}')`;
+      photoEl.style.filter = 'blur(0px)';
+      photoEl.style.transform = 'scale(1)';
+    };
+    full.src = src;
   };
-  full.src = bgFull;
+
+  if (hasPhoto) {
+    showFull(bgFull);
+  } else {
+    // ماكاينش "photo" مخصصة لهاد الباقة — نبحثو أوتوماتيكيا (async) على Wikimedia
+    fetchWikimediaImage(pack.img).then(raw => {
+      if (!raw || !photoEl.isConnected) return;
+      photoEl.style.backgroundImage = `url('${optimizedImg(raw, { w: 24, q: 35, blur: 3 })}')`;
+      showFull(optimizedImg(raw, { w: 600, q: 78 }));
+    });
+  }
 
   return card;
 }
@@ -668,50 +735,38 @@ function initMarqueeAutoScroll(wrap, direction = 'left', speedPxPerSec = 30) {
 // بحث غامض (fuzzy) فـ PRODUCTS اللي كيتبدل من Google Sheet وكيقدر يبدل
 // ترتيبو/أسماءو، وهو لي كان كيسبب خلط الصور مع الأسماء.
 const PACK_ITEM_META = {
-  'طماطم':        { query: 'tomato',            emoji: '🍅' },
-  'بطاطا':        { query: 'potato',             emoji: '🥔' },
-  'بصل':          { query: 'onion',              emoji: '🧅' },
-  'جزر':          { query: 'carrot',             emoji: '🥕' },
-  'خيار':         { query: 'cucumber',           emoji: '🥒' },
-  'ڭرعة خضرا':    { query: 'zucchini',           emoji: '🥒' },
-  'فلفلة خضرا':   { query: 'bell pepper',        emoji: '🫑' },
-  'فلفلة حمرا':   { query: 'bell pepper',        emoji: '🫑' },
-  'معدنوس':       { query: 'parsley',            emoji: '🌿' },
-  'قزبر':         { query: 'coriander leaves',   emoji: '🌿' },
-  'برتقال':       { query: 'orange',             emoji: '🍊' },
-  'دنجال':        { query: 'eggplant',           emoji: '🍆' },
-  'تومة':         { query: 'garlic',             emoji: '🧄' },
-  'خس':           { query: 'lettuce',            emoji: '🥬' },
-  'تفاح أحمر':    { query: 'apple',              emoji: '🍎' },
-  'ليمون':        { query: 'lemon',              emoji: '🍋' },
-  'خوخ':          { query: 'peach',              emoji: '🍑' },
+  'طماطم':        { query: 'tomato',          emoji: '🍅', lock: 1  },
+  'بطاطا':        { query: 'potato',          emoji: '🥔', lock: 2  },
+  'بصل':          { query: 'onion',           emoji: '🧅', lock: 3  },
+  'جزر':          { query: 'carrot',          emoji: '🥕', lock: 4  },
+  'خيار':         { query: 'cucumber',        emoji: '🥒', lock: 5  },
+  'ڭرعة خضرا':    { query: 'zucchini',        emoji: '🥒', lock: 6  },
+  'فلفلة خضرا':   { query: 'bell pepper',     emoji: '🫑', lock: 7  },
+  'فلفلة حمرا':   { query: 'red pepper',      emoji: '🫑', lock: 8  },
+  'معدنوس':       { query: 'parsley',         emoji: '🌿', lock: 9  },
+  'قزبر':         { query: 'coriander',       emoji: '🌿', lock: 10 },
+  'برتقال':       { query: 'orange',          emoji: '🍊', lock: 11 },
+  'دنجال':        { query: 'eggplant',        emoji: '🍆', lock: 12 },
+  'تومة':         { query: 'garlic',          emoji: '🧄', lock: 13 },
+  'خس':           { query: 'lettuce',         emoji: '🥬', lock: 14 },
+  'تفاح أحمر':    { query: 'apple',           emoji: '🍎', lock: 15 },
+  'ليمون':        { query: 'lemon',           emoji: '🍋', lock: 16 },
+  'خوخ':          { query: 'peach',           emoji: '🍑', lock: 17 },
 };
 
 function productForPackItem(itemName) {
   const meta = PACK_ITEM_META[itemName];
-  // 1) تطابق تام (100%) مع منتج موجود دابا فالكتالوگ (يمكن جاي من Google Sheet)
-  const exact = PRODUCTS.find(p => p.darija === itemName || p.name === itemName);
-  if (exact) {
-    const hasCustomPhoto = (exact.cartPhoto && exact.cartPhoto.trim())
-      || (exact.photo && exact.photo.trim())
-      || (exact.img && /^https?:\/\//i.test(exact.img));
-    // إلا عندو صورة مخصصة (مرفوعة يدويا)، نخليوها كيفما هي. وإلا، خانة "query"
-    // ديالو يمكن فارغة ولا مكتوبة بالعربية فالـ Sheet (السبب لي كيخلي البحث عن
-    // الصورة يفشل ديما) — كنبدلوها بكلمة موثوقة معروفة عندنا لهاد المكون بالضبط.
-    if (hasCustomPhoto || !meta) return exact;
-    return { ...exact, query: meta.query };
+  if (meta) {
+    // رقم "lock" صغير وثابت (1 إلى 17) — بنفس أسلوب أرقام المنتجات الأصلية
+    // (p1..p40) اللي خدامة مزيان ديما. رقم كبير عشوائي (بحال مجموع رموز
+    // الحروف العربية) هو لي كان كيسبب فشل تحميل الصور لكامل المكونات.
+    return { id: `pk${meta.lock}`, name: itemName, darija: itemName, query: meta.query, emoji: meta.emoji };
   }
-  // 2) وإلا، صورة موثوقة وخاصة بهاد المكون بالضبط. رقم "lock" كيتصاوب من
-  // مجموع رموز الحروف ديال الاسم (ماشي من الأرقام لي فالـ id، حيت "pk-طماطم"
-  // ما فيهاش أي رقم، وهو لي كان كيخلي كلشي كيرجع لنفس الـ lock ب 1).
-  const hash = itemName.split('').reduce((a, c) => a + c.charCodeAt(0), 0) || 1;
-  return {
-    id: `pk${hash}`,
-    name: itemName,
-    darija: itemName,
-    query: meta ? meta.query : itemName,
-    emoji: meta ? meta.emoji : '🥬',
-  };
+  // مكون ماشي معروف عندنا — نجربو نلقاو منتج مطابق تماما فالكتالوگ الحالي
+  const exact = PRODUCTS.find(p => p.darija === itemName || p.name === itemName);
+  if (exact) return exact;
+  // آخر حل: نستعملو الاسم نفسو كـ query برقم صغير ثابت
+  return { id: 'pk18', name: itemName, darija: itemName, query: itemName, emoji: '🥬' };
 }
 
 function openPackModal(id) {
@@ -720,8 +775,16 @@ function openPackModal(id) {
   const modal = document.getElementById('packModal');
   if (!modal) return;
 
-  const bg = pack.photo && pack.photo.trim() ? pack.photo.trim() : catIconUrl(pack.id, pack.img, 700);
-  document.getElementById('packModalBanner').style.backgroundImage = `url('${bg}')`;
+  const bannerEl = document.getElementById('packModalBanner');
+  if (pack.photo && pack.photo.trim()) {
+    bannerEl.style.backgroundImage = `url('${pack.photo.trim()}')`;
+  } else {
+    // بحث أوتوماتيكي (async) — كنخلعو الخلفية القديمة، وبمجرد ما توصل الصورة كنعمروها
+    bannerEl.style.backgroundImage = '';
+    catIconUrl(pack.id, pack.img, 700).then(src => {
+      if (src) bannerEl.style.backgroundImage = `url('${src}')`;
+    });
+  }
   document.getElementById('packModalDiscount').textContent = `-${pack.discount}%`;
   document.getElementById('packModalName').textContent = pack.name;
   document.getElementById('packModalDesc').textContent = pack.desc;
@@ -809,10 +872,22 @@ function observeCardImage(slot, product) {
   }
 }
 
-function loadCardImage(slot, p) {
+async function loadCardImage(slot, p) {
   const skel = slot.parentElement ? slot.parentElement.querySelector('[data-skel]') : null;
-  const fullSrc = getProductImage(p);
-  const placeholderSrc = getProductImagePlaceholder(p);
+
+  // خطوة 1: نلقاو الرابط "الخام" (بحث Wikimedia إلا كان محتاجينه — شوف القسم 3).
+  // هاد الخطوة async دابا (كانت sync مع LoremFlickr)، وإلا رجعات null معناها
+  // ما لقيناش صورة مناسبة — نخليو الإيموجي (skeleton) بادي بلا ما نضيعو وقت
+  // فمحاولات فارغة.
+  const rawSrc = await getProductImageRaw(p);
+  if (!rawSrc) {
+    if (skel) skel.removeAttribute('data-skel');
+    return;
+  }
+  if (!slot.isConnected) return; // الكارطة تزالت (مثلا الزبون بدل الصنف) قبل ما توصل النتيجة
+
+  const fullSrc = optimizedImg(rawSrc, { w: 480, q: 76 });
+  const placeholderSrc = optimizedImg(rawSrc, { w: 24, q: 40, blur: 3 });
 
   const img = document.createElement('img');
   img.alt = p.name;
@@ -833,12 +908,11 @@ function loadCardImage(slot, p) {
   ph.src = placeholderSrc;
 
   // 2) الصورة الكاملة فالخلفية — بمجرد ما توصل، كتبدل الـ blur وكتبان واضحة.
-  // إلا فشلات (bحال خدمة تحسين الصور images.weserv.nl لي كتحدد عدد الطلبات فنفس
-  // الوقت وكترفض بعضها ملي كنطلقو بزاف دفعة وحدة)، كنعاودو المحاولة 3 مرات
-  // بفارق زمني كيزيد شويا فكل مرة. المحاولة الأخيرة كتكون بالصورة الخام مباشرة
-  // (بلا خدمة التحسين) — احتياط إلا كان الحصار جاي من الخدمة ديال التحسين بالضبط.
-  const rawSrc = getProductImageRaw(p);
-  const MAX_ATTEMPTS = 4;
+  // إلا فشلات (مثلا خدمة تحسين الصور images.weserv.nl مزدحمة ملي كنطلقو بزاف
+  // صور دفعة وحدة)، كنعاودو المحاولة 3 مرات بفارق زمني كيزيد شويا فكل مرة.
+  // المحاولة الأخيرة كتكون بالصورة الخام مباشرة (بلا بروكسي التحسين) — احتياط
+  // إلا كان الحصار جاي من خدمة التحسين بالضبط.
+  const MAX_ATTEMPTS = 3;
   const tryLoadFull = (attempt) => {
     const full = new Image();
     full.onload = () => {
@@ -929,24 +1003,27 @@ function renderProducts() {
 }
 
 /* ---------- 5bis. LIGHTBOX — تكبير صورة المنتج ---------- */
-function openLightbox(product) {
+async function openLightbox(product) {
   const lightbox = document.getElementById('imgLightbox');
   const img = document.getElementById('lightboxImg');
-  const lowSrc = getProductImage(product, 480);  // probablement déjà en cache (grille)
-  const hiSrc  = getProductImage(product, 900);  // qualité haute pour le zoom
-  img.src = lowSrc;
   img.alt = product.name;
-  img.classList.remove('zoom-in');
-  void img.offsetWidth; // reset animation
-  img.classList.add('zoom-in');
-  // Upgrade silencieux vers la haute résolution une fois chargée, sans à-coup
-  const hi = new Image();
-  hi.onload = () => { img.src = hiSrc; };
-  hi.src = hiSrc;
   document.getElementById('lightboxName').textContent = `${product.emoji} ${product.name}`;
   document.getElementById('lightboxPrice').textContent = `${product.price} MAD / ${product.unit}`;
   lightbox.classList.remove('hidden');
   document.body.style.overflow = 'hidden';
+
+  const lowSrc = await getProductImage(product, 480);  // probablement déjà en cache (grille)
+  if (!lowSrc || !lightbox.isConnected) return;
+  img.src = lowSrc;
+  img.classList.remove('zoom-in');
+  void img.offsetWidth; // reset animation
+  img.classList.add('zoom-in');
+  // Upgrade silencieux vers la haute résolution une fois chargée, sans à-coup
+  const hiSrc = await getProductImage(product, 900);  // qualité haute pour le zoom
+  if (!hiSrc) return;
+  const hi = new Image();
+  hi.onload = () => { img.src = hiSrc; };
+  hi.src = hiSrc;
 }
 function closeLightbox() {
   document.getElementById('imgLightbox').classList.add('hidden');
@@ -1093,10 +1170,11 @@ function renderCartDrawer() {
     // Load images in cart — replace emoji only if image loads
     // (vignettes 56px → on demande une image déjà petite au proxy, pas 480px
     // redimensionnée par le navigateur : bien plus léger et rapide)
-    entries.forEach(item => {
+    entries.forEach(async item => {
       const slot = document.getElementById(`cart-img-${item.id}`);
       if (!slot) return;
-      const src = getProductImage(item, 112); // 2x pour écrans retina
+      const src = await getProductImage(item, 112); // 2x pour écrans retina
+      if (!src || !slot.isConnected) return;
       const img = new Image();
       img.onload = () => {
         slot.innerHTML = '';
