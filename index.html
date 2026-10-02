@@ -281,6 +281,11 @@
   .pack-dot.is-on { background:#326239; }
   .trust-bar > div + div { border-inline-start:1px solid rgba(31,61,43,.10); }
   #mobileTabBar button { -webkit-tap-highlight-color:transparent; }
+  /* المشكلة: rounded-t-[22px] كيبين الزوايا مدورة (شفافة بصريا)، ولكن المربع
+     الحقيقي ديال العنصر فيزيكيا كيبقى مربع كامل كيلقط الكليكات حتى فالزوايا
+     "الشفافة". clip-path كيحل هادشي: كيقص المنطقة القابلة للكليك باش تبقى
+     مدورة بحال الشكل المرئي بالضبط — الكليكات فالزوايا كتعدي للكارط لي تحت. */
+  #mobileTabBar { clip-path: inset(0 round 22px 22px 0 0); }
   @media (max-width:1023px) {
     .font-display { font-family:'Plus Jakarta Sans',system-ui,sans-serif; font-weight:800; letter-spacing:-.01em; }
   }
@@ -373,7 +378,7 @@
   </section>
 
   <!-- ===== CATALOGUE — جميع المنتجات (5) ===== -->
-  <main id="catalogue" class="max-w-6xl mx-auto px-2.5 sm:px-4 pt-6 pb-5 sm:pb-6">
+  <main id="catalogue" class="max-w-6xl mx-auto px-2.5 sm:px-4 pt-6 pb-10 sm:pb-6">
     <div class="flex items-baseline justify-between mb-4">
       <h2 class="font-display text-[22px] sm:text-2xl text-green-900" id="sectionTitle">جميع المنتجات</h2>
       <span id="resultCount" class="text-[15px] text-green-700 font-semibold"></span>
