@@ -739,10 +739,16 @@ function initMarqueeAutoScroll(wrap, direction = 'left', speedPxPerSec = 30) {
 // كيخبي النتيجة حسب الكلمة بالضبط — إلا اختلفت ولو بحرف وحد، كيدير بحث جديد
 // فـ Wikimedia Commons ويمكن يرجع صورة غريبة/ماشي مرتبطة. باش الباقة تعرض
 // بالضبط نفس صورة المنتج ديال الكتالوگ، لازم الكلمتين يكونو identiques.
+// لتحكم كامل فصورة أي مكون (رابط مباشر عوض البحث التلقائي): زيد "photo" جنب
+// الصنف لي بغيتي، بحال هادشي:
+//   'طماطم': { query: 'tomato', emoji: '🍅', lock: 1, photo: 'https://i.imgur.com/XXXXXXX.jpg' },
+// إلا كان "photo" موجود، التطبيق غايستعملو مباشرة (بلا بحث Wikimedia). خاصو
+// يكون رابط مباشر لصورة (.jpg/.png/.webp) — ماشي رابط صفحة (مثلا رابط Google
+// Drive العادي "/view" ما كيخدمش، خاص يكون رابط تحميل مباشر).
 const PACK_ITEM_META = {
-  'طماطم':        { query: 'tomato',          emoji: '🍅', lock: 1  },
+  'طماطم':        { query: 'tomato',          emoji: '🍅', photo: 'https://images.pexels.com/photos/26950753/pexels-photo-26950753.jpeg'  },
   'بطاطا':        { query: 'potato',          emoji: '🥔', lock: 2  },
-  'بصل':          { query: 'onion',           emoji: '🧅', lock: 3  },
+  'بصل':          { query: 'onion',           emoji: '🧅', lock: 3 , photo: 'https://images.pexels.com/photos/30931751/pexels-photo-30931751.jpeg' },
   'جزر':          { query: 'carrot',          emoji: '🥕', lock: 4  },
   'خيار':         { query: 'cucumber',        emoji: '🥒', lock: 5  },
   'ڭرعة خضرا':    { query: 'zucchini',        emoji: '🥒', lock: 6  },
@@ -769,7 +775,14 @@ function productForPackItem(itemName) {
   // التعليق فوق PACK_ITEM_META) — هادشي كيضمن نفس الصورة بالضبط عبر الكاش.
   const meta = PACK_ITEM_META[itemName];
   if (meta) {
-    return { id: `pk${meta.lock}`, name: itemName, darija: itemName, query: meta.query, emoji: meta.emoji };
+    return {
+      id: `pk${meta.lock}`,
+      name: itemName,
+      darija: itemName,
+      query: meta.query,
+      emoji: meta.emoji,
+      photo: meta.photo || undefined, // رابط مباشر إلا كان معطى — كياخذ الأولوية فـ getProductImageRaw
+    };
   }
   // 3) آخر حل: نستعملو الاسم نفسو كـ query برقم صغير ثابت
   return { id: 'pk18', name: itemName, darija: itemName, query: itemName, emoji: '🥬' };
