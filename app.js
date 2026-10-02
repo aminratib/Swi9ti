@@ -734,6 +734,11 @@ function initMarqueeAutoScroll(wrap, direction = 'left', speedPxPerSec = 30) {
 // هاد الشي كيضمن صورة صحيحة ودايما مرتبطة بالاسم الصحيح، بلا ما نعتمدو على
 // بحث غامض (fuzzy) فـ PRODUCTS اللي كيتبدل من Google Sheet وكيقدر يبدل
 // ترتيبو/أسماءو، وهو لي كان كيسبب خلط الصور مع الأسماء.
+// مهم: كل "query" هنا خاصو يكون مطابق بالحرف لـ query ديال نفس المنتج فـ
+// PRODUCTS (فوق فبداية الملف). نظام البحث عن الصور (fetchWikimediaImage)
+// كيخبي النتيجة حسب الكلمة بالضبط — إلا اختلفت ولو بحرف وحد، كيدير بحث جديد
+// فـ Wikimedia Commons ويمكن يرجع صورة غريبة/ماشي مرتبطة. باش الباقة تعرض
+// بالضبط نفس صورة المنتج ديال الكتالوگ، لازم الكلمتين يكونو identiques.
 const PACK_ITEM_META = {
   'طماطم':        { query: 'tomato',          emoji: '🍅', lock: 1  },
   'بطاطا':        { query: 'potato',          emoji: '🥔', lock: 2  },
@@ -742,9 +747,9 @@ const PACK_ITEM_META = {
   'خيار':         { query: 'cucumber',        emoji: '🥒', lock: 5  },
   'ڭرعة خضرا':    { query: 'zucchini',        emoji: '🥒', lock: 6  },
   'فلفلة خضرا':   { query: 'bell pepper',     emoji: '🫑', lock: 7  },
-  'فلفلة حمرا':   { query: 'red pepper',      emoji: '🫑', lock: 8  },
+  'فلفلة حمرا':   { query: 'bell pepper',     emoji: '🫑', lock: 8  },
   'معدنوس':       { query: 'parsley',         emoji: '🌿', lock: 9  },
-  'قزبر':         { query: 'coriander',       emoji: '🌿', lock: 10 },
+  'قزبر':         { query: 'coriander leaves', emoji: '🌿', lock: 10 },
   'برتقال':       { query: 'orange',          emoji: '🍊', lock: 11 },
   'دنجال':        { query: 'eggplant',        emoji: '🍆', lock: 12 },
   'تومة':         { query: 'garlic',          emoji: '🧄', lock: 13 },
@@ -755,17 +760,18 @@ const PACK_ITEM_META = {
 };
 
 function productForPackItem(itemName) {
-  const meta = PACK_ITEM_META[itemName];
-  if (meta) {
-    // رقم "lock" صغير وثابت (1 إلى 17) — بنفس أسلوب أرقام المنتجات الأصلية
-    // (p1..p40) اللي خدامة مزيان ديما. رقم كبير عشوائي (بحال مجموع رموز
-    // الحروف العربية) هو لي كان كيسبب فشل تحميل الصور لكامل المكونات.
-    return { id: `pk${meta.lock}`, name: itemName, darija: itemName, query: meta.query, emoji: meta.emoji };
-  }
-  // مكون ماشي معروف عندنا — نجربو نلقاو منتج مطابق تماما فالكتالوگ الحالي
+  // 1) تطابق تام (100%) مع منتج موجود دابا فالكتالوگ — نستعملوه هو بالضبط
+  // (بلا ما نصاوبو كائن بديل)، باش إلا كانت عندو صورة مخصصة مرفوعة (cartPhoto
+  // / photo / img) تبقى محترمة، وتبقى الصورة فالباقة identique لصورة الكتالوگ.
   const exact = PRODUCTS.find(p => p.darija === itemName || p.name === itemName);
   if (exact) return exact;
-  // آخر حل: نستعملو الاسم نفسو كـ query برقم صغير ثابت
+  // 2) وإلا، كلمة بحث موثوقة ومطابقة بالحرف لكلمة نفس المنتج فالكتالوگ (شوف
+  // التعليق فوق PACK_ITEM_META) — هادشي كيضمن نفس الصورة بالضبط عبر الكاش.
+  const meta = PACK_ITEM_META[itemName];
+  if (meta) {
+    return { id: `pk${meta.lock}`, name: itemName, darija: itemName, query: meta.query, emoji: meta.emoji };
+  }
+  // 3) آخر حل: نستعملو الاسم نفسو كـ query برقم صغير ثابت
   return { id: 'pk18', name: itemName, darija: itemName, query: itemName, emoji: '🥬' };
 }
 
