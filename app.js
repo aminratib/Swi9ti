@@ -220,7 +220,7 @@ function computeCategories() {
       label: CATEGORY_META[id]?.label || id,
       emoji: CATEGORY_META[id]?.emoji || '',
     })),
-    { id: 'promo', label: 'بروموسيون', emoji: '🔥' },
+    { id: 'promo', label: 'بروموسيون', emoji: '' },
   ];
 }
 computeCategories();
@@ -639,7 +639,7 @@ function buildDealCard(p, index = 0) {
     <div class="relative aspect-square bg-sand-100 overflow-hidden">
       <div data-skel class="absolute inset-0 flex items-center justify-center text-4xl">${p.emoji}</div>
       <div data-img-slot="deal-${p.id}" class="absolute inset-0"></div>
-      <span class="absolute top-1.5 right-1.5 bg-terracotta-500 text-white text-[11px] font-bold px-2 py-0.5 rounded-full">حار 🔥</span>
+      <span class="absolute top-1.5 right-1.5 bg-terracotta-500 text-white text-[11px] font-bold px-2 py-0.5 rounded-full"> ... </span>
     </div>
     <div class="px-2.5 pt-2.5 pb-2.5 flex flex-col gap-1 flex-1">
       <h3 class="font-bold text-[15px] leading-tight text-charcoal-800 truncate">${p.name}</h3>
@@ -978,7 +978,7 @@ function renderProducts() {
       <div data-lightbox-trigger="${p.id}" class="relative aspect-square bg-sand-100 overflow-hidden cursor-zoom-in" role="button" tabindex="0" aria-label="كبّر صورة ${p.name}">
         <div data-skel class="absolute inset-0 flex items-center justify-center text-4xl">${p.emoji}</div>
         <div data-img-slot="${p.id}" class="absolute inset-0"></div>
-        ${p.promo ? `<span class="absolute top-1.5 left-1.5 bg-terracotta-500 text-white text-[11px] font-bold px-2 py-0.5 rounded-full">بروم</span>` : ''}
+        ${p.promo ? `<span class="absolute top-1.5 left-1.5 bg-terracotta-500 text-white text-[11px] font-bold px-2 py-0.5 rounded-full">برومو</span>` : ''}
       </div>
       <div class="px-3 pt-2.5 pb-3 flex flex-col gap-2 flex-1">
         <h3 class="font-semibold text-[15px] font-bold leading-snug text-charcoal-800 line-clamp-2 min-h-[2.6em]">${p.name}</h3>
@@ -1721,21 +1721,18 @@ if ('serviceWorker' in navigator) {
   });
 }
 
-/* ---------- 12. BARRE FLOTTANTE D'INSTALLATION (iOS + Android + Desktop) ----------
-   هدف: نعرضو بار أنيق وسلس لكل الزوار — لي كيدخلو من iPhone، Android، ولا الكمبيوتر —
-   باش "يحملو" Swi9ti (فالحقيقة: تثبيت PWA / إضافة للشاشة الرئيسية، ماشي تحميل حقيقي
-   من App Store/Play Store لي مازال جاي). كنستافدو من beforeinstallprompt فحيت
-   كاين (Chrome/Edge/Android) باش نعرضو popup التثبيت الرسمي ديال المتصفح، وكنبينو
-   إرشادات ديال 3 خطوات فالمنصات لي ما كيدعموهاش (iOS Safari، متصفحات قديمة، ...). */
+/* ---------- 12. BARRE FLOTTANTE D'INSTALLATION → Google Play ----------
+   Le bouton "حمّل التطبيق" est un lien <a> direct vers le Play Store (voir index.html).
+   Ici on gère seulement l'affichage / la fermeture de la barre. */
 (function initInstallBar() {
   const bar = document.getElementById('installBar');
   if (!bar) return;
 
+  const SHOW_ON_IOS = false; // le Play Store n'existe pas sur iPhone → barre masquée sur iOS
   const ua = navigator.userAgent || '';
   const isIos =
     /iphone|ipad|ipod/i.test(ua) ||
-    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1); // iPadOS 13+
-  const isAndroid = /android/i.test(ua);
+    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
   const isStandalone =
     window.navigator.standalone === true ||
     window.matchMedia('(display-mode: standalone)').matches;
@@ -1743,80 +1740,28 @@ if ('serviceWorker' in navigator) {
   let dismissed = false;
   try { dismissed = localStorage.getItem('swi9ti_install_dismissed') === '1'; } catch (e) {}
 
-  if (isStandalone || dismissed) return;
+  // Si la barre ne doit pas s'afficher, on la supprime du DOM : elle ne peut plus rien bloquer
+  if (isStandalone || dismissed || (isIos && !SHOW_ON_IOS)) {
+    bar.remove();
+    return;
+  }
 
-  let deferredPrompt = null;
-  window.addEventListener('beforeinstallprompt', (e) => {
-    e.preventDefault();
-    deferredPrompt = e;
-  });
-  window.addEventListener('appinstalled', () => {
-    hideBar(true);
-    try { localStorage.setItem('swi9ti_install_dismissed', '1'); } catch (e) {}
-  });
-
-  const modal          = document.getElementById('installModal');
-  const modalOverlay    = document.getElementById('installModalOverlay');
-  const modalClose      = document.getElementById('installModalClose');
-  const stepsIos        = document.getElementById('installStepsIos');
-  const stepsAndroid    = document.getElementById('installStepsAndroid');
-  const stepsDesktop    = document.getElementById('installStepsDesktop');
-  const closeBtn        = document.getElementById('installBarClose');
-  const dismissBtn      = document.getElementById('installBarDismiss');
-  const installBtn      = document.getElementById('installBarInstall');
-
-  // ---- animation: entrée/sortie fluide de la barre ----
   function showBar() {
-    bar.classList.remove('pointer-events-none', 'opacity-0', 'translate-y-6', 'scale-[0.97]');
-    bar.classList.add('opacity-100', 'translate-y-0', 'scale-100', 'pointer-events-auto');
+    bar.classList.remove('opacity-0', 'translate-y-6', 'scale-[0.97]');
+    bar.classList.add('opacity-100', 'translate-y-0', 'scale-100');
   }
   function hideBar(persist) {
-    bar.classList.add('opacity-0', 'translate-y-6', 'scale-[0.97]', 'pointer-events-none');
+    bar.classList.add('opacity-0', 'translate-y-6', 'scale-[0.97]');
     bar.classList.remove('opacity-100', 'translate-y-0', 'scale-100');
     if (persist) {
       try { localStorage.setItem('swi9ti_install_dismissed', '1'); } catch (e) {}
     }
   }
 
-  // ---- modal d'instructions (steps selon la plateforme) ----
-  const allStepLists = [stepsIos, stepsAndroid, stepsDesktop];
-  function openModal() {
-    let target = stepsDesktop;
-    if (isIos) target = stepsIos;
-    else if (isAndroid) target = stepsAndroid;
+  document.getElementById('installBarClose')?.addEventListener('click', () => hideBar(true));
+  document.getElementById('installBarDismiss')?.addEventListener('click', () => hideBar(true));
+  // Après le clic sur "حمّل التطبيق" : on masque la barre (le lien s'ouvre normalement)
+  document.getElementById('installBarInstall')?.addEventListener('click', () => hideBar(true));
 
-    allStepLists.forEach(el => {
-      if (!el) return;
-      if (el === target) { el.classList.remove('hidden'); el.classList.add('flex'); }
-      else { el.classList.add('hidden'); el.classList.remove('flex'); }
-    });
-    modal?.classList.remove('hidden');
-  }
-  function closeModal() { modal?.classList.add('hidden'); }
-
-  // ---- clic sur "حمّل التطبيق" ----
-  async function handleInstallClick() {
-    if (deferredPrompt) {
-      deferredPrompt.prompt();
-      try {
-        const choice = await deferredPrompt.userChoice;
-        deferredPrompt = null;
-        if (choice.outcome === 'accepted') hideBar(true);
-      } catch (e) {
-        openModal(); // fallback إلا خابت مشكلة
-      }
-      return;
-    }
-    openModal();
-  }
-
-  installBtn?.addEventListener('click', handleInstallClick);
-  closeBtn?.addEventListener('click', () => hideBar(true));
-  dismissBtn?.addEventListener('click', () => hideBar(true));
-  modalClose?.addEventListener('click', closeModal);
-  modalOverlay?.addEventListener('click', closeModal);
-
-  // كنعرضو البار بعد تأخير خفيف باش الصفحة توليها الفرصة تتحمل مزيان أولا，
-  // وباش الدخول ديالو يبان smooth وماشي مفاجئ.
-  window.setTimeout(showBar, 12000); // plus tard, et masquée automatiquement quand un panneau/modal est ouvert (voir CSS)
+  window.setTimeout(showBar, 12000);
 })();
