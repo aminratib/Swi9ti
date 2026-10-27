@@ -589,8 +589,12 @@ function renderPacks() {
   if (!row) return;
   row.innerHTML = '';
 
-  // كنكرر اللائحة مرتين باش الحركة تبقى سلسة وبلا "قفزة" (seamless loop)
-  [...PACKS, ...PACKS].forEach((pack, i) => row.appendChild(buildPackCard(pack, i)));
+  // كنكرر اللائحة بعدد كافي باش تعمر العرض كامل (حتى الشاشات الكبيرة) بلا فراغ ولا "قفزة"
+  const copies = marqueeCopies(PACKS.length, 340);
+  row.dataset.setSize = String(PACKS.length);
+  for (let c = 0; c < copies; c++) {
+    PACKS.forEach((pack, i) => row.appendChild(buildPackCard(pack, c * PACKS.length + i)));
+  }
 
   document.querySelectorAll('[data-add-pack]').forEach(btn => {
     btn.onclick = (e) => {
@@ -616,17 +620,14 @@ function renderPacks() {
 
   const dots = document.getElementById('packsDots');
   const packWrap = row.closest('.marquee-wrap');
-  if (dots && packWrap) {
+  if (dots) {
     dots.innerHTML = PACKS.map((_, i) => `<span class="pack-dot${i === 0 ? ' is-on' : ''}"></span>`).join('');
-    packWrap.addEventListener('scroll', () => {
-      const half = packWrap.scrollWidth / 2;
-      if (!half) return;
-      const idx = Math.round(((packWrap.scrollLeft % half) / half) * PACKS.length) % PACKS.length;
-      dots.querySelectorAll('.pack-dot').forEach((d, k) => d.classList.toggle('is-on', k === idx));
-    }, { passive: true });
   }
 
-  initMarqueeAutoScroll(packWrap, 'right', 34);
+  initMarqueeAutoScroll(packWrap, 'right', 34, (idx) => {
+    if (!dots) return;
+    dots.querySelectorAll('.pack-dot').forEach((d, k) => d.classList.toggle('is-on', k === idx));
+  });
 }
 
 /* ---------- 4c. عروض اليوم — سطر كيتحرك وحدو ---------- */
@@ -650,7 +651,8 @@ function buildDealCard(p, index = 0) {
     </div>
   `;
   const slot = card.querySelector(`[data-img-slot="deal-${p.id}"]`);
-  if (slot) observeCardImage(slot, p);
+  // الكاروسيل كيتحرك، فكنحملو الصورة مباشرة (بلا IntersectionObserver) باش ما تبانش فارغة ملي كتدخل للشاشة
+  if (slot) loadCardImage(slot, p);
   return card;
 }
 
@@ -660,73 +662,133 @@ function renderDailyDeals() {
   const deals = PRODUCTS.filter(p => p.promo).slice(0, 12);
   row.innerHTML = '';
 
-  // كنكرر اللائحة مرتين باش الحركة تبقى سلسة وبلا "قفزة" (seamless loop)
-  [...deals, ...deals].forEach((p, i) => row.appendChild(buildDealCard(p, i)));
+  // كنكرر اللائحة بعدد كافي باش تعمر العرض كامل بلا فراغ ولا "قفزة"
+  const copies = marqueeCopies(deals.length, 160);
+  row.dataset.setSize = String(deals.length);
+  for (let c = 0; c < copies; c++) {
+    deals.forEach((p, i) => row.appendChild(buildDealCard(p, c * deals.length + i)));
+  }
 
   attachQtyHandlers();
   initMarqueeAutoScroll(row.closest('.marquee-wrap'), 'left', 30);
 }
 
-/* ---------- 4c-bis. الحركة الأوتوماتيكية ديال الكاروسيل — بلا ما توقف السكرول اليدوي ----------
-   الزبون يقدر يسكرول بيدو (تاتش، ماوس، عجلة) فأي وقت. ملي يوقف، الحركة
-   الأوتوماتيكية كترجع تخدم وحدها من نفس البلاصة (بلا "قفزة") بعد شوية. */
-function initMarqueeAutoScroll(wrap, direction = 'left', speedPxPerSec = 30) {
-  if (!wrap || wrap.dataset.autoScrollBound) return;
-  wrap.dataset.autoScrollBound = '1';
+/* ---------- 4c-bis. محرك الحركة الأوتوماتيكية (Marquee) — سلس 60fps ----------
+   كنستعملو transform: translate3d (GPU) بدل scrollLeft: scrollLeft كيتقرب
+   لأرقام صحيحة فالديسكتوب، وهادشي كيخلي الحركة البطيئة "تتقطع". هنا الموضع (x)
+   رقم عشري، والحلقة (loop) كتتحسب بالضبط من موضع أول عنصر فالنسخة التانية —
+   يعني بلا قفزة حتى مع gap وبلا padding.
+   الزبون يقدر: يجر بالماوس/الاصبع، يستعمل عجلة أفقية (trackpad / Shift+wheel).
+   ملي يوقف، الحركة كترجع بسلاسة (تسارع تدريجي) بعد 1.5 ثانية. */
+function marqueeCopies(n, minItemW) {
+  if (!n) return 1;
+  const vw = Math.max(window.innerWidth || 0, (window.screen && window.screen.width) || 0, 1280);
+  return Math.max(2, Math.ceil(vw / (n * minItemW)) + 1);
+}
 
-  // نبداو من نص المسافة (لليمين) ولا من البداية (لليسار) باش يكون عندو مجال
-  requestAnimationFrame(() => {
-    const half = wrap.scrollWidth / 2;
-    wrap.scrollLeft = direction === 'right' ? half : 0;
+function initMarqueeAutoScroll(wrap, direction = 'left', speedPxPerSec = 30, onProgress) {
+  if (!wrap) return;
+  if (wrap._marquee) { wrap._marquee.refresh(); return; } // إعادة رسم (مثلا من بعد Google Sheet)
+  const track = wrap.firstElementChild;
+  if (!track) return;
+
+  const dir = direction === 'right' ? -1 : 1; // إشارة تغيير x فالحركة الأوتوماتيكية
+  const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const canHover = window.matchMedia && window.matchMedia('(hover: hover)').matches;
+
+  let loop = 0, x = 0, inertia = 0, autoSpeed = 0, lastIdx = -1;
+  let pressed = false, dragging = false, hovering = false, resumeAt = 0;
+  let pid = null, startX = 0, lastX = 0, lastT = 0, swallowClick = false;
+
+  const measure = () => {
+    const n = Number(track.dataset.setSize) || 0;
+    const kids = track.children;
+    loop = (n > 0 && kids.length > n) ? kids[n].offsetLeft - kids[0].offsetLeft : 0;
+  };
+  const wrapX = () => { x = loop > 0 ? ((x % loop) + loop) % loop : 0; };
+  const render = () => {
+    track.style.transform = `translate3d(${-x}px,0,0)`;
+    if (onProgress && loop > 0) {
+      const n = Number(track.dataset.setSize) || 1;
+      const idx = Math.round((x / loop) * n) % n;
+      if (idx !== lastIdx) { lastIdx = idx; onProgress(idx); }
+    }
+  };
+  const refresh = () => { measure(); wrapX(); render(); };
+  wrap._marquee = { refresh };
+
+  // ── سحب بالماوس / اللمس ──
+  const endPress = () => {
+    if (!pressed) return;
+    pressed = false;
+    if (dragging) {
+      dragging = false;
+      swallowClick = true;
+      setTimeout(() => { swallowClick = false; }, 60);
+      wrap.classList.remove('is-dragging');
+      resumeAt = performance.now() + 1500;
+    }
+  };
+  wrap.addEventListener('pointerdown', (e) => {
+    if (e.pointerType === 'mouse' && e.button !== 0) return;
+    pressed = true; dragging = false; inertia = 0;
+    pid = e.pointerId; startX = lastX = e.clientX; lastT = performance.now();
   });
+  wrap.addEventListener('pointermove', (e) => {
+    if (!pressed || e.pointerId !== pid) return;
+    if (e.pointerType === 'mouse' && e.buttons === 0) { endPress(); return; }
+    if (!dragging && Math.abs(e.clientX - startX) > 6) {
+      dragging = true;
+      try { wrap.setPointerCapture(pid); } catch (_) {}
+      wrap.classList.add('is-dragging');
+    }
+    if (!dragging) return;
+    const now = performance.now();
+    const dt = Math.max(now - lastT, 1) / 1000;
+    const dx = e.clientX - lastX;
+    x -= dx; // نجر لليمين => المحتوى كيمشي لليمين => x كينقص
+    inertia = inertia * 0.7 + (-dx / dt) * 0.3;
+    lastX = e.clientX; lastT = now;
+    wrapX(); render();
+  });
+  ['pointerup', 'pointercancel', 'lostpointercapture'].forEach(evt => wrap.addEventListener(evt, endPress));
+  wrap.addEventListener('click', (e) => { if (swallowClick) { e.preventDefault(); e.stopPropagation(); } }, true);
+
+  // ── عجلة أفقية (trackpad) ولا Shift + wheel ──
+  wrap.addEventListener('wheel', (e) => {
+    const d = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : (e.shiftKey ? e.deltaY : 0);
+    if (!d) return; // سكرول عمودي عادي كيمر للصفحة
+    e.preventDefault();
+    inertia = 0; resumeAt = performance.now() + 1500;
+    x += d; wrapX(); render();
+  }, { passive: false });
+
+  if (canHover) {
+    wrap.addEventListener('mouseenter', () => { hovering = true; });
+    wrap.addEventListener('mouseleave', () => { hovering = false; });
+  }
+
+  if ('ResizeObserver' in window) new ResizeObserver(refresh).observe(track);
+  window.addEventListener('resize', refresh, { passive: true });
 
   let lastTs = null;
-  let userActive = false;
-  let hovering = false;
-  let resumeTimer = null;
-  let programmatic = false; // باش نميزو السكرول لي درناه حنا (JS) من السكرول اليدوي ديال الزبون
-
-  const markInteraction = () => { userActive = true; clearTimeout(resumeTimer); };
-  const scheduleResume = () => {
-    clearTimeout(resumeTimer);
-    resumeTimer = setTimeout(() => { userActive = false; }, 1200);
-  };
-
-  ['pointerdown', 'touchstart', 'wheel'].forEach(evt =>
-    wrap.addEventListener(evt, markInteraction, { passive: true })
-  );
-  ['pointerup', 'touchend', 'touchcancel'].forEach(evt =>
-    wrap.addEventListener(evt, scheduleResume, { passive: true })
-  );
-  wrap.addEventListener('scroll', () => {
-    // إلا كان هاد السكرول درناه حنا (الحركة الأوتوماتيكية)، تجاهلو — ماشي تدخل يدوي
-    if (programmatic) { programmatic = false; return; }
-    markInteraction();
-    scheduleResume();
-  }, { passive: true });
-  wrap.addEventListener('mouseenter', () => { hovering = true; });
-  wrap.addEventListener('mouseleave', () => { hovering = false; scheduleResume(); });
-
-  const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  if (reduceMotion) return;
-
   function frame(ts) {
     if (lastTs == null) lastTs = ts;
     const dt = Math.min((ts - lastTs) / 1000, 0.05);
     lastTs = ts;
 
-    if (!userActive && !hovering && wrap.scrollWidth > wrap.clientWidth) {
-      const half = wrap.scrollWidth / 2;
-      const delta = speedPxPerSec * dt * (direction === 'right' ? -1 : 1);
-      let next = wrap.scrollLeft + delta;
-      if (next <= 0) next += half;
-      else if (next >= half) next -= half;
-      programmatic = true;
-      wrap.scrollLeft = next;
+    if (loop > 0 && !dragging) {
+      const paused = pressed || hovering || document.hidden || performance.now() < resumeAt || reduceMotion;
+      const target = paused ? 0 : speedPxPerSec * dir;
+      autoSpeed += (target - autoSpeed) * Math.min(1, dt * 3.5); // تسارع/توقف ناعم
+      inertia *= Math.pow(0.05, dt);                              // تباطؤ بعد السحب
+      if (Math.abs(inertia) < 4) inertia = 0;
+      const v = autoSpeed + inertia;
+      if (Math.abs(v) > 0.02) { x += v * dt; wrapX(); render(); }
     }
     requestAnimationFrame(frame);
   }
-  requestAnimationFrame(frame);
+  requestAnimationFrame(() => { refresh(); requestAnimationFrame(frame); });
 }
 
 /* ---------- 4d. تفاصيل الباقة — Modal ---------- */
