@@ -643,7 +643,7 @@ function buildDealCard(p, index = 0) {
     </div>
     <div class="px-2.5 pt-2.5 pb-2.5 flex flex-col gap-1 flex-1">
       <h3 class="font-bold text-[15px] leading-tight text-charcoal-800 truncate">${p.name}</h3>
-      <p class="text-green-800 font-extrabold text-[15px]">${p.price} MAD<span class="text-charcoal-800/50 font-medium text-[12px]">/${p.unit}</span></p>
+      <p class="text-green-800 font-extrabold text-[15px]">${fmt(p.price)} MAD<span class="text-charcoal-800/50 font-medium text-[12px]">/${p.unit}</span></p>
       <div class="mt-auto pt-1" data-qty-zone="${p.id}">
         ${qty > 0 ? qtyStepperHTML(p.id, qty, p.unit) : addButtonHTML(p.id)}
       </div>
@@ -795,7 +795,7 @@ function openPackModal(id) {
   document.getElementById('packModalName').textContent = pack.name;
   document.getElementById('packModalDesc').textContent = pack.desc;
   document.getElementById('packModalPrice').innerHTML =
-    `${pack.price} <span class="text-charcoal-800/40 text-base font-normal line-through">${pack.oldPrice}</span> MAD`;
+    `${fmt(pack.price)} <span class="text-charcoal-800/40 text-base font-normal line-through">${fmt(pack.oldPrice)}</span> MAD`;
   document.getElementById('packModalAdd').dataset.addPack = pack.id;
 
   // شبكة بصرية: صورة حقيقية لكل منتج (نفس الصور اللي فالكتالوگ) + كمية فبادج صغير
@@ -983,7 +983,7 @@ function renderProducts() {
       <div class="px-3 pt-2.5 pb-3 flex flex-col gap-2 flex-1">
         <h3 class="font-semibold text-[15px] font-bold leading-snug text-charcoal-800 line-clamp-2 min-h-[2.6em]">${p.name}</h3>
         <div class="mt-auto flex items-center justify-between gap-1.5 flex-wrap">
-          <p class="text-green-800 font-extrabold text-[15px] leading-tight">${p.price} MAD<span class="text-charcoal-800/50 font-medium text-[12px]">/${p.unit}</span></p>
+          <p class="text-green-800 font-extrabold text-[15px] leading-tight">${fmt(p.price)} MAD<span class="text-charcoal-800/50 font-medium text-[12px]">/${p.unit}</span></p>
           <div class="ml-auto" data-qty-zone="${p.id}" data-variant="compact">
             ${qty > 0 ? qtyStepperHTML(p.id, qty, p.unit, true) : addButtonHTML(p.id, true)}
           </div>
@@ -1014,7 +1014,7 @@ async function openLightbox(product) {
   const img = document.getElementById('lightboxImg');
   img.alt = product.name;
   document.getElementById('lightboxName').textContent = `${product.emoji} ${product.name}`;
-  document.getElementById('lightboxPrice').textContent = `${product.price} MAD / ${product.unit}`;
+  document.getElementById('lightboxPrice').textContent = `${fmt(product.price)} MAD / ${product.unit}`;
   lightbox.classList.remove('hidden');
   document.body.style.overflow = 'hidden';
 
@@ -1103,7 +1103,16 @@ function cartEntries() {
   }
   return entries;
 }
-const DELIVERY = 9;
+const DELIVERY = 15;
+const MIN_ORDER = 120; // الحد الأدنى للطلبية (المنتجات فقط، بلا التوصيل)
+
+// تقريب لرقمين بعد الفاصلة (يحل مشكل 18.9999999)
+const round2 = (n) => Math.round((Number(n) + Number.EPSILON) * 100) / 100;
+// تنسيق للعرض: 2 أرقام كحد أقصى بعد الفاصلة، بلا أصفار زائدة
+function fmt(n) {
+  const v = round2(n);
+  return Number.isInteger(v) ? String(v) : v.toFixed(2).replace(/0+$/, '').replace(/\.$/, '');
+}
 // Livraison gratuite dès qu'il y a au moins un pack dans le panier
 // (le prix du pack inclut déjà la livraison). Panier vide → 0.
 function deliveryFee() {
@@ -1112,10 +1121,17 @@ function deliveryFee() {
   return entries.some(item => PACKS.some(p => p.id === item.id)) ? 0 : DELIVERY;
 }
 function cartSubtotal() {
-  return cartEntries().reduce((sum, item) => sum + item.price * item.qty, 0);
+  return round2(cartEntries().reduce((sum, item) => sum + round2(item.price * item.qty), 0));
 }
 function cartTotal() {
-  return cartSubtotal() + deliveryFee();
+  return round2(cartSubtotal() + deliveryFee());
+}
+function isMinOrderReached() {
+  return cartSubtotal() >= MIN_ORDER;
+}
+function minOrderMessage() {
+  const missing = round2(MIN_ORDER - cartSubtotal());
+  return `الحد الأدنى للطلبية هو ${MIN_ORDER} درهم — زيد ${fmt(missing)} درهم ديال السلعة باش تكمل الطلبية`;
 }
 function cartCount() {
   return Object.values(state.cart).reduce((a, b) => a + b, 0);
@@ -1131,7 +1147,7 @@ function renderCartBadges() {
   const sticky = document.getElementById('stickyBar');
   sticky.classList.toggle('hidden', count === 0);
   document.getElementById('stickyCount').textContent = count;
-  document.getElementById('stickyTotal').textContent = `${total} درهم`;
+  document.getElementById('stickyTotal').textContent = `${fmt(total)} درهم`;
 
   const tabBadge = document.getElementById('tabCartBadge');
   if (tabBadge) {
@@ -1160,7 +1176,7 @@ function renderCartDrawer() {
         </div>
         <div class="flex-1 min-w-0">
           <p class="text-[16px] font-bold text-charcoal-800 truncate">${item.name}</p>
-          <p class="text-[13px] text-charcoal-800/60">${item.price} درهم / ${item.unit}</p>
+          <p class="text-[13px] text-charcoal-800/60">${fmt(item.price)} درهم / ${item.unit}</p>
         </div>
         <div class="flex items-center gap-2 bg-green-50 rounded-full p-1 shrink-0">
           <button data-cart-dec="${item.id}" class="w-9 h-9 rounded-full bg-white text-green-700 flex items-center justify-center shadow-sm active:scale-90">${MINUS_ICON}</button>
@@ -1200,15 +1216,21 @@ function renderCartDrawer() {
   document.querySelectorAll('[data-cart-dec]').forEach(b => b.onclick = () => updateQty(b.dataset.cartDec, -1));
 
   const total = cartTotal();
-  document.getElementById('cartSubtotal').textContent = `${cartSubtotal()} درهم`;
+  document.getElementById('cartSubtotal').textContent = `${fmt(cartSubtotal())} درهم`;
   const feeEl = document.getElementById('cartDelivery');
   if (feeEl) {
     const fee = deliveryFee();
-    feeEl.textContent = entries.length === 0 ? '—' : (fee === 0 ? 'مجانا 🎉' : `${fee} درهم`);
+    feeEl.textContent = entries.length === 0 ? '—' : (fee === 0 ? 'مجانا 🎉' : `${fmt(fee)} درهم`);
   }
-  document.getElementById('cartTotal').textContent = `${total} درهم`;
+  document.getElementById('cartTotal').textContent = `${fmt(total)} درهم`;
   document.getElementById('checkoutBtn').disabled = entries.length === 0;
-  document.getElementById('checkoutBtn').classList.toggle('opacity-40', entries.length === 0);
+  const belowMin = entries.length > 0 && !isMinOrderReached();
+  document.getElementById('checkoutBtn').classList.toggle('opacity-40', entries.length === 0 || belowMin);
+  const notice = document.getElementById('cartMinNotice');
+  if (notice) {
+    notice.classList.toggle('hidden', !belowMin);
+    if (belowMin) notice.querySelector('span').textContent = minOrderMessage();
+  }
 }
 
 /* ---------- 7. WHATSAPP ORDER ---------- */
@@ -1219,6 +1241,7 @@ const WA_NUMBER = '212694536496';
 const ORDERS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx-Y-5T1lHGgEJUfgFbEnEf9hL8_Etf9uTvXeXTGIxrXmdoleCXGWNrLtKWkrmEmqIGNw/exec';
 
 function sendOrderToSheet(clientInfo) {
+  if (!isMinOrderReached()) return;
   if (!ORDERS_SCRIPT_URL || ORDERS_SCRIPT_URL.includes('COLLEZ_ICI')) {
     console.warn('Swi9ti: ORDERS_SCRIPT_URL ماشي معمر بعد — الطلبية غادي تبقى غير فـ WhatsApp، ماغاديش تتسجل فـ Sheet.');
     return;
@@ -1227,10 +1250,10 @@ function sendOrderToSheet(clientInfo) {
   const DELIVERY_FEE = 0;
   const entries = cartEntries();
   const cartDetails = entries
-    .map(item => `${item.emoji} ${item.name} : ${item.qty} ${item.unit} — ${item.price * item.qty} DH`)
+    .map(item => `${item.emoji} ${item.name} : ${item.qty} ${item.unit} — ${fmt(item.price * item.qty)} DH`)
     .join('\n');
   const availability = `${clientInfo.day} — ${clientInfo.slot}`;
-  const totalToPay = cartTotal() + DELIVERY_FEE;
+  const totalToPay = round2(cartTotal() + DELIVERY_FEE);
 
   const payload = {
     name: clientInfo.name,
@@ -1273,12 +1296,12 @@ function buildWhatsAppMessage(clientInfo) {
   let msg = `🥕 *طلبية Swi9ti* 🥕\n`;
   msg += `━━━━━━━━━━━━━━━━\n`;
   entries.forEach(item => {
-    msg += `• ${item.name} × ${item.qty} ${item.unit} = ${item.price * item.qty} درهم\n`;
+    msg += `• ${item.name} × ${item.qty} ${item.unit} = ${fmt(item.price * item.qty)} درهم\n`;
   });
   msg += `━━━━━━━━━━━━━━━━\n`;
-  msg += `💰 *المجموع: ${total} درهم*\n`;
+  msg += `💰 *المجموع: ${fmt(total)} درهم*\n`;
   const fee = deliveryFee();
-  msg += `🚚 التوصيل: *${fee === 0 ? 'مجاني' : fee + ' درهم'}* 🎉\n`;
+  msg += `🚚 التوصيل: *${fee === 0 ? 'مجاني' : fmt(fee) + ' درهم'}* 🎉\n`;
   msg += `━━━━━━━━━━━━━━━━\n`;
   msg += `👤 *الاسم:* ${clientInfo.name}\n`;
   msg += `📞 *الهاتف:* ${clientInfo.phone}\n`;
@@ -1496,12 +1519,16 @@ function captureLocation() {
 function showWAModal() {
   const entries = cartEntries();
   if (entries.length === 0) return;
+  if (!isMinOrderReached()) {
+    showToast(minOrderMessage(), false);
+    return;
+  }
 
   const summaryEl = document.getElementById('waOrderSummary');
   const total = cartTotal();
   summaryEl.innerHTML = entries.map(item =>
-    `<div class="flex justify-between py-0.5"><span>${item.emoji} ${item.name} × ${item.qty}</span><span class="font-semibold">${item.price * item.qty} درهم</span></div>`
-  ).join('') + `<div class="flex justify-between py-0.5 text-green-700"><span>🚚 التوصيل</span><span class="font-semibold">${deliveryFee() === 0 ? 'مجاني' : deliveryFee() + ' درهم'}</span></div><div class="border-t border-charcoal-800/10 mt-2 pt-2 flex justify-between font-bold text-green-800"><span>المجموع</span><span>${total} درهم</span></div>`;
+    `<div class="flex justify-between py-0.5"><span>${item.emoji} ${item.name} × ${item.qty}</span><span class="font-semibold">${fmt(item.price * item.qty)} درهم</span></div>`
+  ).join('') + `<div class="flex justify-between py-0.5 text-green-700"><span>🚚 التوصيل</span><span class="font-semibold">${deliveryFee() === 0 ? 'مجاني' : fmt(deliveryFee()) + ' درهم'}</span></div><div class="border-t border-charcoal-800/10 mt-2 pt-2 flex justify-between font-bold text-green-800"><span>المجموع</span><span>${fmt(total)} درهم</span></div>`;
 
   // Reset wizard
   document.getElementById('clientName').value = '';
@@ -1531,6 +1558,11 @@ function hideWAModal() {
 }
 
 function sendToWhatsApp() {
+  if (!isMinOrderReached()) {
+    hideWAModal();
+    showToast(minOrderMessage(), false);
+    return;
+  }
   const name  = document.getElementById('clientName').value.trim();
   const phone = document.getElementById('clientPhone').value.trim();
   const day   = state.selectedDay;
@@ -1575,7 +1607,7 @@ function showToast(message, showIcon = true) {
   toast.innerHTML = `<span class="flex items-center gap-2">${showIcon ? TOAST_CHECK_ICON : ''}<span>${message}</span></span>`;
   toast.classList.remove('hidden');
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => toast.classList.add('hidden'), 2200);
+  toastTimer = setTimeout(() => toast.classList.add('hidden'), message.length > 40 ? 4500 : 2200);
 }
 
 /* ---------- 9. DRAWERS ---------- */

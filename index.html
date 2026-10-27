@@ -542,11 +542,15 @@
         <span>المجموع الجزئي</span><span id="cartSubtotal">0 MAD</span>
       </div>
       <div class="flex items-center justify-between text-sm text-charcoal-800/60 mb-3">
-        <span>التوصيل</span><span id="cartDelivery" class="text-green-700 font-medium">9 درهم</span>
+        <span>التوصيل</span><span id="cartDelivery" class="text-green-700 font-medium">15 درهم</span>
       </div>
       <div class="flex items-center justify-between font-semibold text-green-900 text-lg mb-4">
         <span>الكل</span><span id="cartTotal">0 MAD</span>
       </div>
+      <p id="cartMinNotice" class="hidden mb-3 text-[13px] font-semibold text-terracotta-600 bg-terracotta-500/10 rounded-xl px-3 py-2.5 flex items-start gap-2">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4 shrink-0 mt-0.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z"/></svg>
+        <span></span>
+      </p>
       <button id="checkoutBtn" class="w-full bg-green-700 hover:bg-green-600 text-white font-bold text-base py-3.5 rounded-2xl transition active:scale-95 flex items-center justify-center gap-2">
         <!-- Heroicons: paper-airplane -->
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-5 h-5">
@@ -799,7 +803,7 @@
   </div>
 
   <!-- ===== TOAST ===== -->
-  <div id="toast" role="status" aria-live="polite" class="hidden fixed bottom-24 lg:bottom-6 left-1/2 -translate-x-1/2 z-[60] bg-charcoal-800 text-sand-50 text-sm font-medium px-4 py-2.5 rounded-full shadow-xl whitespace-nowrap max-w-[90vw] text-center"></div>
+  <div id="toast" role="status" aria-live="polite" class="hidden fixed bottom-24 lg:bottom-6 left-1/2 -translate-x-1/2 z-[60] bg-charcoal-800 text-sand-50 text-sm font-medium px-4 py-2.5 rounded-full shadow-xl max-w-[90vw] text-center"></div>
 
   <!-- PapaParse: يقرا الـ CSV ديال Google Sheet (تحديث الأثمنة) -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
